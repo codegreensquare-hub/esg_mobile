@@ -1,4 +1,4 @@
-import 'package:esg_mobile/presentation/screens/code_green/home.screen.dart';
+import 'package:esg_mobile/presentation/screens/main.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
-      path: '/',
+      path: MainScreen.route,
       builder: (BuildContext context, GoRouterState state) {
-        return const CodeGreenHomeScreen();
+        return const MainScreen();
       },
       routes: <RouteBase>[
         // GoRoute(
