@@ -12,6 +12,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.zero,
       color: Colors.green[100],
       child: Center(
         child: Text(
