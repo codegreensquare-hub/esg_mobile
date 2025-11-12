@@ -1,13 +1,17 @@
+import 'package:esg_mobile/core/enums/navigations.dart';
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
+import 'package:esg_mobile/presentation/screens/green_square/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
+import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/nav_header.delegate.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:flutter/material.dart';
+import 'package:esg_mobile/core/constants/navigation.dart';
 
 class MainScreen extends StatefulWidget {
   static const String route = '/';
@@ -23,6 +27,10 @@ class _MainScreenState extends State<MainScreen> {
   late final ScrollController _scrollController;
   double _scrollOffset = 0.0;
   int _selectedIndex = 0; // active tab index
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  MainTab _selectedMainTab = MainTab.greenSquare;
+  int _greenIndex = 0; // 0: Story, 1: Shopping, 2: Participate, 3: Account
 
   static const double _topHeaderHeight =
       72; // header height excluding status bar
@@ -62,68 +70,137 @@ class _MainScreenState extends State<MainScreen> {
         : (_scrollOffset / removalEnd).clamp(0.0, 1.0);
     final double topPad = safeTop * t;
 
-    // Tab identifiers; used internally for content selection.
-    final tabIds = <String>[
-      HomeTab.tab,
-      OriginalShopTab.tab,
-      CurationShopTab.tab,
-      AboutTab.tab,
-      LookBookTab.tab,
-      EventTab.tab,
-    ];
-
     // Active tab id derived from selected index.
-    final String activeTabId = tabIds[_selectedIndex];
+    final String activeTabId = codeGreenTabs[_selectedIndex];
+
+    final bool isGreenSquare = _selectedMainTab == MainTab.greenSquare;
 
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: CodeGreenLeftDrawer(
+        tabs: codeGreenTabs,
+        selectedIndex: _selectedIndex,
+        labels: codeGreenLabels,
+        homeTab: HomeTab.tab,
+        onSelect: (index) {
+          if (index != _selectedIndex) {
+            setState(() => _selectedIndex = index);
+          }
+        },
+      ),
+      floatingActionButton: isGreenSquare
+          ? FloatingActionButton(
+              onPressed: _onTapKnock,
+              tooltip: 'Knock',
+              child: const Icon(Icons.campaign_outlined),
+            )
+          : null,
+      floatingActionButtonLocation: isGreenSquare
+          ? FloatingActionButtonLocation.centerDocked
+          : null,
+      bottomNavigationBar: isGreenSquare
+          ? BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 6,
+              child: SizedBox(
+                height: 64,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildGsItem(
+                      context,
+                      index: 0,
+                      icon: Icons.auto_stories_outlined,
+                      label: 'Story',
+                    ),
+                    _buildGsItem(
+                      context,
+                      index: 1,
+                      icon: Icons.storefront_outlined,
+                      label: 'Shopping',
+                    ),
+                    const SizedBox(width: 56), // space for FAB notch
+                    _buildGsItem(
+                      context,
+                      index: 2,
+                      icon: Icons.group_outlined,
+                      label: 'Participate',
+                    ),
+                    _buildGsItem(
+                      context,
+                      index: 3,
+                      icon: Icons.person_outline,
+                      label: 'Account',
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: CustomScrollView(
         controller: _scrollController,
         // physics: ClampingScrollPhysics(),
         slivers: [
-          CodeGreenTopHeader(),
-
-          SliverPersistentHeader(
-            floating: true,
-            pinned: false,
-            delegate: CodeGreenNavHeaderDelegate(
-              tabs: tabIds,
-              theme: theme,
-              toolbarHeight: _toolbarHeight,
-              topPad: topPad,
-              selectedIndex: _selectedIndex,
-              onTabSelected: (index, _) {
-                if (index != _selectedIndex) {
-                  setState(() => _selectedIndex = index);
-                }
-              },
-              onTapMenu: () => _showTabMenu(tabIds),
-            ),
+          CodeGreenTopHeader(
+            initialValue: _selectedMainTab,
+            onChanged: (tab) => setState(() => _selectedMainTab = tab),
           ),
-          // Animated tab content area
-          SliverToBoxAdapter(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: Curves.easeInOut,
-              switchOutCurve: Curves.easeInOut,
-              layoutBuilder: (currentChild, previousChildren) {
-                return Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    ...previousChildren,
-                    if (currentChild != null) currentChild,
-                  ],
-                );
-              },
-              child: Container(
-                padding: EdgeInsets.zero,
-                key: ValueKey(activeTabId),
-                constraints: const BoxConstraints(minHeight: 600),
-                color: theme.colorScheme.surface,
-                width: double.infinity,
-                child: _buildTabContent(activeTabId),
+          if (_selectedMainTab == MainTab.codeGreen)
+            SliverPersistentHeader(
+              floating: true,
+              pinned: false,
+              delegate: CodeGreenNavHeaderDelegate(
+                tabs: codeGreenTabs,
+                theme: theme,
+                toolbarHeight: _toolbarHeight,
+                topPad: topPad,
+                labels: codeGreenLabels,
+                homeTab: HomeTab.tab,
+                selectedIndex: _selectedIndex,
+                onTabSelected: (index, _) {
+                  if (index != _selectedIndex) {
+                    setState(() => _selectedIndex = index);
+                  }
+                },
+                onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
               ),
             ),
-          ),
+          if (_selectedMainTab == MainTab.greenSquare)
+            SliverToBoxAdapter(
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 600),
+                width: double.infinity,
+                color: theme.colorScheme.surface,
+                child: _buildGreenSquareContent(_greenIndex),
+              ),
+            ),
+
+          if (_selectedMainTab == MainTab.codeGreen)
+            SliverToBoxAdapter(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                layoutBuilder: (currentChild, previousChildren) {
+                  return Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      ...previousChildren,
+                      if (currentChild != null) currentChild,
+                    ],
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.zero,
+                  key: ValueKey(activeTabId),
+                  constraints: const BoxConstraints(minHeight: 600),
+                  color: theme.colorScheme.surface,
+                  width: double.infinity,
+                  child: _buildTabContent(activeTabId),
+                ),
+              ),
+            ),
+
           SliverFillRemaining(
             hasScrollBody: false,
             fillOverscroll: true,
@@ -154,38 +231,65 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _showTabMenu(List<String> tabIds) {
+  Widget _buildGsItem(
+    BuildContext context, {
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final bool selected = _greenIndex == index;
+    final Color color = selected ? cs.primary : cs.onSurfaceVariant;
+    return InkWell(
+      customBorder: const StadiumBorder(),
+      onTap: () => setState(() => _greenIndex = index),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onTapKnock() {
     showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return SafeArea(
-          child: ListView.builder(
-            itemCount: tabIds.length,
-            itemBuilder: (context, index) {
-              final id = tabIds[index];
-              final selected = index == _selectedIndex;
-              return ListTile(
-                title: Text(
-                  id,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                  ),
-                ),
-                trailing: selected
-                    ? Icon(Icons.check, color: theme.colorScheme.primary)
-                    : null,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  if (index != _selectedIndex) {
-                    setState(() => _selectedIndex = index);
-                  }
-                },
-              );
-            },
+      showDragHandle: true,
+      builder: (ctx) => SizedBox(
+        height: 260,
+        child: Center(
+          child: Text(
+            'Knock! Coming soon…',
+            style: Theme.of(ctx).textTheme.titleMedium,
           ),
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  Widget _buildGreenSquareContent(int index) {
+    switch (index) {
+      case 0:
+        return const StoryTab(); // Story placeholder for now
+      case 1:
+        return const Center(child: Text('Shopping Mall'));
+      case 2:
+        return const Center(child: Text('Participate'));
+      case 3:
+        return const Center(child: Text('Account'));
+      default:
+        return const SizedBox.shrink();
+    }
   }
 }

@@ -12,6 +12,7 @@ class _OriginalShopTabState extends State<OriginalShopTab> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 2000,
       color: Colors.green[100],
       child: Center(
         child: Text(

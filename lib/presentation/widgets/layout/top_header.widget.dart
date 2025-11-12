@@ -1,28 +1,31 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:esg_mobile/core/enums/navigations.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable top header that renders a SliverAppBar.
 class CodeGreenTopHeader extends StatefulWidget {
   const CodeGreenTopHeader({
     super.key,
-    this.initialValue = false,
+    this.initialValue = MainTab.greenSquare,
     this.onChanged,
   });
 
-  final bool initialValue;
-  final ValueChanged<bool>? onChanged;
+  final MainTab initialValue;
+  final ValueChanged<MainTab>? onChanged;
 
   @override
   State<CodeGreenTopHeader> createState() => _CodeGreenTopHeaderState();
 }
 
 class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
-  late bool _switchValue;
+  late MainTab _selectedTab;
+
+  bool get _switchValue => _selectedTab == MainTab.codeGreen;
 
   @override
   void initState() {
     super.initState();
-    _switchValue = widget.initialValue;
+    _selectedTab = widget.initialValue;
   }
 
   @override
@@ -32,6 +35,7 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
       pinned: false,
       floating: false,
       snap: false,
+      leading: SizedBox.shrink(),
       backgroundColor: theme.colorScheme.primary,
       title: SizedBox(
         width: 200,
@@ -71,8 +75,11 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
             height: 32,
             indicatorSize: const Size.fromWidth(2000),
             onChanged: (value) {
-              setState(() => _switchValue = value);
-              widget.onChanged?.call(value);
+              final selectedTab = value
+                  ? MainTab.codeGreen
+                  : MainTab.greenSquare;
+              setState(() => _selectedTab = selectedTab);
+              widget.onChanged?.call(selectedTab);
             },
           ),
         ),
