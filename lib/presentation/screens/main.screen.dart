@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static const double _topHeaderHeight =
       72; // header height excluding status bar
-  static const double _toolbarHeight = 64; // floating bar height
+  static const double _toolbarHeight = 72; // floating bar height
 
   @override
   void initState() {
@@ -74,6 +74,8 @@ class _MainScreenState extends State<MainScreen> {
     final String activeTabId = codeGreenTabs[_selectedIndex];
 
     final bool isGreenSquare = _selectedMainTab == MainTab.greenSquare;
+
+    final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -155,6 +157,7 @@ class _MainScreenState extends State<MainScreen> {
                 toolbarHeight: _toolbarHeight,
                 topPad: topPad,
                 labels: codeGreenLabels,
+                currentWidth: width,
                 homeTab: HomeTab.tab,
                 selectedIndex: _selectedIndex,
                 onTabSelected: (index, _) {
@@ -201,11 +204,12 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
 
-          SliverFillRemaining(
-            hasScrollBody: false,
-            fillOverscroll: true,
-            child: const CodeGreenFooter(),
-          ),
+          if (_selectedMainTab == MainTab.codeGreen)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: true,
+              child: const CodeGreenFooter(),
+            ),
         ],
       ),
     );
@@ -249,7 +253,6 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: color),
-            const SizedBox(height: 4),
             Text(
               label,
               style: Theme.of(

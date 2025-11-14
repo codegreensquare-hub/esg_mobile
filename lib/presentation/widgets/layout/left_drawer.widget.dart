@@ -1,3 +1,5 @@
+import 'package:esg_mobile/presentation/widgets/logo/code_green.logo.dart';
+import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
 
@@ -23,149 +25,181 @@ class CodeGreenLeftDrawer extends StatelessWidget {
     final cs = theme.colorScheme;
 
     return Drawer(
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _DrawerHeader(
-              cs: cs,
-              theme: theme,
-              onTapHome: () {
-                if (homeTab == null) return;
-                final idx = tabs.indexOf(homeTab!);
-                if (idx >= 0) {
-                  Navigator.of(context).pop();
-                  if (idx != selectedIndex) {
-                    onSelect?.call(idx);
-                  }
-                }
-              },
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView(
-                children: [
-                  for (int index = 0; index < tabs.length; index++) ...[
-                    if (!(homeTab != null && tabs[index] == homeTab))
-                      _buildParentTile(
-                        context: context,
-                        theme: theme,
-                        cs: cs,
-                        id: tabs[index],
-                        index: index,
-                        selected: index == selectedIndex,
-                        label: labels[tabs[index]] ?? tabs[index],
-                      ),
-                    if (codeGreenSubTabs.containsKey(tabs[index]))
-                      ..._buildSubTabs(
-                        context: context,
-                        theme: theme,
-                        cs: cs,
-                        parentIndex: index,
-                        subs: (codeGreenSubTabs[tabs[index]] as List)
-                            .cast<String>(),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildParentTile({
-    required BuildContext context,
-    required ThemeData theme,
-    required ColorScheme cs,
-    required String id,
-    required int index,
-    required bool selected,
-    required String label,
-  }) {
-    return ListTile(
-      selected: selected,
-      selectedColor: cs.onPrimaryContainer,
-      selectedTileColor: cs.primaryContainer,
-      leading: selected
-          ? Icon(Icons.check, color: cs.primary)
-          : const SizedBox(),
-      title: Text(label, style: theme.textTheme.titleMedium),
-      onTap: () {
-        Navigator.of(context).pop();
-        onSelect?.call(index);
-      },
-    );
-  }
-
-  List<Widget> _buildSubTabs({
-    required BuildContext context,
-    required ThemeData theme,
-    required ColorScheme cs,
-    required int parentIndex,
-    required List<String> subs,
-  }) {
-    return [
-      for (final sub in subs)
-        Padding(
-          padding: const EdgeInsets.only(left: 40),
-          child: ListTile(
-            dense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: const SizedBox(width: 24),
-            title: Text(_toTitleCase(sub), style: theme.textTheme.bodyMedium),
-            onTap: () {
-              Navigator.of(context).pop();
-              onSelect?.call(parentIndex);
-            },
-          ),
-        ),
-    ];
-  }
-}
-
-class _DrawerHeader extends StatelessWidget {
-  final ColorScheme cs;
-  final ThemeData theme;
-  final VoidCallback? onTapHome;
-  const _DrawerHeader({required this.cs, required this.theme, this.onTapHome});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: cs.surfaceContainer,
-      child: InkWell(
-        onTap: onTapHome,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Column(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: cs.primary,
-                child: Icon(Icons.eco, color: cs.onPrimary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Code Green',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: cs.onSurface,
-                  fontWeight: FontWeight.w600,
+              InkWell(
+                onTap: () {
+                  if (homeTab == null) return;
+                  final idx = tabs.indexOf(homeTab!);
+                  if (idx >= 0) {
+                    Navigator.of(context).pop();
+                    if (idx != selectedIndex) {
+                      onSelect?.call(idx);
+                    }
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
+                  color: cs.surfaceContainer,
+                  child: SafeArea(bottom: false, child: CodeGreenLogo()),
                 ),
               ),
+              const Divider(height: 1),
             ],
           ),
-        ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+              children: [
+                // TODO : Replace with actual username
+                // TODO : show "login" when not logged in
+                ListTile(
+                  onTap: () {
+                    // TODO : implement profile tap
+                    throw UnimplementedError();
+                  },
+                  title: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'jioo 님',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ', 안녕하세요.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+
+                ...tabs
+                    .asMap()
+                    .entries
+                    .where((e) => !(homeTab != null && e.value == homeTab))
+                    .map<Widget>((e) {
+                      final index = e.key;
+                      final id = e.value;
+                      final isSelected = index == selectedIndex;
+                      final subTabs =
+                          (codeGreenSubTabs[id] as List?)?.cast<String>() ??
+                          const [];
+
+                      // If no sub-tabs, render a simple ListTile.
+                      if (subTabs.isEmpty) {
+                        return ListTile(
+                          selected: isSelected,
+                          selectedTileColor: cs.surfaceContainer,
+                          title: Text(
+                            labels[id] ?? id,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            onSelect?.call(index);
+                          },
+                        );
+                      }
+
+                      // With sub-tabs: render an ExpansionTile (dropdown)
+                      return Theme(
+                        data: theme.copyWith(
+                          dividerColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                        ),
+                        child: ExpansionTile(
+                          initiallyExpanded: isSelected,
+                          tilePadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          childrenPadding: const EdgeInsets.only(left: 24),
+                          collapsedBackgroundColor: isSelected
+                              ? cs.surfaceContainer
+                              : null,
+                          backgroundColor: isSelected
+                              ? cs.surfaceContainer
+                              : null,
+                          title: Text(
+                            labels[id] ?? id,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          onExpansionChanged: (_) {},
+                          children: subTabs
+                              .map(
+                                (sub) => ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    sub,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    onSelect?.call(index);
+                                  },
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      );
+                    }),
+
+                InkWell(
+                  onTap: () {
+                    if (homeTab == null) return;
+                    final idx = tabs.indexOf(homeTab!);
+                    if (idx >= 0) {
+                      Navigator.of(context).pop();
+                      if (idx != selectedIndex) {
+                        onSelect?.call(idx);
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: SafeArea(top: false, child: GreenSquareLogo()),
+                  ),
+                ),
+
+                // Logout
+                InkWell(
+                  onTap: () {
+                    // TODO : implement logout
+                    throw UnimplementedError();
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Text(
+                      'Log out',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
-}
-
-String _toTitleCase(String id) {
-  if (id.isEmpty) return id;
-  final parts = id.split('_').where((p) => p.isNotEmpty);
-  return parts
-      .map((p) => p[0].toUpperCase() + (p.length > 1 ? p.substring(1) : ''))
-      .join(' ');
 }

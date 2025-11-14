@@ -1,3 +1,9 @@
+import 'package:esg_mobile/core/constants/frame_width.dart';
+import 'dart:async';
+import 'package:esg_mobile/core/enums/device.dart';
+import 'package:esg_mobile/presentation/widgets/layout/nav_header.button.dart';
+import 'package:esg_mobile/presentation/widgets/logo/code_green.logo.dart';
+import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
 
@@ -12,11 +18,11 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.toolbarHeight,
     required this.topPad,
     required this.tabs,
+    required this.currentWidth,
     this.labels = const {},
     this.selectedIndex = 0,
     this.onTabSelected,
     this.onTapMenu,
-    this.breakpointWidth = 600,
     this.homeTab,
   });
 
@@ -28,8 +34,10 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int selectedIndex;
   final void Function(int index, String tab)? onTabSelected;
   final void Function()? onTapMenu;
-  final double breakpointWidth;
   final String? homeTab;
+  // Current layout width supplied by parent (e.g. LayoutBuilder). We only
+  // rebuild when this crosses a breakpoint (narrow <-> wide) or other props change.
+  final double currentWidth;
 
   @override
   double get minExtent => toolbarHeight + topPad;
@@ -45,77 +53,115 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    final width = MediaQuery.of(context).size.width;
-    final bool showAllTabs = width >= breakpointWidth && tabs.isNotEmpty;
+    final wideMode = _isWide(currentWidth);
 
     return Material(
       color: theme.colorScheme.surfaceContainerLow,
       elevation: overlapsContent ? 4 : 0,
-      child: Padding(
-        padding: EdgeInsets.only(top: topPad, left: 8, right: 8, bottom: 0),
-        child: SizedBox(
-          height: toolbarHeight,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.only(
+            top: topPad,
+            left: wideMode ? defaultPadding : 5,
+            right: wideMode ? defaultPadding : 5,
+            bottom: 0,
+          ),
+          constraints: BoxConstraints(
+            maxWidth: frameWidth + defaultPadding * 2,
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Branding / Title (clickable to go Home)
-              InkWell(
-                borderRadius: BorderRadius.circular(6),
-                onTap: homeTab == null
-                    ? null
-                    : () {
-                        final int idx = tabs.indexOf(homeTab!);
-                        if (idx >= 0) {
-                          onTabSelected?.call(idx, tabs[idx]);
-                        }
-                      },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 6,
-                  ),
-                  child: Text(
-                    'Code Green',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 24),
-              // Expanded region for tabs or spacer.
-              if (showAllTabs)
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (int i = 0; i < tabs.length; i++)
-                          if (!(homeTab != null && tabs[i] == homeTab))
-                            _NavTabButton(
-                              id: tabs[i],
-                              label: _labelFor(tabs[i]) ?? tabs[i],
-                              selected: i == selectedIndex,
-                              theme: theme,
-                              onTap: () => onTabSelected?.call(i, tabs[i]),
-                              subTabs:
-                                  (codeGreenSubTabs[tabs[i]] as List?)
-                                      ?.cast<String>() ??
-                                  const <String>[],
-                            ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                const Spacer(),
-              // Menu icon for narrow layouts.
-              if (!showAllTabs)
+              if (!wideMode) ...[
                 IconButton(
                   tooltip: 'Menu',
                   icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
                   onPressed: onTapMenu,
                 ),
+                Spacer(),
+                InkWell(
+                  borderRadius: BorderRadius.circular(6),
+                  onTap: homeTab == null
+                      ? null
+                      : () {
+                          final int idx = tabs.indexOf(homeTab!);
+                          if (idx >= 0) {
+                            onTabSelected?.call(idx, tabs[idx]);
+                          }
+                        },
+                  child: CodeGreenLogo(),
+                ),
+                Spacer(),
+                IconButton(
+                  tooltip: 'Shopping',
+                  icon: Icon(
+                    Icons.shopping_bag_outlined,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  onPressed: onTapMenu,
+                ),
+              ],
+              // Expanded region for tabs or spacer.
+              if (wideMode) ...[
+                InkWell(
+                  borderRadius: BorderRadius.circular(6),
+                  onTap: homeTab == null
+                      ? null
+                      : () {
+                          final int idx = tabs.indexOf(homeTab!);
+                          if (idx >= 0) {
+                            onTabSelected?.call(idx, tabs[idx]);
+                          }
+                        },
+                  child: CodeGreenLogo(),
+                ),
+                Spacer(),
+                ...tabs
+                    .asMap()
+                    .entries
+                    .where((e) => !(homeTab != null && e.value == homeTab))
+                    .map(
+                      (e) => _NavTabButton(
+                        id: e.value,
+                        label: _labelFor(e.value) ?? e.value,
+                        selected: e.key == selectedIndex,
+                        theme: theme,
+                        onTap: () => onTabSelected?.call(e.key, e.value),
+                        subTabs:
+                            (codeGreenSubTabs[e.value] as List?)
+                                ?.cast<String>() ??
+                            const <String>[],
+                      ),
+                    ),
+                GreenSquareLogo(),
+                Spacer(),
+                // Logout
+                NavHeaderButton(
+                  icon: Icons.logout,
+                  title: 'Logout',
+                  onTap: () {
+                    // TODO
+                    throw UnimplementedError();
+                  },
+                ),
+                // My
+                NavHeaderButton(
+                  icon: Icons.person_outline,
+                  title: 'My',
+                  onTap: () {
+                    // TODO
+                    throw UnimplementedError();
+                  },
+                ),
+                // Cart
+                NavHeaderButton(
+                  icon: Icons.shopping_bag_outlined,
+                  title: 'Cart',
+                  onTap: () {
+                    // TODO
+                    throw UnimplementedError();
+                  },
+                ),
+              ],
             ],
           ),
         ),
@@ -125,15 +171,21 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant CodeGreenNavHeaderDelegate oldDelegate) {
+    // Rebuild only when something meaningful changes: theme, sizing, tabs,
+    // selection, labels, homeTab, or when width crosses breakpoint boundary.
+    final prevWide = _isWide(oldDelegate.currentWidth);
+    final nextWide = _isWide(currentWidth);
     return oldDelegate.theme != theme ||
         oldDelegate.toolbarHeight != toolbarHeight ||
         oldDelegate.topPad != topPad ||
         oldDelegate.tabs != tabs ||
         oldDelegate.labels != labels ||
         oldDelegate.selectedIndex != selectedIndex ||
-        oldDelegate.breakpointWidth != breakpointWidth ||
-        oldDelegate.homeTab != homeTab;
+        oldDelegate.homeTab != homeTab ||
+        prevWide != nextWide;
   }
+
+  bool _isWide(double width) => width >= Device.smallTablet.breakpoint;
 }
 
 class _NavTabButton extends StatefulWidget {
@@ -151,8 +203,7 @@ class _NavTabButton extends StatefulWidget {
     required this.theme,
     this.onTap,
     this.subTabs = const <String>[],
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   State<_NavTabButton> createState() => _NavTabButtonState();
@@ -190,36 +241,30 @@ class _NavTabButtonState extends State<_NavTabButton> {
       color: widget.selected ? cs.primary : cs.onSurfaceVariant,
       fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
     );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: MouseRegion(
-        onEnter: (event) {
-          _DropdownOverlay.hide();
-          _showDropdown();
-        },
-        onExit: (event) {
-          // If the pointer leaves the tab button and doesn't enter the menu,
-          // close the dropdown shortly after.
-          Future.delayed(const Duration(milliseconds: 120), () {
-            if (!mounted) return;
-            if (!_DropdownOverlay.isHovered) {
-              _DropdownOverlay.hide();
-            }
-          });
-        },
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: widget.selected ? cs.primaryContainer : cs.surface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(widget.label, style: style),
+    return MouseRegion(
+      onEnter: (event) {
+        // Cancel any pending hide when moving between tabs to prevent blink.
+        if (widget.subTabs.isEmpty) return _DropdownOverlay.hide();
+        _DropdownOverlay.cancelHide();
+        _showDropdown();
+      },
+      onExit: (event) {
+        // If the pointer leaves the tab button and doesn't enter the menu,
+        // close the dropdown shortly after.
+        _DropdownOverlay.scheduleHide(const Duration(milliseconds: 120));
+      },
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.selected ? cs.primaryContainer : cs.surface,
+            borderRadius: BorderRadius.circular(8),
           ),
+          child: Text(widget.label, style: style),
         ),
       ),
     );
@@ -272,6 +317,7 @@ class _HoverMenu extends StatelessWidget {
 class _DropdownOverlay {
   static OverlayEntry? _entry;
   static bool _hovered = false;
+  static Timer? _hideTimer;
   static void show(BuildContext context, OverlayEntry entry) {
     hide();
     Overlay.of(context).insert(entry);
@@ -279,6 +325,8 @@ class _DropdownOverlay {
   }
 
   static void hide() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
     _entry?.remove();
     _entry = null;
   }
@@ -287,7 +335,21 @@ class _DropdownOverlay {
     _hovered = value;
   }
 
-  static bool get isHovered => _hovered;
+  // no getter needed; internal state checked within scheduleHide
+
+  static void scheduleHide(Duration delay) {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(delay, () {
+      if (!_hovered) {
+        hide();
+      }
+    });
+  }
+
+  static void cancelHide() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+  }
 }
 
 String _toTitleCase(String id) {

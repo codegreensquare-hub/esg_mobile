@@ -339,6 +339,9 @@ class MaterialTheme {
     useMaterial3: true,
     brightness: colorScheme.brightness,
     colorScheme: colorScheme,
+    // Global default font for any Text not bound to textTheme tokens.
+    fontFamily: 'Noto Sans KR',
+    fontFamilyFallback: const ['EB Garamond'],
     textTheme: textTheme.apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,

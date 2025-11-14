@@ -10,7 +10,7 @@ class App extends StatelessWidget {
 
   MaterialTheme _materialTheme(BuildContext context) {
     // Choose downloadable fonts; adjust families as needed.
-    final textTheme = createTextTheme(context, 'Noto Sans KR', 'EB Garamond');
+    final textTheme = createTextTheme(context);
     return MaterialTheme(textTheme);
   }
 
@@ -19,15 +19,18 @@ class App extends StatelessWidget {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
     final materialTheme = _materialTheme(context);
     // Configure GoRouter (provided by router.dart import) and themes.
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'ESG Mobile',
-      theme: materialTheme.light(),
-      darkTheme: materialTheme.dark(),
-      themeMode: brightness == Brightness.light
-          ? ThemeMode.light
-          : ThemeMode.dark,
-      routerConfig: router,
+    return DefaultTextStyle(
+      style: const TextStyle(fontFamily: 'Noto Sans KR'),
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'ESG Mobile',
+        theme: materialTheme.light(),
+        darkTheme: materialTheme.dark(),
+        themeMode: brightness == Brightness.light
+            ? ThemeMode.light
+            : ThemeMode.dark,
+        routerConfig: router,
+      ),
     );
   }
 }
