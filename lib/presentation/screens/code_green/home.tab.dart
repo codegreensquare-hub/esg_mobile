@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:esg_mobile/core/constants/frame_width.dart';
 import 'package:esg_mobile/presentation/widgets/main/fade_carousel.container.dart';
@@ -18,6 +17,29 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   List<String> _carouselAssets = const [];
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _loadCarouselAssets();
+  // }
+
+  // Future<void> _loadCarouselAssets() async {
+  //   try {
+  //     final manifestJson = await rootBundle.loadString('AssetManifest.json');
+  //     final Map<String, dynamic> manifest =
+  //         (jsonDecode(manifestJson) as Map<String, dynamic>);
+  //     final assets =
+  //         manifest.keys
+  //             .where((k) => k.startsWith('assets/images/carousel/'))
+  //             .toList()
+  //           ..sort();
+  //     if (!mounted) return;
+  //     setState(() => _carouselAssets = assets);
+  //   } catch (_) {
+  //     // If manifest is unavailable or empty, leave list empty.
+  //   }
+  // }
+
   @override
   void initState() {
     super.initState();
@@ -25,32 +47,38 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _loadCarouselAssets() async {
-    try {
-      final manifestJson = await rootBundle.loadString('AssetManifest.json');
-      final Map<String, dynamic> manifest =
-          (jsonDecode(manifestJson) as Map<String, dynamic>);
-      final assets =
-          manifest.keys
-              .where((k) => k.startsWith('assets/images/carousel/'))
-              .toList()
-            ..sort();
-      if (!mounted) return;
-      setState(() => _carouselAssets = assets);
-    } catch (_) {
-      // If manifest is unavailable or empty, leave list empty.
+    // Predefined list of carousel assets
+    const potentialAssets = [
+      'assets/images/carousel/1_carousel.jpg',
+      'assets/images/carousel/2_carousel.jpg',
+      'assets/images/carousel/3_carousel.jpg',
+      'assets/images/carousel/4_carousel.jpg',
+    ];
+
+    // Verify each asset exists by trying to load it
+    final verifiedAssets = <String>[];
+    for (final asset in potentialAssets) {
+      try {
+        await rootBundle.load(asset);
+        verifiedAssets.add(asset);
+      } catch (_) {
+        // Asset doesn't exist or can't be loaded, skip it
+      }
     }
+
+    if (!mounted) return;
+    setState(() => _carouselAssets = verifiedAssets);
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final bool isSmall = width < Device.smallTablet.breakpoint;
-    final double carouselHeight = isSmall ? 367 : math.min(width / 3, 700);
+    final double carouselHeight = isSmall ? 445 : math.min(width / 3, 700);
     final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.zero,
       width: double.infinity,
-      color: Colors.green[100],
       child: Column(
         children: [
           // Carousel or banner can be added here
@@ -59,6 +87,7 @@ class _HomeTabState extends State<HomeTab> {
             height: carouselHeight,
             switchInterval: const Duration(seconds: 5),
             overlayColor: Colors.black.withAlpha(89),
+            alignment: Alignment(0, -0.5),
             child: Center(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: frameWidth),
@@ -124,7 +153,6 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
           ),
-
           Center(
             child: Text(
               'Code Green Home Screen',
