@@ -26,7 +26,7 @@ class _HomeTabState extends State<HomeTab> {
   // Future<void> _loadCarouselAssets() async {
   //   try {
   //     final manifestJson = await rootBundle.loadString('AssetManifest.json');
-  //     final Map<String, dynamic> manifest =
+  //     final Map<String, dynamic> manifest =``
   //         (jsonDecode(manifestJson) as Map<String, dynamic>);
   //     final assets =
   //         manifest.keys
@@ -49,10 +49,10 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _loadCarouselAssets() async {
     // Predefined list of carousel assets
     const potentialAssets = [
-      'assets/images/carousel/1_carousel.jpg',
-      'assets/images/carousel/2_carousel.jpg',
-      'assets/images/carousel/3_carousel.jpg',
-      'assets/images/carousel/4_carousel.jpg',
+      'assets/images/carousel/carousel_1.jpg',
+      'assets/images/carousel/carousel_2.jpg',
+      'assets/images/carousel/carousel_4.jpg',
+      'assets/images/carousel/carousel_5.jpg',
     ];
 
     // Verify each asset exists by trying to load it
