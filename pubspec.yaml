@@ -23,6 +23,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/carousel/
+    - assets/images/product_grid/
   fonts:
     - family: EB Garamond
       fonts:
