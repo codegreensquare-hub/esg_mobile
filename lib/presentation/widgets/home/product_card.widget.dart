@@ -39,20 +39,37 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           // Text container: takes 42/244 of the card height
-          Expanded(
-            flex: 32,
-            child: Container(
-              width: double.infinity,
-              alignment: Alignment.center,
-              child: Text(
-                productName,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
+          Text(
+            productName,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
           ),
         ],
       ),
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Column(
+  //     children: [
+  //       AspectRatio(
+  //         aspectRatio: 152 / 202,
+  //         child: Image.asset(imagePath, fit: BoxFit.cover),
+  //       ),
+
+  //       SizedBox(height: 6), // you control the spacing
+
+  //       Text(
+  //         productName,
+  //         textAlign: TextAlign.center,
+  //         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+  //           height: 1.0, // removes extra text padding
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 }

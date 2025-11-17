@@ -24,6 +24,7 @@ flutter:
   assets:
     - assets/images/carousel/
     - assets/images/product_grid/
+    - assets/images/material_grid/
   fonts:
     - family: EB Garamond
       fonts:
