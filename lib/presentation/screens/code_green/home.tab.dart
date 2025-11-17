@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:esg_mobile/core/constants/frame_width.dart';
+import 'package:esg_mobile/core/theme/util.dart';
 import 'package:esg_mobile/presentation/widgets/main/fade_carousel.container.dart';
+import 'package:esg_mobile/presentation/widgets/product/product_card.widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -153,10 +155,53 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
           ),
+          // New In section
+          const SizedBox(height: 54),
           Center(
-            child: Text(
-              'Code Green Home Screen',
-              style: Theme.of(context).textTheme.headlineMedium,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: frameWidth),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                children: [
+                  Text(
+                    'New In',
+                    textAlign: TextAlign.center,
+                    style: createTextTheme(context).headlineMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  // Product grid with 20px padding on sides and 15px gap between cards
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 15,
+                          childAspectRatio: 152 / 244,
+                        ),
+                    itemCount: 4,
+                    itemBuilder: (context, index) {
+                      return ProductCard(
+                        imagePath:
+                            'assets/images/product_grid/product_${index + 1}.png',
+                        productName: '스퀘어네스트 백',
+                      );
+                    },
+                  ),
+                  // "See all" link
+                  Text(
+                    'See all',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
