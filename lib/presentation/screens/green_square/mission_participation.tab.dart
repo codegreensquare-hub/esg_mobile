@@ -1,3 +1,5 @@
+import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
+import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:flutter/material.dart';
 
 class MissionParticipationTab extends StatelessWidget {
@@ -34,6 +36,17 @@ class MissionParticipationTab extends StatelessWidget {
             '오늘 미션참여 가능 횟수 3/3',
             textAlign: TextAlign.center,
           ),
+        ),
+        Column(
+          children: [
+            MissionAvailableListTile(
+              mission: MissionRow(
+                id: 'test',
+                title: '플라스틱 줄이기',
+                text: '일회용 플라스틱 사용을 줄이고, 재사용 가능한 물품을 사용해요.',
+              ),
+            ),
+          ],
         ),
       ],
     );
