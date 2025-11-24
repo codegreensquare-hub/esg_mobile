@@ -14,6 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^17.0.0
+  supabase_codegen: ^3.0.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -108,3 +109,10 @@ flutter:
         - asset: assets/fonts/Source_Han_Kr/SourceHanSerifK-Heavy.otf
           weight: 900
   uses-material-design: true
+
+supabase_codegen:
+  # env: env.app # Overrides default: .env
+  output: lib/data/models/supabase # Overrides default: supabase/types
+  tag: v1 # Overrides default: ''
+  debug: false # Overrides default: false
+  skipFooter: false # Overrides default: false

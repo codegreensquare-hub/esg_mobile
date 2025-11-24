@@ -5,6 +5,7 @@ import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
+import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
@@ -126,7 +127,7 @@ class _MainScreenState extends State<MainScreen> {
                       context,
                       index: 2,
                       icon: Icons.group_outlined,
-                      label: 'Participate',
+                      label: '미션 참여',
                     ),
                     _buildGsItem(
                       context,
@@ -288,7 +289,7 @@ class _MainScreenState extends State<MainScreen> {
       case 1:
         return const Center(child: Text('Shopping Mall'));
       case 2:
-        return const Center(child: Text('Participate'));
+        return MissionParticipationTab();
       case 3:
         return const Center(child: Text('Account'));
       default:
