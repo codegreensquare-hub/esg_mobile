@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class MissionDetailDialog extends StatelessWidget {
+class MissionDetailDialog extends StatefulWidget {
   final MissionRow mission;
 
   const MissionDetailDialog({
@@ -12,148 +14,377 @@ class MissionDetailDialog extends StatelessWidget {
   });
 
   @override
+  State<MissionDetailDialog> createState() => _MissionDetailDialogState();
+}
+
+class _MissionDetailDialogState extends State<MissionDetailDialog> {
+  List<MissionPhotoTaskRow> _taskPhotos = [];
+  List<MissionPhotoNotAllowedRow> _notAllowedPhotos = [];
+  bool _isLoadingPhotos = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPhotos();
+  }
+
+  Future<void> _fetchPhotos() async {
+    try {
+      final supabase = Supabase.instance.client;
+
+      // Fetch task photos for this mission
+      final taskPhotosResponse = await supabase
+          .from('mission_photo_task')
+          .select()
+          .eq('mission', widget.mission.id)
+          .order('order');
+
+      // Fetch not allowed photos for this mission
+      final notAllowedPhotosResponse = await supabase
+          .from('mission_photo_not_allowed')
+          .select()
+          .eq('mission', widget.mission.id)
+          .order('order');
+
+      setState(() {
+        _taskPhotos = (taskPhotosResponse as List)
+            .map((json) => MissionPhotoTaskRow.fromJson(json))
+            .toList();
+        _notAllowedPhotos = (notAllowedPhotosResponse as List)
+            .map((json) => MissionPhotoNotAllowedRow.fromJson(json))
+            .toList();
+        _isLoadingPhotos = false;
+      });
+    } catch (e) {
+      print('Error fetching mission photos: $e');
+      setState(() {
+        _isLoadingPhotos = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final imageUrl =
-        mission.thumbnailBucket != null && mission.thumbnailFilename != null
+        widget.mission.thumbnailBucket != null &&
+            widget.mission.thumbnailFilename != null
         ? getImageLink(
-            mission.thumbnailBucket!,
-            mission.thumbnailFilename!,
-            folderPath: mission.thumbnailFolderPath,
+            widget.mission.thumbnailBucket!,
+            widget.mission.thumbnailFilename!,
+            folderPath: widget.mission.thumbnailFolderPath,
           )
         : null;
 
     return Scaffold(
       appBar: AppBar(
         title: Hero(
-          tag: 'mission_title_${mission.id}',
+          tag: 'mission_title_${widget.mission.id}',
           child: Text(
-            mission.title ?? 'No Title',
+            widget.mission.title ?? 'No Title',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Image with Hero - square, max 200x200
-            if (imageUrl != null)
-              Hero(
-                tag: 'mission_image_${mission.id}',
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: SafeArea(
+          top: false,
+          bottom: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image with Hero - square, max 200x200
+              if (imageUrl != null)
+                Hero(
+                  tag: 'mission_image_${widget.mission.id}',
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
                     height: 200,
                     width: 200,
-                    color: Colors.grey[300],
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    height: 200,
-                    width: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.error, size: 48),
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 200,
+                      width: 200,
+                      color: Colors.grey[300],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 200,
+                      width: 200,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.error, size: 48),
+                    ),
                   ),
                 ),
+              // Title with Hero
+              const SizedBox(height: 16),
+              // Description with Hero
+              Hero(
+                tag: 'mission_text_${widget.mission.id}',
+                child: Text(
+                  widget.mission.text ?? 'No Description',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ),
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 24),
+              // Additional details
+              if (widget.mission.taskExplanation != null) ...[
+                Text(
+                  'Explanation',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.mission.taskExplanation!,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 24),
+              ],
+              if (widget.mission.awardPoints > 0) ...[
+                Row(
                   children: [
-                    // Title with Hero
-                    const SizedBox(height: 16),
-                    // Description with Hero
-                    Hero(
-                      tag: 'mission_text_${mission.id}',
-                      child: Text(
-                        mission.text ?? 'No Description',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Additional details
-                    if (mission.taskExplanation != null) ...[
-                      Text(
-                        'Explanation',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        mission.taskExplanation!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                    if (mission.awardPoints > 0) ...[
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 24),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${mission.awardPoints} Points',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                    // Dates
-                    if (mission.startActiveDate != null ||
-                        mission.lastActiveDate != null) ...[
-                      Text(
-                        'Duration',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${mission.startActiveDate ?? 'N/A'} - ${mission.lastActiveDate ?? 'N/A'}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                    // Participate Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: Implement participation logic
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Participation feature coming soon!',
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text('Participate in Mission'),
+                    Icon(Icons.star, color: Colors.amber, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${widget.mission.awardPoints} Points',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+              ],
+              // 이렇게 해 주세요 Section
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '이렇게 해 주세요',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade800,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('👍'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (widget.mission.taskExplanation != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.mission.taskExplanation ?? '',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                    ],
+                    // Grid of task photos
+                    if (_isLoadingPhotos)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_taskPhotos.isEmpty)
+                      const SizedBox.shrink()
+                    else
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        children: _taskPhotos.map((photo) {
+                          final photoUrl = getImageLink(
+                            photo.bucket,
+                            photo.fileName,
+                            folderPath: photo.folderPath,
+                          );
+                          return CachedNetworkImage(
+                            imageUrl: photoUrl,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              height: 100,
+                              color: Colors.grey.shade300,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              height: 100,
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.error),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              // 이건 안 돼요 Section
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '이건 안 돼요',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade800,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('✋'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (widget.mission.doNotDoExplanation != null) ...[
+                      Text(
+                        widget.mission.doNotDoExplanation ?? '',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    // Grid of not allowed photos
+                    if (_isLoadingPhotos)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_notAllowedPhotos.isEmpty)
+                      const SizedBox.shrink()
+                    else
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        children: _notAllowedPhotos.map((photo) {
+                          final photoUrl = getImageLink(
+                            photo.bucket,
+                            photo.fileName,
+                            folderPath: photo.folderPath,
+                          );
+                          return CachedNetworkImage(
+                            imageUrl: photoUrl,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              height: 100,
+                              color: Colors.grey.shade300,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              height: 100,
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.error),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Participate Button
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () {
+                    // TODO: Implement participation logic
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Participation feature coming soon!',
+                        ),
+                      ),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    widget.mission.participationButtonText ??
+                        'Participate in Mission',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // 유의사항 Section
+              Text(
+                '유의사항',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildNoteItem('미션 참여는 하루에 최대 10회까지 가능합니다.'),
+                  _buildNoteItem('위의 인증 기준에 따라 주셔야 심사가 통과됩니다.'),
+                  _buildNoteItem('미션 참여 방식은 변경될 수 있습니다.'),
+                ],
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoteItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 16)),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
       ),
     );
   }
