@@ -1,7 +1,8 @@
+import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
-import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
+import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,16 +16,36 @@ class MissionParticipationTab extends StatefulWidget {
 
 class _MissionParticipationTabState extends State<MissionParticipationTab> {
   late final MissionRowService _missionService;
-  late final Future<List<MissionRow>> _missionsFuture;
+
+  List<MissionRow> currentMissions = [];
+  List<MissionRow> pastMissions = [];
+
+  bool showPastMissions = false;
 
   @override
   void initState() {
     super.initState();
     _missionService = MissionRowService(Supabase.instance.client);
-    _missionsFuture = _missionService.fetchList(
+    _fetchCurrentMissions();
+    _fetchPastMissions();
+  }
+
+  void _fetchCurrentMissions() async {
+    currentMissions = await _missionService.fetchList(
       isPublished: true,
+      status: MissionStatus.current,
       publicity: MissionPublicity.public,
     );
+    setState(() {});
+  }
+
+  void _fetchPastMissions() async {
+    pastMissions = await _missionService.fetchList(
+      isPublished: true,
+      status: MissionStatus.past,
+      publicity: MissionPublicity.public,
+    );
+    setState(() {});
   }
 
   @override
@@ -33,6 +54,7 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
     final cs = theme.colorScheme;
     return Column(
       children: [
+        SizedBox(height: 48),
         Text('🌿 친환경 미션인증이란? '),
         Container(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -58,39 +80,82 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
             textAlign: TextAlign.center,
           ),
         ),
-        FutureBuilder<List<MissionRow>>(
-          future: _missionsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error loading missions: ${snapshot.error}'),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No missions available'));
-            } else {
-              final missions = snapshot.data!;
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: missions.length,
-                itemBuilder: (context, index) {
-                  final mission = missions[index];
-                  return MissionAvailableListTile(
-                    mission: mission,
-                    onTap: (mission) {
-                      // TODO: Handle mission tap, e.g., navigate to participation screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Tapped on ${mission.title}')),
-                      );
-                    },
+        // Current Missions
+        if (currentMissions.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              '현재 미션',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: currentMissions.length,
+            itemBuilder: (context, index) {
+              final mission = currentMissions[index];
+              return MissionAvailableListTile(
+                mission: mission,
+                onTap: (mission) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MissionDetailDialog(mission: mission),
+                    ),
                   );
                 },
               );
-            }
+            },
+          ),
+        ] else ...[
+          const Center(child: Text('현재 진행 중인 미션이 없습니다.')),
+        ],
+        SizedBox(height: 48),
+        // Button to toggle past missions
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              showPastMissions = !showPastMissions;
+            });
           },
+          child: Text(showPastMissions ? '- 지난 미션 닫기 -' : '- 지난 미션 보기 -'),
         ),
+
+        // Past Missions
+        if (showPastMissions) ...[
+          const SizedBox(height: 24),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              '지난 미션',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (pastMissions.isNotEmpty) ...[
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: pastMissions.length,
+              itemBuilder: (context, index) {
+                final mission = pastMissions[index];
+                return MissionAvailableListTile(
+                  mission: mission,
+                  onTap: (mission) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MissionDetailDialog(mission: mission),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ] else ...[
+            const Center(child: Text('지난 미션이 없습니다.')),
+          ],
+        ],
       ],
     );
   }

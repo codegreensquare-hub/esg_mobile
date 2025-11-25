@@ -56,7 +56,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     final wideMode = _isWide(currentWidth);
 
     return Material(
-      color: theme.colorScheme.surfaceContainerLow,
+      color: theme.colorScheme.surface,
       elevation: overlapsContent ? 4 : 0,
       child: Center(
         child: Container(

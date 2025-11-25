@@ -1,5 +1,6 @@
 import 'package:supabase/supabase.dart';
 
+import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 
 typedef _FilterStep =
@@ -40,11 +41,15 @@ class MissionRowService {
     MissionType? type,
     MissionPublicity? publicity,
     bool? isPublished,
+    DateTime? lastActiveDateBefore,
+    DateTime? lastActiveDateAfter,
+    MissionStatus? status,
     int? limit,
     int? offset,
     String orderBy = MissionRow.orderField,
     bool ascending = true,
   }) async {
+    final now = DateTime.now().toIso8601String().split('T')[0];
     final filters = <_FilterStep>[
       if (type != null)
         (builder) => builder.eq(MissionRow.typeField, type.name),
@@ -52,6 +57,22 @@ class MissionRowService {
         (builder) => builder.eq(MissionRow.publicityField, publicity.name),
       if (isPublished != null)
         (builder) => builder.eq(MissionRow.isPublishedField, isPublished),
+      if (lastActiveDateBefore != null)
+        (builder) => builder.lt(
+          MissionRow.lastActiveDateField,
+          lastActiveDateBefore.toIso8601String().split('T')[0],
+        ),
+      if (lastActiveDateAfter != null)
+        (builder) => builder.gte(
+          MissionRow.lastActiveDateField,
+          lastActiveDateAfter.toIso8601String().split('T')[0],
+        ),
+      if (status == MissionStatus.current)
+        (builder) => builder
+            .lte(MissionRow.startActiveDateField, now)
+            .gte(MissionRow.lastActiveDateField, now),
+      if (status == MissionStatus.past)
+        (builder) => builder.lt(MissionRow.lastActiveDateField, now),
     ];
     print('Filters applied: $filters');
 
