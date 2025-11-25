@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>미션 인증 사진 촬영을 위해 카메라 접근 권한이 필요합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>앨범에서 인증 사진을 선택할 수 있도록 사진 접근 권한이 필요합니다.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>녹음 또는 음성 입력이 필요한 기능을 위해 마이크 접근 권한이 필요합니다.</string>
 </dict>
 </plist>

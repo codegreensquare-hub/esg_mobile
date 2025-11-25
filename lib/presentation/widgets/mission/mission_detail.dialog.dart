@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
@@ -56,7 +57,7 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
         _isLoadingPhotos = false;
       });
     } catch (e) {
-      print('Error fetching mission photos: $e');
+      debugPrint('Error fetching mission photos: $e');
       setState(() {
         _isLoadingPhotos = false;
       });
@@ -194,15 +195,13 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    if (widget.mission.taskExplanation != null) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.mission.taskExplanation ?? '',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.green.shade700,
-                        ),
+                    Text(
+                      '어떤 종류의 친환경 일상이든,\n서대문구임을 알 수 있는 랜드마크나 표지판,\n또는 영수증과 함께 친환경 일상 인증 사진을 찍어 주세요',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.green.shade700,
                       ),
-                    ],
+                    ),
+                    const SizedBox(height: 16),
                     // Grid of task photos
                     if (_isLoadingPhotos)
                       const Center(child: CircularProgressIndicator())
@@ -270,15 +269,13 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    if (widget.mission.doNotDoExplanation != null) ...[
-                      Text(
-                        widget.mission.doNotDoExplanation ?? '',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.red.shade700,
-                        ),
+                    Text(
+                      '친환경 일상을 인증하는 사진이더라도, 서대문구임을 알 수 없는 사진은 인증이 어려워요',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.red.shade700,
                       ),
-                      const SizedBox(height: 16),
-                    ],
+                    ),
+                    const SizedBox(height: 16),
                     // Grid of not allowed photos
                     if (_isLoadingPhotos)
                       const Center(child: CircularProgressIndicator())
@@ -325,16 +322,11 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () {
-                    // TODO: Implement participation logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Participation feature coming soon!',
-                        ),
+                  onPressed: () => MissionParticipationService.instance
+                      .startParticipationFlow(
+                        context: context,
+                        mission: widget.mission,
                       ),
-                    );
-                  },
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
