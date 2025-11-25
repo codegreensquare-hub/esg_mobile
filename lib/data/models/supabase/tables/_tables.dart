@@ -4,6 +4,8 @@
 //
 // ignore_for_file: require_trailing_commas, constant_identifier_names
 
+export 'award_points.dart';
+export 'award_points_transaction.dart';
 export 'faq.dart';
 export 'inquiry.dart';
 export 'inquiry_response.dart';
@@ -23,5 +25,5 @@ export 'trigger_event_log.dart';
 export 'user.dart';
 export 'user_organization.dart';
 
-/// Tag: v1
-/// Date: 2025-11-24 13:40:19.346205
+/// Tag: v2
+/// Date: 2025-11-25 09:28:17.066659

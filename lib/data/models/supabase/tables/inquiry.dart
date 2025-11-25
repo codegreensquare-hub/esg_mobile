@@ -94,5 +94,5 @@ class InquiryRow extends SupabaseDataRow {
   });
 }
 
-/// Tag: v1
-/// Date: 2025-11-24 13:40:19.335248
+/// Tag: v2
+/// Date: 2025-11-25 09:28:17.048610

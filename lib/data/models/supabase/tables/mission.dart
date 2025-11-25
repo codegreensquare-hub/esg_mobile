@@ -387,5 +387,5 @@ class MissionRow extends SupabaseDataRow {
   });
 }
 
-/// Tag: v1
-/// Date: 2025-11-24 13:40:19.337592
+/// Tag: v2
+/// Date: 2025-11-25 09:28:17.050858

@@ -13,5 +13,5 @@ enum MissionType {
   banner_exposed,
 }
 
-/// Tag: v1
-/// Date: 2025-11-24 13:40:19.324759
+/// Tag: v2
+/// Date: 2025-11-25 09:28:17.036140

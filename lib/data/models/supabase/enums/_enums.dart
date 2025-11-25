@@ -8,5 +8,5 @@ export 'mission_publicity.dart';
 export 'mission_type.dart';
 export 'user_type.dart';
 
-/// Tag: v1
-/// Date: 2025-11-24 13:40:19.325267
+/// Tag: v2
+/// Date: 2025-11-25 09:28:17.036869

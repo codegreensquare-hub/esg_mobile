@@ -13,9 +13,11 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter:
     sdk: flutter
+  flutter_dotenv: ^6.0.0
   go_router: ^17.0.0
   supabase: ^2.10.0
   supabase_codegen: ^3.0.1
+  supabase_flutter: ^2.10.3
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -27,6 +29,7 @@ flutter:
     - assets/images/carousel/
     - assets/images/product_grid/
     - assets/images/material_grid/
+    - .env
   fonts:
     - family: EB Garamond
       fonts:
@@ -110,10 +113,9 @@ flutter:
         - asset: assets/fonts/Source_Han_Kr/SourceHanSerifK-Heavy.otf
           weight: 900
   uses-material-design: true
-
 supabase_codegen:
-  # env: env.app # Overrides default: .env
+  env: .env # Overrides default: .env
   output: lib/data/models/supabase # Overrides default: supabase/types
-  tag: v1 # Overrides default: ''
+  tag: v2 # Overrides default: ''
   debug: false # Overrides default: false
   skipFooter: false # Overrides default: false

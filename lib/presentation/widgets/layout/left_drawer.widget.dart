@@ -1,7 +1,10 @@
+import 'package:esg_mobile/core/constants/navigation.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
 import 'package:esg_mobile/presentation/widgets/logo/code_green.logo.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
-import 'package:esg_mobile/core/constants/navigation.dart';
+import 'package:go_router/go_router.dart';
 
 class CodeGreenLeftDrawer extends StatelessWidget {
   final List<String> tabs;
@@ -23,6 +26,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final authService = UserAuthService.instance;
 
     return Drawer(
       child: Column(
@@ -58,32 +62,50 @@ class CodeGreenLeftDrawer extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
               children: [
-                // TODO : Replace with actual username
-                // TODO : show "login" when not logged in
-                ListTile(
-                  onTap: () {
-                    // TODO : implement profile tap
-                    throw UnimplementedError();
-                  },
-                  title: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'jioo 님',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                AnimatedBuilder(
+                  animation: authService,
+                  builder: (context, _) {
+                    if (authService.isLoggedIn) {
+                      return ListTile(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          // TODO: navigate to profile when available
+                        },
+                        title: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${authService.displayName} 님',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ', 안녕하세요.',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
+                          style: theme.textTheme.titleMedium,
                         ),
-                        TextSpan(
-                          text: ', 안녕하세요.',
-                          style: theme.textTheme.bodyMedium,
+                      );
+                    }
+                    return ListTile(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.push(LoginScreen.route);
+                      },
+                      title: Text(
+                        '로그인',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
                         ),
-                      ],
-                    ),
-                    style: theme.textTheme.titleMedium,
-                  ),
+                      ),
+                    );
+                  },
                 ),
 
                 ...tabs
@@ -175,25 +197,35 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                   ),
                 ),
 
-                // Logout
-                InkWell(
-                  onTap: () {
-                    // TODO : implement logout
-                    throw UnimplementedError();
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    child: Text(
-                      'Log out',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                AnimatedBuilder(
+                  animation: authService,
+                  builder: (context, _) {
+                    if (!authService.isLoggedIn) {
+                      return const SizedBox.shrink();
+                    }
+                    return InkWell(
+                      onTap: () async {
+                        await authService.signOut();
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('로그아웃되었습니다.')),
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'Log out',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ],
             ),

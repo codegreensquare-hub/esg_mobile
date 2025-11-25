@@ -53,6 +53,7 @@ class MissionRowService {
       if (isPublished != null)
         (builder) => builder.eq(MissionRow.isPublishedField, isPublished),
     ];
+    print('Filters applied: $filters');
 
     final filtered = filters.fold<PostgrestFilterBuilder>(
       _baseQuery.select(),
@@ -68,6 +69,7 @@ class MissionRowService {
     };
 
     final rows = await result;
+    print(rows);
 
     return (rows as List)
         .map(
