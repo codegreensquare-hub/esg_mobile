@@ -32,6 +32,7 @@ flutter:
     - assets/images/carousel/
     - assets/images/product_grid/
     - assets/images/material_grid/
+    - assets/images/backgrounds/trees.png
     - .env
   fonts:
     - family: EB Garamond

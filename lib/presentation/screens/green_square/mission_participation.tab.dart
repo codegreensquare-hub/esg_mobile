@@ -4,7 +4,6 @@ import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MissionParticipationTab extends StatefulWidget {
   const MissionParticipationTab({super.key});
@@ -15,8 +14,6 @@ class MissionParticipationTab extends StatefulWidget {
 }
 
 class _MissionParticipationTabState extends State<MissionParticipationTab> {
-  late final MissionRowService _missionService;
-
   List<MissionRow> currentMissions = [];
   List<MissionRow> pastMissions = [];
 
@@ -25,26 +22,27 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
   @override
   void initState() {
     super.initState();
-    _missionService = MissionRowService(Supabase.instance.client);
     _fetchCurrentMissions();
     _fetchPastMissions();
   }
 
   void _fetchCurrentMissions() async {
-    currentMissions = await _missionService.fetchList(
+    currentMissions = await MissionService.instance.fetchList(
       isPublished: true,
       status: MissionStatus.current,
       publicity: MissionPublicity.public,
     );
+    if (!mounted) return;
     setState(() {});
   }
 
   void _fetchPastMissions() async {
-    pastMissions = await _missionService.fetchList(
+    pastMissions = await MissionService.instance.fetchList(
       isPublished: true,
       status: MissionStatus.past,
       publicity: MissionPublicity.public,
     );
+    if (!mounted) return;
     setState(() {});
   }
 

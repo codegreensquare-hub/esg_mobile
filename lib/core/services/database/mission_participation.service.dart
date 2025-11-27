@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_participation.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_photo_animation_completion.dart';
@@ -42,6 +44,7 @@ class MissionParticipationService {
     required BuildContext context,
     required MissionRow mission,
   }) async {
+    VoidCallback? dismissLoading;
     try {
       final source = await _chooseImageSource(context);
       if (source == null || !context.mounted) {
@@ -73,12 +76,26 @@ class MissionParticipationService {
         return;
       }
 
-      await _createParticipation(mission);
+      dismissLoading = _showLoadingDialog(context);
+      final uploadedPhoto = await _uploadPhoto(
+        file: file,
+        mission: mission,
+      );
+      await _createParticipation(
+        mission,
+        photo: uploadedPhoto,
+      );
       final completionPhotos = await _fetchCompletionPhotos(mission.id);
+
+      dismissLoading();
+      dismissLoading = null;
 
       if (!context.mounted) {
         return;
       }
+
+      // Close the mission detail dialog first
+      Navigator.of(context).pop();
 
       await Navigator.of(context).push(
         MaterialPageRoute(
@@ -89,6 +106,8 @@ class MissionParticipationService {
         ),
       );
     } on MissionParticipationException catch (error) {
+      dismissLoading?.call();
+      dismissLoading = null;
       if (!context.mounted) {
         return;
       }
@@ -96,6 +115,8 @@ class MissionParticipationService {
         SnackBar(content: Text(error.message)),
       );
     } catch (error) {
+      dismissLoading?.call();
+      dismissLoading = null;
       if (!context.mounted) {
         return;
       }
@@ -103,6 +124,25 @@ class MissionParticipationService {
         const SnackBar(content: Text('미션 참여 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.')),
       );
     }
+  }
+
+  VoidCallback _showLoadingDialog(BuildContext context) {
+    bool closed = false;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    ).whenComplete(() => closed = true);
+    return () {
+      if (closed || !context.mounted) {
+        return;
+      }
+      final navigator = Navigator.of(context, rootNavigator: true);
+      if (navigator.canPop()) {
+        navigator.pop();
+        closed = true;
+      }
+    };
   }
 
   Future<ImageSource?> _chooseImageSource(BuildContext context) {
@@ -128,7 +168,10 @@ class MissionParticipationService {
     );
   }
 
-  Future<void> _createParticipation(MissionRow mission) async {
+  Future<void> _createParticipation(
+    MissionRow mission, {
+    required ({String bucket, String folderPath, String fileName}) photo,
+  }) async {
     final userId = UserAuthService.instance.currentUser?.id;
     if (userId == null) {
       throw const MissionParticipationException('로그인이 필요한 기능입니다.');
@@ -139,9 +182,42 @@ class MissionParticipationService {
         .insert({
           MissionParticipationRow.participatedByField: userId,
           MissionParticipationRow.missionField: mission.id,
+          MissionParticipationRow.photoBucketField: photo.bucket,
+          MissionParticipationRow.photoFolderPathField: photo.folderPath,
+          MissionParticipationRow.photoFileNameField: photo.fileName,
         })
         .select()
         .single();
+  }
+
+  Future<({String bucket, String folderPath, String fileName})> _uploadPhoto({
+    required XFile file,
+    required MissionRow mission,
+  }) async {
+    final userId = UserAuthService.instance.currentUser?.id;
+    if (userId == null) {
+      throw const MissionParticipationException('로그인이 필요한 기능입니다.');
+    }
+
+    final Uint8List bytes = await file.readAsBytes();
+    final folderPath = 'missions/${mission.id}/$userId';
+    final fileName =
+        'participation_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final storagePath = '$folderPath/$fileName';
+
+    await _client.storage
+        .from(bucket.participation)
+        .uploadBinary(
+          storagePath,
+          bytes,
+          fileOptions: const FileOptions(contentType: 'image/jpeg'),
+        );
+
+    return (
+      bucket: bucket.participation,
+      folderPath: folderPath,
+      fileName: fileName,
+    );
   }
 
   Future<List<MissionPhotoAnimationCompletionRow>> _fetchCompletionPhotos(

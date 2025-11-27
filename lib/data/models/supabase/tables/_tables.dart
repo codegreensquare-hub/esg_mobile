@@ -20,10 +20,11 @@ export 'organization.dart';
 export 'popup.dart';
 export 'product.dart';
 export 'push_notification.dart';
+export 'shipping_address.dart';
 export 'stamp.dart';
 export 'trigger_event_log.dart';
 export 'user.dart';
 export 'user_organization.dart';
 
 /// Tag: v2
-/// Date: 2025-11-25 09:28:17.066659
+/// Date: 2025-11-25 17:06:15.076358

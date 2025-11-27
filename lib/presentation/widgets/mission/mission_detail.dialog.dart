@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
@@ -322,11 +323,18 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () => MissionParticipationService.instance
-                      .startParticipationFlow(
-                        context: context,
-                        mission: widget.mission,
-                      ),
+                  onPressed: () {
+                    if (UserAuthService.instance.currentUser == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('로그인이 필요한 기능입니다.')),
+                      );
+                      return;
+                    }
+                    MissionParticipationService.instance.startParticipationFlow(
+                      context: context,
+                      mission: widget.mission,
+                    );
+                  },
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

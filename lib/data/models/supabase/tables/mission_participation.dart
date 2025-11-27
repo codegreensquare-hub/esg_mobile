@@ -34,6 +34,9 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? rejectedBy,
     String? rejectionReason,
     DateTime? createdAt,
+    String? photoBucket,
+    String? photoFolderPath,
+    String? photoFileName,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (participatedBy != null)
@@ -46,6 +49,11 @@ class MissionParticipationRow extends SupabaseDataRow {
          if (rejectionReason != null)
            'rejection_reason': supaSerialize(rejectionReason),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
+         if (photoBucket != null) 'photo_bucket': supaSerialize(photoBucket),
+         if (photoFolderPath != null)
+           'photo_folder_path': supaSerialize(photoFolderPath),
+         if (photoFileName != null)
+           'photo_file_name': supaSerialize(photoFileName),
        });
 
   /// Mission Participation Row
@@ -130,6 +138,29 @@ class MissionParticipationRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
+  /// Photo Bucket field name
+  static const String photoBucketField = 'photo_bucket';
+
+  /// Photo Bucket
+  String? get photoBucket => getField<String>(photoBucketField);
+  set photoBucket(String? value) => setField<String>(photoBucketField, value);
+
+  /// Photo Folder Path field name
+  static const String photoFolderPathField = 'photo_folder_path';
+
+  /// Photo Folder Path
+  String? get photoFolderPath => getField<String>(photoFolderPathField);
+  set photoFolderPath(String? value) =>
+      setField<String>(photoFolderPathField, value);
+
+  /// Photo File Name field name
+  static const String photoFileNameField = 'photo_file_name';
+
+  /// Photo File Name
+  String? get photoFileName => getField<String>(photoFileNameField);
+  set photoFileName(String? value) =>
+      setField<String>(photoFileNameField, value);
+
   /// Make a copy of the current [MissionParticipationRow]
   /// overriding the provided fields
   MissionParticipationRow copyWith({
@@ -142,6 +173,9 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? rejectedBy,
     String? rejectionReason,
     DateTime? createdAt,
+    String? photoBucket,
+    String? photoFolderPath,
+    String? photoFileName,
   }) => MissionParticipationRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'participated_by': supaSerialize(participatedBy) ?? data['participated_by'],
@@ -153,8 +187,12 @@ class MissionParticipationRow extends SupabaseDataRow {
     'rejection_reason':
         supaSerialize(rejectionReason) ?? data['rejection_reason'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
+    'photo_bucket': supaSerialize(photoBucket) ?? data['photo_bucket'],
+    'photo_folder_path':
+        supaSerialize(photoFolderPath) ?? data['photo_folder_path'],
+    'photo_file_name': supaSerialize(photoFileName) ?? data['photo_file_name'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-25 09:28:17.053628
+/// Date: 2025-11-25 17:06:15.062069

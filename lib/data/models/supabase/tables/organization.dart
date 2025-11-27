@@ -96,4 +96,4 @@ class OrganizationRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-25 09:28:17.060297
+/// Date: 2025-11-25 17:06:15.068789

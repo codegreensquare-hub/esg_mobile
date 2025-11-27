@@ -1,4 +1,4 @@
-import 'package:supabase/supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
@@ -10,14 +10,17 @@ typedef _FilterStep =
 
 /// Lightweight wrapper around the generated [MissionTable] that exposes
 /// typed CRUD helpers plus common listing queries.
-class MissionRowService {
-  MissionRowService(
-    this._client, {
-    MissionTable? missionTable,
-  }) : _missionTable = missionTable ?? MissionTable();
+class MissionService {
+  MissionService._internal({
+    SupabaseClient? client,
+  }) : _client = client ?? Supabase.instance.client;
+
+  static final MissionService _instance = MissionService._internal();
+
+  static MissionService get instance => _instance;
 
   final SupabaseClient _client;
-  final MissionTable _missionTable;
+  final MissionTable _missionTable = MissionTable();
 
   PostgrestQueryBuilder get _baseQuery => _client.from(_missionTable.tableName);
 
