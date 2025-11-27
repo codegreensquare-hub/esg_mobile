@@ -9,46 +9,48 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Organization Table
-class OrganizationTable extends SupabaseTable<OrganizationRow> {
+/// Story Tag Table
+class StoryTagTable extends SupabaseTable<StoryTagRow> {
   /// Table Name
   @override
-  String get tableName => 'organization';
+  String get tableName => 'story_tag';
 
-  /// Create a [OrganizationRow] from the [data] provided
+  /// Create a [StoryTagRow] from the [data] provided
   @override
-  OrganizationRow createRow(Map<String, dynamic> data) =>
-      OrganizationRow.fromJson(data);
+  StoryTagRow createRow(Map<String, dynamic> data) =>
+      StoryTagRow.fromJson(data);
 }
 
-/// Organization Row
-class OrganizationRow extends SupabaseDataRow {
-  /// Organization Row
-  OrganizationRow({
+/// Story Tag Row
+class StoryTagRow extends SupabaseDataRow {
+  /// Story Tag Row
+  StoryTagRow({
     String? id,
     DateTime? createdAt,
-    String? name,
     String? createdBy,
+    String? story,
+    String? tag,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (name != null) 'name': supaSerialize(name),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (story != null) 'story': supaSerialize(story),
+         if (tag != null) 'tag': supaSerialize(tag),
        });
 
-  /// Organization Row
-  const OrganizationRow._(super.data);
+  /// Story Tag Row
+  const StoryTagRow._(super.data);
 
-  /// Create Organization Row from a [data] map
-  factory OrganizationRow.fromJson(Map<String, dynamic> data) =>
-      OrganizationRow._(data.cleaned);
+  /// Create Story Tag Row from a [data] map
+  factory StoryTagRow.fromJson(Map<String, dynamic> data) =>
+      StoryTagRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => OrganizationTable();
+  SupabaseTable get table => StoryTagTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -65,13 +67,6 @@ class OrganizationRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Name field name
-  static const String nameField = 'name';
-
-  /// Name
-  String? get name => getField<String>(nameField);
-  set name(String? value) => setField<String>(nameField, value);
-
   /// Created By field name
   static const String createdByField = 'created_by';
 
@@ -80,20 +75,36 @@ class OrganizationRow extends SupabaseDataRow {
       getField<String>(createdByField, defaultValue: 'auth.')!;
   set createdBy(String value) => setField<String>(createdByField, value);
 
-  /// Make a copy of the current [OrganizationRow]
+  /// Story field name
+  static const String storyField = 'story';
+
+  /// Story
+  String? get story => getField<String>(storyField);
+  set story(String? value) => setField<String>(storyField, value);
+
+  /// Tag field name
+  static const String tagField = 'tag';
+
+  /// Tag
+  String? get tag => getField<String>(tagField);
+  set tag(String? value) => setField<String>(tagField, value);
+
+  /// Make a copy of the current [StoryTagRow]
   /// overriding the provided fields
-  OrganizationRow copyWith({
+  StoryTagRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? name,
     String? createdBy,
-  }) => OrganizationRow.fromJson({
+    String? story,
+    String? tag,
+  }) => StoryTagRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'name': supaSerialize(name) ?? data['name'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'story': supaSerialize(story) ?? data['story'],
+    'tag': supaSerialize(tag) ?? data['tag'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-27 18:02:57.365653
+/// Date: 2025-11-27 18:02:57.370986

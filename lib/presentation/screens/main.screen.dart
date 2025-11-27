@@ -7,7 +7,7 @@ import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
-import 'package:esg_mobile/presentation/screens/green_square/story.tab.dart';
+import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/nav_header.delegate.dart';
