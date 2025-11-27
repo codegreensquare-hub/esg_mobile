@@ -115,7 +115,7 @@ class _MainScreenState extends State<MainScreen> {
                       context,
                       index: 0,
                       icon: Icons.auto_stories_outlined,
-                      label: 'Story',
+                      label: '스토리',
                     ),
                     _buildGsItem(
                       context,
