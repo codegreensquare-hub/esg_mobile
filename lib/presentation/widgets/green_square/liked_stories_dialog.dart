@@ -100,7 +100,9 @@ class _LikedStoriesDialogState extends State<LikedStoriesDialog> {
                               children: [
                                 Text(
                                   story.title ?? '',
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
                                 ),
                                 if (story.subtitle != null &&
                                     story.subtitle!.isNotEmpty)

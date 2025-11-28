@@ -7,6 +7,7 @@ import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
+import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
@@ -288,7 +289,7 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return const StoryTab(); // Story placeholder for now
       case 1:
-        return const Center(child: Text('Shopping Mall'));
+        return const ShoppingMallTab();
       case 2:
         return MissionParticipationTab();
       case 3:
