@@ -141,4 +141,4 @@ class MissionPhotoPromotionalRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-27 18:02:57.364507
+/// Date: 2025-11-28 10:14:23.487474
