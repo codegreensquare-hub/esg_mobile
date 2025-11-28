@@ -76,8 +76,8 @@ class StoryLikeRow extends SupabaseDataRow {
   static const String likedByField = 'liked_by';
 
   /// Liked By
-  String? get likedBy => getField<String>(likedByField);
-  set likedBy(String? value) => setField<String>(likedByField, value);
+  String get likedBy => getField<String>(likedByField, defaultValue: 'auth.')!;
+  set likedBy(String value) => setField<String>(likedByField, value);
 
   /// Make a copy of the current [StoryLikeRow]
   /// overriding the provided fields
@@ -95,4 +95,4 @@ class StoryLikeRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 10:14:23.495799
+/// Date: 2025-11-28 10:23:41.145762

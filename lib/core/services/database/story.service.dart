@@ -1,3 +1,4 @@
+import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,11 +21,11 @@ class StoryService {
     int offset = 0,
   }) async {
     PostgrestFilterBuilder query = _client
-        .from('story')
+        .from(StoryTable().tableName)
         .select('*, story_tag(*)');
 
     // Only fetch published stories
-    query = query.eq('is_published', true);
+    query = query.eq(StoryRow.isPublishedField, true);
 
     if (search != null && search.isNotEmpty) {
       query = query.or(
@@ -33,7 +34,7 @@ class StoryService {
     }
 
     final response = await query
-        .order('created_at', ascending: false)
+        .order(StoryRow.createdAtField, ascending: false)
         .range(offset, offset + limit - 1);
 
     print('Fetched stories response: $response');
@@ -41,11 +42,67 @@ class StoryService {
     return (response as List).map((json) {
       final story = StoryRow.fromJson(json);
       final tags =
-          (json['story_tag'] as List?)
+          (json[StoryTagTable().tableName] as List?)
               ?.map((tagJson) => StoryTagRow.fromJson(tagJson))
               .toList() ??
           [];
       return StoryWithTags(story: story, tags: tags);
     }).toList();
+  }
+
+  Future<List<StoryCommentWithUser>> fetchComments(String storyId) async {
+    final response = await _client
+        .from(StoryCommentTable().tableName)
+        .select('*, user(*)')
+        .eq(StoryCommentRow.storyField, storyId)
+        .order(StoryCommentRow.createdAtField);
+    return (response as List).map((json) {
+      final comment = StoryCommentRow.fromJson(json);
+      final user = UserRow.fromJson(json['user']);
+      return StoryCommentWithUser(comment: comment, commentBy: user);
+    }).toList();
+  }
+
+  Future<int> getLikeCount(String storyId) async {
+    final response = await _client
+        .from(StoryLikeTable().tableName)
+        .select(StoryLikeRow.idField)
+        .eq(StoryLikeRow.storyField, storyId)
+        .count(CountOption.exact);
+    return response.count;
+  }
+
+  Future<bool> hasUserLiked(String storyId, String userId) async {
+    final response = await _client
+        .from(StoryLikeTable().tableName)
+        .select()
+        .eq(StoryLikeRow.storyField, storyId)
+        .eq(StoryLikeRow.likedByField, userId);
+    return response.isNotEmpty;
+  }
+
+  Future<void> toggleLike(String storyId, String userId) async {
+    final hasLiked = await hasUserLiked(storyId, userId);
+    if (hasLiked) {
+      await _client
+          .from(StoryLikeTable().tableName)
+          .delete()
+          .eq(StoryLikeRow.storyField, storyId)
+          .eq(StoryLikeRow.likedByField, userId);
+    } else {
+      await _client.from(StoryLikeTable().tableName).insert({
+        StoryLikeRow.storyField: storyId,
+        StoryLikeRow.likedByField: userId,
+      });
+    }
+  }
+
+  Future<void> addComment(String storyId, String userId, String comment) async {
+    await _client.from(StoryCommentTable().tableName).insert({
+      StoryCommentRow.storyField: storyId,
+      StoryCommentRow.commentByField: userId,
+      StoryCommentRow.commentField: comment,
+      StoryCommentRow.createdAtField: DateTime.now().toIso8601String(),
+    });
   }
 }

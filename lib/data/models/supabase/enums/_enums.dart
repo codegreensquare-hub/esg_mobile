@@ -9,4 +9,4 @@ export 'mission_type.dart';
 export 'user_type.dart';
 
 /// Tag: v2
-/// Date: 2025-11-28 10:14:23.464537
+/// Date: 2025-11-28 10:23:41.122305
