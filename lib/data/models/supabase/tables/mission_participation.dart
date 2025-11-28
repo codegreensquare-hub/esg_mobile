@@ -195,4 +195,4 @@ class MissionParticipationRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:12:55.290715
+/// Date: 2025-11-28 16:55:59.350803

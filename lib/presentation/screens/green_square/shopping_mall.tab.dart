@@ -20,6 +20,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
   List<ProductCategoryRow> categories = [];
   List<ProductWithOtherDetails> products = [];
   bool isLoading = true;
+  String? userId;
 
   @override
   void initState() {
@@ -30,9 +31,9 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
   Future<void> _loadData() async {
     setState(() => isLoading = true);
     try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
+      userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId != null) {
-        awardPoints = await ProductService.instance.getUserAwardPoints(userId);
+        awardPoints = await ProductService.instance.getUserAwardPoints(userId!);
       }
 
       categories = await ProductService.instance.fetchCategories();
@@ -53,9 +54,49 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
       searchQuery: _searchController.text.isEmpty
           ? null
           : _searchController.text,
+      userId: userId,
     );
     if (mounted) {
       setState(() => products = fetchedProducts);
+    }
+  }
+
+  Future<void> _toggleWishlist(
+    ProductWithOtherDetails productWithDetails,
+  ) async {
+    if (userId == null) {
+      // Handle not logged in - maybe show login prompt
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    try {
+      await ProductService.instance.toggleWishlist(
+        productWithDetails.product.code,
+        userId!,
+      );
+
+      // Update the local state
+      setState(() {
+        final index = products.indexWhere(
+          (p) => p.product.code == productWithDetails.product.code,
+        );
+        if (index != -1) {
+          products[index] = ProductWithOtherDetails(
+            product: productWithDetails.product,
+            categoryName: productWithDetails.categoryName,
+            images: productWithDetails.images,
+            isInWishlist: !productWithDetails.isInWishlist,
+          );
+        }
+      });
+    } catch (e) {
+      debugPrint('Error toggling wishlist: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('찜하기 처리 중 오류가 발생했습니다.')),
+      );
     }
   }
 
@@ -180,6 +221,9 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
                 final productWithDetails = products[index];
                 return ProductCard(
                   productWithDetails: productWithDetails,
+                  onWishlistToggle: userId != null
+                      ? () => _toggleWishlist(productWithDetails)
+                      : null,
                 );
               },
             ),

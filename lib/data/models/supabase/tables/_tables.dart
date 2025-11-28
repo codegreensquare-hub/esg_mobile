@@ -23,6 +23,7 @@ export 'product_category.dart';
 export 'product_image.dart';
 export 'product_option_parameter.dart';
 export 'product_option_value.dart';
+export 'product_wishlist.dart';
 export 'push_notification.dart';
 export 'shipping_address.dart';
 export 'stamp.dart';
@@ -38,4 +39,4 @@ export 'user.dart';
 export 'user_organization.dart';
 
 /// Tag: v2
-/// Date: 2025-11-28 16:12:55.314005
+/// Date: 2025-11-28 16:55:59.372165

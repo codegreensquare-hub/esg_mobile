@@ -107,4 +107,4 @@ class StoryRelatedMissionRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:12:55.311270
+/// Date: 2025-11-28 16:55:59.368732
