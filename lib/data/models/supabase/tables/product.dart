@@ -24,17 +24,40 @@ class ProductTable extends SupabaseTable<ProductRow> {
 class ProductRow extends SupabaseDataRow {
   /// Product Row
   ProductRow({
-    String? id,
-    String? name,
-    String? description,
-    String? createdBy,
+    required ProductSaleStatus saleStatus,
+    String? code,
     DateTime? createdAt,
+    String? createdBy,
+    String? productBy,
+    String? category,
+    double? regularPrice,
+    double? salesPrice,
+    double? stockQuantity,
+    double? safeStockQuantity,
+    String? mainImageBucket,
+    String? mainImageFolderPath,
+    String? mainImageFileName,
+    String? description,
   }) : super({
-         if (id != null) 'id': supaSerialize(id),
-         if (name != null) 'name': supaSerialize(name),
-         if (description != null) 'description': supaSerialize(description),
-         if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         'sale_status': supaSerialize(saleStatus),
+         if (code != null) 'code': supaSerialize(code),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
+         if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (productBy != null) 'product_by': supaSerialize(productBy),
+         if (category != null) 'category': supaSerialize(category),
+         if (regularPrice != null) 'regular_price': supaSerialize(regularPrice),
+         if (salesPrice != null) 'sales_price': supaSerialize(salesPrice),
+         if (stockQuantity != null)
+           'stock_quantity': supaSerialize(stockQuantity),
+         if (safeStockQuantity != null)
+           'safe_stock_quantity': supaSerialize(safeStockQuantity),
+         if (mainImageBucket != null)
+           'main_image_bucket': supaSerialize(mainImageBucket),
+         if (mainImageFolderPath != null)
+           'main_image_folder_path': supaSerialize(mainImageFolderPath),
+         if (mainImageFileName != null)
+           'main_image_file_name': supaSerialize(mainImageFileName),
+         if (description != null) 'description': supaSerialize(description),
        });
 
   /// Product Row
@@ -51,34 +74,12 @@ class ProductRow extends SupabaseDataRow {
   @override
   SupabaseTable get table => ProductTable();
 
-  /// Id field name
-  static const String idField = 'id';
+  /// Code field name
+  static const String codeField = 'code';
 
-  /// Id
-  String get id => getField<String>(idField, defaultValue: '')!;
-  set id(String value) => setField<String>(idField, value);
-
-  /// Name field name
-  static const String nameField = 'name';
-
-  /// Name
-  String? get name => getField<String>(nameField);
-  set name(String? value) => setField<String>(nameField, value);
-
-  /// Description field name
-  static const String descriptionField = 'description';
-
-  /// Description
-  String? get description => getField<String>(descriptionField);
-  set description(String? value) => setField<String>(descriptionField, value);
-
-  /// Created By field name
-  static const String createdByField = 'created_by';
-
-  /// Created By
-  String get createdBy =>
-      getField<String>(createdByField, defaultValue: 'auth.')!;
-  set createdBy(String value) => setField<String>(createdByField, value);
+  /// Code
+  String get code => getField<String>(codeField, defaultValue: '()')!;
+  set code(String value) => setField<String>(codeField, value);
 
   /// Created At field name
   static const String createdAtField = 'created_at';
@@ -88,22 +89,140 @@ class ProductRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
+  /// Created By field name
+  static const String createdByField = 'created_by';
+
+  /// Created By
+  String get createdBy =>
+      getField<String>(createdByField, defaultValue: 'auth.')!;
+  set createdBy(String value) => setField<String>(createdByField, value);
+
+  /// Product By field name
+  static const String productByField = 'product_by';
+
+  /// Product By
+  String get productBy =>
+      getField<String>(productByField, defaultValue: 'auth.')!;
+  set productBy(String value) => setField<String>(productByField, value);
+
+  /// Category field name
+  static const String categoryField = 'category';
+
+  /// Category
+  String? get category => getField<String>(categoryField);
+  set category(String? value) => setField<String>(categoryField, value);
+
+  /// Sale Status field name
+  static const String saleStatusField = 'sale_status';
+
+  /// Sale Status
+  ProductSaleStatus get saleStatus => getField<ProductSaleStatus>(
+    saleStatusField,
+    enumValues: ProductSaleStatus.values,
+  )!;
+  set saleStatus(ProductSaleStatus value) =>
+      setField<ProductSaleStatus>(saleStatusField, value);
+
+  /// Regular Price field name
+  static const String regularPriceField = 'regular_price';
+
+  /// Regular Price
+  double? get regularPrice => getField<double>(regularPriceField);
+  set regularPrice(double? value) => setField<double>(regularPriceField, value);
+
+  /// Sales Price field name
+  static const String salesPriceField = 'sales_price';
+
+  /// Sales Price
+  double? get salesPrice => getField<double>(salesPriceField);
+  set salesPrice(double? value) => setField<double>(salesPriceField, value);
+
+  /// Stock Quantity field name
+  static const String stockQuantityField = 'stock_quantity';
+
+  /// Stock Quantity
+  double get stockQuantity =>
+      getField<double>(stockQuantityField, defaultValue: 0)!;
+  set stockQuantity(double value) =>
+      setField<double>(stockQuantityField, value);
+
+  /// Safe Stock Quantity field name
+  static const String safeStockQuantityField = 'safe_stock_quantity';
+
+  /// Safe Stock Quantity
+  double? get safeStockQuantity => getField<double>(safeStockQuantityField);
+  set safeStockQuantity(double? value) =>
+      setField<double>(safeStockQuantityField, value);
+
+  /// Main Image Bucket field name
+  static const String mainImageBucketField = 'main_image_bucket';
+
+  /// Main Image Bucket
+  String? get mainImageBucket => getField<String>(mainImageBucketField);
+  set mainImageBucket(String? value) =>
+      setField<String>(mainImageBucketField, value);
+
+  /// Main Image Folder Path field name
+  static const String mainImageFolderPathField = 'main_image_folder_path';
+
+  /// Main Image Folder Path
+  String? get mainImageFolderPath => getField<String>(mainImageFolderPathField);
+  set mainImageFolderPath(String? value) =>
+      setField<String>(mainImageFolderPathField, value);
+
+  /// Main Image File Name field name
+  static const String mainImageFileNameField = 'main_image_file_name';
+
+  /// Main Image File Name
+  String? get mainImageFileName => getField<String>(mainImageFileNameField);
+  set mainImageFileName(String? value) =>
+      setField<String>(mainImageFileNameField, value);
+
+  /// Description field name
+  static const String descriptionField = 'description';
+
+  /// Description
+  String? get description => getField<String>(descriptionField);
+  set description(String? value) => setField<String>(descriptionField, value);
+
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
   ProductRow copyWith({
-    String? id,
-    String? name,
-    String? description,
-    String? createdBy,
+    ProductSaleStatus? saleStatus,
+    String? code,
     DateTime? createdAt,
+    String? createdBy,
+    String? productBy,
+    String? category,
+    double? regularPrice,
+    double? salesPrice,
+    double? stockQuantity,
+    double? safeStockQuantity,
+    String? mainImageBucket,
+    String? mainImageFolderPath,
+    String? mainImageFileName,
+    String? description,
   }) => ProductRow.fromJson({
-    'id': supaSerialize(id) ?? data['id'],
-    'name': supaSerialize(name) ?? data['name'],
-    'description': supaSerialize(description) ?? data['description'],
-    'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'sale_status': supaSerialize(saleStatus) ?? data['sale_status'],
+    'code': supaSerialize(code) ?? data['code'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
+    'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'product_by': supaSerialize(productBy) ?? data['product_by'],
+    'category': supaSerialize(category) ?? data['category'],
+    'regular_price': supaSerialize(regularPrice) ?? data['regular_price'],
+    'sales_price': supaSerialize(salesPrice) ?? data['sales_price'],
+    'stock_quantity': supaSerialize(stockQuantity) ?? data['stock_quantity'],
+    'safe_stock_quantity':
+        supaSerialize(safeStockQuantity) ?? data['safe_stock_quantity'],
+    'main_image_bucket':
+        supaSerialize(mainImageBucket) ?? data['main_image_bucket'],
+    'main_image_folder_path':
+        supaSerialize(mainImageFolderPath) ?? data['main_image_folder_path'],
+    'main_image_file_name':
+        supaSerialize(mainImageFileName) ?? data['main_image_file_name'],
+    'description': supaSerialize(description) ?? data['description'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 10:23:41.142510
+/// Date: 2025-11-28 16:12:55.298983

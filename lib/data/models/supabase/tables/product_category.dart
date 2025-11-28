@@ -9,45 +9,46 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Inquiry Table
-class InquiryTable extends SupabaseTable<InquiryRow> {
+/// Product Category Table
+class ProductCategoryTable extends SupabaseTable<ProductCategoryRow> {
   /// Table Name
   @override
-  String get tableName => 'inquiry';
+  String get tableName => 'product_category';
 
-  /// Create a [InquiryRow] from the [data] provided
+  /// Create a [ProductCategoryRow] from the [data] provided
   @override
-  InquiryRow createRow(Map<String, dynamic> data) => InquiryRow.fromJson(data);
+  ProductCategoryRow createRow(Map<String, dynamic> data) =>
+      ProductCategoryRow.fromJson(data);
 }
 
-/// Inquiry Row
-class InquiryRow extends SupabaseDataRow {
-  /// Inquiry Row
-  InquiryRow({
+/// Product Category Row
+class ProductCategoryRow extends SupabaseDataRow {
+  /// Product Category Row
+  ProductCategoryRow({
+    required String name,
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? content,
   }) : super({
+         'name': supaSerialize(name),
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
-         if (content != null) 'content': supaSerialize(content),
        });
 
-  /// Inquiry Row
-  const InquiryRow._(super.data);
+  /// Product Category Row
+  const ProductCategoryRow._(super.data);
 
-  /// Create Inquiry Row from a [data] map
-  factory InquiryRow.fromJson(Map<String, dynamic> data) =>
-      InquiryRow._(data.cleaned);
+  /// Create Product Category Row from a [data] map
+  factory ProductCategoryRow.fromJson(Map<String, dynamic> data) =>
+      ProductCategoryRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => InquiryTable();
+  SupabaseTable get table => ProductCategoryTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -68,31 +69,30 @@ class InquiryRow extends SupabaseDataRow {
   static const String createdByField = 'created_by';
 
   /// Created By
-  String get createdBy =>
-      getField<String>(createdByField, defaultValue: 'auth.')!;
-  set createdBy(String value) => setField<String>(createdByField, value);
+  String? get createdBy => getField<String>(createdByField);
+  set createdBy(String? value) => setField<String>(createdByField, value);
 
-  /// Content field name
-  static const String contentField = 'content';
+  /// Name field name
+  static const String nameField = 'name';
 
-  /// Content
-  String? get content => getField<String>(contentField);
-  set content(String? value) => setField<String>(contentField, value);
+  /// Name
+  String get name => getField<String>(nameField)!;
+  set name(String value) => setField<String>(nameField, value);
 
-  /// Make a copy of the current [InquiryRow]
+  /// Make a copy of the current [ProductCategoryRow]
   /// overriding the provided fields
-  InquiryRow copyWith({
+  ProductCategoryRow copyWith({
+    String? name,
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? content,
-  }) => InquiryRow.fromJson({
+  }) => ProductCategoryRow.fromJson({
+    'name': supaSerialize(name) ?? data['name'],
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
-    'content': supaSerialize(content) ?? data['content'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:12:55.286272
+/// Date: 2025-11-28 16:12:55.300084

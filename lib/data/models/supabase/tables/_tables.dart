@@ -19,6 +19,10 @@ export 'mission_request.dart';
 export 'organization.dart';
 export 'popup.dart';
 export 'product.dart';
+export 'product_category.dart';
+export 'product_image.dart';
+export 'product_option_parameter.dart';
+export 'product_option_value.dart';
 export 'push_notification.dart';
 export 'shipping_address.dart';
 export 'stamp.dart';
@@ -34,4 +38,4 @@ export 'user.dart';
 export 'user_organization.dart';
 
 /// Tag: v2
-/// Date: 2025-11-28 10:23:41.151457
+/// Date: 2025-11-28 16:12:55.314005

@@ -121,7 +121,7 @@ class _MainScreenState extends State<MainScreen> {
                       context,
                       index: 1,
                       icon: Icons.storefront_outlined,
-                      label: 'Shopping',
+                      label: '쇼핑몰',
                     ),
                     const SizedBox(width: 56), // space for FAB notch
                     _buildGsItem(
@@ -134,7 +134,7 @@ class _MainScreenState extends State<MainScreen> {
                       context,
                       index: 3,
                       icon: Icons.person_outline,
-                      label: 'Account',
+                      label: '나의 콕',
                     ),
                   ],
                 ),

@@ -2,6 +2,7 @@ import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/liked_stories_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -228,8 +229,11 @@ class _AccountTabState extends State<AccountTab> {
                   icon: Icons.thumb_up_outlined,
                   label: '좋아요 한 글',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('좋아요 한 글 기능은 준비 중입니다.')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => const LikedStoriesDialog(),
+                      ),
                     );
                   },
                 ),

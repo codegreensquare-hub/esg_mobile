@@ -1,7 +1,7 @@
 import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
-import 'package:esg_mobile/data/entities/story_with_tags.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,10 +9,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class StoryDialog extends StatefulWidget {
   const StoryDialog({
     super.key,
-    required this.storyWithTags,
+    required this.story,
+    required this.tags,
   });
 
-  final StoryWithTags storyWithTags;
+  final StoryRow story;
+  final List<StoryTagRow> tags;
 
   @override
   State<StoryDialog> createState() => _StoryDialogState();
@@ -42,7 +44,7 @@ class _StoryDialogState extends State<StoryDialog> {
   }
 
   Future<void> _loadData() async {
-    final storyId = widget.storyWithTags.story.id;
+    final storyId = widget.story.id;
     final fetchedComments = await StoryService.instance.fetchComments(storyId);
     final count = await StoryService.instance.getLikeCount(storyId);
     bool liked = false;
@@ -84,7 +86,7 @@ class _StoryDialogState extends State<StoryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final story = widget.storyWithTags.story;
+    final story = widget.story;
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
 
@@ -143,11 +145,11 @@ class _StoryDialogState extends State<StoryDialog> {
                         story.content!,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                    if (widget.storyWithTags.tags.isNotEmpty) ...[
+                    if (widget.tags.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Wrap(
                         spacing: 8,
-                        children: widget.storyWithTags.tags
+                        children: widget.tags
                             .map(
                               (tag) => Chip(label: Text('#${tag.tag ?? ''}')),
                             )

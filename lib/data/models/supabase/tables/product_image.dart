@@ -9,52 +9,52 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Story Photo Table
-class StoryPhotoTable extends SupabaseTable<StoryPhotoRow> {
+/// Product Image Table
+class ProductImageTable extends SupabaseTable<ProductImageRow> {
   /// Table Name
   @override
-  String get tableName => 'story_photo';
+  String get tableName => 'product_image';
 
-  /// Create a [StoryPhotoRow] from the [data] provided
+  /// Create a [ProductImageRow] from the [data] provided
   @override
-  StoryPhotoRow createRow(Map<String, dynamic> data) =>
-      StoryPhotoRow.fromJson(data);
+  ProductImageRow createRow(Map<String, dynamic> data) =>
+      ProductImageRow.fromJson(data);
 }
 
-/// Story Photo Row
-class StoryPhotoRow extends SupabaseDataRow {
-  /// Story Photo Row
-  StoryPhotoRow({
+/// Product Image Row
+class ProductImageRow extends SupabaseDataRow {
+  /// Product Image Row
+  ProductImageRow({
     String? id,
     DateTime? createdAt,
-    String? createdBy,
-    String? story,
+    String? uploadedBy,
     String? bucket,
     String? folderPath,
     String? fileName,
+    String? product,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (createdBy != null) 'created_by': supaSerialize(createdBy),
-         if (story != null) 'story': supaSerialize(story),
+         if (uploadedBy != null) 'uploaded_by': supaSerialize(uploadedBy),
          if (bucket != null) 'bucket': supaSerialize(bucket),
          if (folderPath != null) 'folder_path': supaSerialize(folderPath),
          if (fileName != null) 'file_name': supaSerialize(fileName),
+         if (product != null) 'product': supaSerialize(product),
        });
 
-  /// Story Photo Row
-  const StoryPhotoRow._(super.data);
+  /// Product Image Row
+  const ProductImageRow._(super.data);
 
-  /// Create Story Photo Row from a [data] map
-  factory StoryPhotoRow.fromJson(Map<String, dynamic> data) =>
-      StoryPhotoRow._(data.cleaned);
+  /// Create Product Image Row from a [data] map
+  factory ProductImageRow.fromJson(Map<String, dynamic> data) =>
+      ProductImageRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => StoryPhotoTable();
+  SupabaseTable get table => ProductImageTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -71,20 +71,12 @@ class StoryPhotoRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Created By field name
-  static const String createdByField = 'created_by';
+  /// Uploaded By field name
+  static const String uploadedByField = 'uploaded_by';
 
-  /// Created By
-  String get createdBy =>
-      getField<String>(createdByField, defaultValue: 'auth.')!;
-  set createdBy(String value) => setField<String>(createdByField, value);
-
-  /// Story field name
-  static const String storyField = 'story';
-
-  /// Story
-  String? get story => getField<String>(storyField);
-  set story(String? value) => setField<String>(storyField, value);
+  /// Uploaded By
+  String? get uploadedBy => getField<String>(uploadedByField);
+  set uploadedBy(String? value) => setField<String>(uploadedByField, value);
 
   /// Bucket field name
   static const String bucketField = 'bucket';
@@ -107,26 +99,33 @@ class StoryPhotoRow extends SupabaseDataRow {
   String? get fileName => getField<String>(fileNameField);
   set fileName(String? value) => setField<String>(fileNameField, value);
 
-  /// Make a copy of the current [StoryPhotoRow]
+  /// Product field name
+  static const String productField = 'product';
+
+  /// Product
+  String? get product => getField<String>(productField);
+  set product(String? value) => setField<String>(productField, value);
+
+  /// Make a copy of the current [ProductImageRow]
   /// overriding the provided fields
-  StoryPhotoRow copyWith({
+  ProductImageRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? createdBy,
-    String? story,
+    String? uploadedBy,
     String? bucket,
     String? folderPath,
     String? fileName,
-  }) => StoryPhotoRow.fromJson({
+    String? product,
+  }) => ProductImageRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'created_by': supaSerialize(createdBy) ?? data['created_by'],
-    'story': supaSerialize(story) ?? data['story'],
+    'uploaded_by': supaSerialize(uploadedBy) ?? data['uploaded_by'],
     'bucket': supaSerialize(bucket) ?? data['bucket'],
     'folder_path': supaSerialize(folderPath) ?? data['folder_path'],
     'file_name': supaSerialize(fileName) ?? data['file_name'],
+    'product': supaSerialize(product) ?? data['product'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:12:55.310848
+/// Date: 2025-11-28 16:12:55.300753

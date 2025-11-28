@@ -1,3 +1,4 @@
+import 'package:esg_mobile/data/entities/liked_story.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -104,5 +105,17 @@ class StoryService {
       StoryCommentRow.commentField: comment,
       StoryCommentRow.createdAtField: DateTime.now().toIso8601String(),
     });
+  }
+
+  Future<List<LikedStory>> fetchLikedStories(String userId) async {
+    final response = await _client
+        .from(StoryLikeTable().tableName)
+        .select('*, story(*)')
+        .eq(StoryLikeRow.likedByField, userId);
+    return (response as List).map((json) {
+      final like = StoryLikeRow.fromJson(json);
+      final story = StoryRow.fromJson(json['story']);
+      return LikedStory(like: like, story: story);
+    }).toList();
   }
 }

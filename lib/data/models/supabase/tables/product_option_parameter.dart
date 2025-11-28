@@ -9,48 +9,50 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Story Related Product Table
-class StoryRelatedProductTable extends SupabaseTable<StoryRelatedProductRow> {
+/// Product Option Parameter Table
+class ProductOptionParameterTable
+    extends SupabaseTable<ProductOptionParameterRow> {
   /// Table Name
   @override
-  String get tableName => 'story_related_product';
+  String get tableName => 'product_option_parameter';
 
-  /// Create a [StoryRelatedProductRow] from the [data] provided
+  /// Create a [ProductOptionParameterRow] from the [data] provided
   @override
-  StoryRelatedProductRow createRow(Map<String, dynamic> data) =>
-      StoryRelatedProductRow.fromJson(data);
+  ProductOptionParameterRow createRow(Map<String, dynamic> data) =>
+      ProductOptionParameterRow.fromJson(data);
 }
 
-/// Story Related Product Row
-class StoryRelatedProductRow extends SupabaseDataRow {
-  /// Story Related Product Row
-  StoryRelatedProductRow({
-    required String story,
+/// Product Option Parameter Row
+class ProductOptionParameterRow extends SupabaseDataRow {
+  /// Product Option Parameter Row
+  ProductOptionParameterRow({
     required String product,
     String? id,
     DateTime? createdAt,
     String? createdBy,
+    String? optionParameter,
   }) : super({
-         'story': supaSerialize(story),
          'product': supaSerialize(product),
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (optionParameter != null)
+           'option_parameter': supaSerialize(optionParameter),
        });
 
-  /// Story Related Product Row
-  const StoryRelatedProductRow._(super.data);
+  /// Product Option Parameter Row
+  const ProductOptionParameterRow._(super.data);
 
-  /// Create Story Related Product Row from a [data] map
-  factory StoryRelatedProductRow.fromJson(Map<String, dynamic> data) =>
-      StoryRelatedProductRow._(data.cleaned);
+  /// Create Product Option Parameter Row from a [data] map
+  factory ProductOptionParameterRow.fromJson(Map<String, dynamic> data) =>
+      ProductOptionParameterRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => StoryRelatedProductTable();
+  SupabaseTable get table => ProductOptionParameterTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -71,16 +73,8 @@ class StoryRelatedProductRow extends SupabaseDataRow {
   static const String createdByField = 'created_by';
 
   /// Created By
-  String get createdBy =>
-      getField<String>(createdByField, defaultValue: 'auth.')!;
-  set createdBy(String value) => setField<String>(createdByField, value);
-
-  /// Story field name
-  static const String storyField = 'story';
-
-  /// Story
-  String get story => getField<String>(storyField)!;
-  set story(String value) => setField<String>(storyField, value);
+  String? get createdBy => getField<String>(createdByField);
+  set createdBy(String? value) => setField<String>(createdByField, value);
 
   /// Product field name
   static const String productField = 'product';
@@ -89,22 +83,31 @@ class StoryRelatedProductRow extends SupabaseDataRow {
   String get product => getField<String>(productField)!;
   set product(String value) => setField<String>(productField, value);
 
-  /// Make a copy of the current [StoryRelatedProductRow]
+  /// Option Parameter field name
+  static const String optionParameterField = 'option_parameter';
+
+  /// Option Parameter
+  String? get optionParameter => getField<String>(optionParameterField);
+  set optionParameter(String? value) =>
+      setField<String>(optionParameterField, value);
+
+  /// Make a copy of the current [ProductOptionParameterRow]
   /// overriding the provided fields
-  StoryRelatedProductRow copyWith({
-    String? story,
+  ProductOptionParameterRow copyWith({
     String? product,
     String? id,
     DateTime? createdAt,
     String? createdBy,
-  }) => StoryRelatedProductRow.fromJson({
-    'story': supaSerialize(story) ?? data['story'],
+    String? optionParameter,
+  }) => ProductOptionParameterRow.fromJson({
     'product': supaSerialize(product) ?? data['product'],
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'option_parameter':
+        supaSerialize(optionParameter) ?? data['option_parameter'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:12:55.311712
+/// Date: 2025-11-28 16:12:55.301435

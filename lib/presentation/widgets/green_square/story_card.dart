@@ -21,7 +21,10 @@ class StoryCard extends StatelessWidget {
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (context) => StoryDialog(storyWithTags: storyWithTags),
+          builder: (context) => StoryDialog(
+            story: storyWithTags.story,
+            tags: storyWithTags.tags,
+          ),
         ),
       ),
       child: Card(
