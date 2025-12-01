@@ -7,6 +7,7 @@
 export 'award_points.dart';
 export 'award_points_transaction.dart';
 export 'faq.dart';
+export 'faq_category.dart';
 export 'inquiry.dart';
 export 'inquiry_response.dart';
 export 'mission.dart';
@@ -37,6 +38,7 @@ export 'story_tag.dart';
 export 'trigger_event_log.dart';
 export 'user.dart';
 export 'user_organization.dart';
+export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2025-11-28 16:55:59.372165
+/// Date: 2025-12-01 16:24:31.664919

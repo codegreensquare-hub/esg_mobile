@@ -34,6 +34,7 @@ class UserRow extends SupabaseDataRow {
     bool? emailVerified,
     DateTime? adminApprovalDate,
     String? adminApprovedBy,
+    String? defaultShippingAddress,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -48,6 +49,8 @@ class UserRow extends SupabaseDataRow {
            'admin_approval_date': supaSerialize(adminApprovalDate),
          if (adminApprovedBy != null)
            'admin_approved_by': supaSerialize(adminApprovedBy),
+         if (defaultShippingAddress != null)
+           'default_shipping_address': supaSerialize(defaultShippingAddress),
        });
 
   /// User Row
@@ -142,6 +145,15 @@ class UserRow extends SupabaseDataRow {
   set adminApprovedBy(String? value) =>
       setField<String>(adminApprovedByField, value);
 
+  /// Default Shipping Address field name
+  static const String defaultShippingAddressField = 'default_shipping_address';
+
+  /// Default Shipping Address
+  String? get defaultShippingAddress =>
+      getField<String>(defaultShippingAddressField);
+  set defaultShippingAddress(String? value) =>
+      setField<String>(defaultShippingAddressField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -155,6 +167,7 @@ class UserRow extends SupabaseDataRow {
     bool? emailVerified,
     DateTime? adminApprovalDate,
     String? adminApprovedBy,
+    String? defaultShippingAddress,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -168,8 +181,11 @@ class UserRow extends SupabaseDataRow {
         supaSerialize(adminApprovalDate) ?? data['admin_approval_date'],
     'admin_approved_by':
         supaSerialize(adminApprovedBy) ?? data['admin_approved_by'],
+    'default_shipping_address':
+        supaSerialize(defaultShippingAddress) ??
+        data['default_shipping_address'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:55:59.370705
+/// Date: 2025-12-01 16:24:31.661281

@@ -29,12 +29,14 @@ class FaqRow extends SupabaseDataRow {
     String? answer,
     DateTime? createdAt,
     String? createdBy,
+    String? categoryId,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (question != null) 'question': supaSerialize(question),
          if (answer != null) 'answer': supaSerialize(answer),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (categoryId != null) 'category_id': supaSerialize(categoryId),
        });
 
   /// Faq Row
@@ -87,6 +89,13 @@ class FaqRow extends SupabaseDataRow {
       getField<String>(createdByField, defaultValue: 'auth.')!;
   set createdBy(String value) => setField<String>(createdByField, value);
 
+  /// Category Id field name
+  static const String categoryIdField = 'category_id';
+
+  /// Category Id
+  String? get categoryId => getField<String>(categoryIdField);
+  set categoryId(String? value) => setField<String>(categoryIdField, value);
+
   /// Make a copy of the current [FaqRow]
   /// overriding the provided fields
   FaqRow copyWith({
@@ -95,14 +104,16 @@ class FaqRow extends SupabaseDataRow {
     String? answer,
     DateTime? createdAt,
     String? createdBy,
+    String? categoryId,
   }) => FaqRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'question': supaSerialize(question) ?? data['question'],
     'answer': supaSerialize(answer) ?? data['answer'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'category_id': supaSerialize(categoryId) ?? data['category_id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:55:59.345763
+/// Date: 2025-12-01 16:24:31.633790

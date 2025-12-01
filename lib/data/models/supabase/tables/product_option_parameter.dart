@@ -110,4 +110,4 @@ class ProductOptionParameterRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:55:59.360167
+/// Date: 2025-12-01 16:24:31.651830

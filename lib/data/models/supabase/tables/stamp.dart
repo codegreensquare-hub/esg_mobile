@@ -83,4 +83,4 @@ class StampRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-11-28 16:55:59.363492
+/// Date: 2025-12-01 16:24:31.656233

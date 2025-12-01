@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/entities/wishlisted_product.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -120,6 +121,48 @@ class ProductService {
     } catch (e) {
       debugPrint('Error toggling wishlist: $e');
       rethrow;
+    }
+  }
+
+  Future<List<WishlistedProduct>> fetchWishlistedProducts(String userId) async {
+    try {
+      final response = await _client
+          .from(ProductWishlistTable().tableName)
+          .select(
+            'created_at, product:product(*, product_category(name), product_image(*))',
+          )
+          .eq(ProductWishlistRow.wishlistByField, userId)
+          .order(ProductWishlistRow.createdAtField, ascending: false);
+
+      return response.map((data) {
+        final productData = data['product'] as Map<String, dynamic>?;
+        if (productData == null) {
+          throw Exception('Wishlist entry missing product data');
+        }
+
+        final product = ProductRow.fromJson(productData);
+        final categoryData =
+            productData['product_category'] as Map<String, dynamic>?;
+        final categoryName = categoryData?['name'] as String?;
+        final imagesData =
+            productData['product_image'] as List<dynamic>? ?? <dynamic>[];
+        final images = imagesData
+            .map((img) => ProductImageRow.fromJson(img as Map<String, dynamic>))
+            .toList();
+
+        return WishlistedProduct(
+          product: ProductWithOtherDetails(
+            product: product,
+            categoryName: categoryName,
+            images: images,
+            isInWishlist: true,
+          ),
+          createdAt: DateTime.parse(data['created_at'] as String),
+        );
+      }).toList();
+    } catch (e) {
+      debugPrint('Error fetching wishlisted products: $e');
+      return [];
     }
   }
 

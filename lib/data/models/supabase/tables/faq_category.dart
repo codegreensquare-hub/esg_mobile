@@ -9,46 +9,46 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Mission Request Table
-class MissionRequestTable extends SupabaseTable<MissionRequestRow> {
+/// Faq Category Table
+class FaqCategoryTable extends SupabaseTable<FaqCategoryRow> {
   /// Table Name
   @override
-  String get tableName => 'mission_request';
+  String get tableName => 'faq_category';
 
-  /// Create a [MissionRequestRow] from the [data] provided
+  /// Create a [FaqCategoryRow] from the [data] provided
   @override
-  MissionRequestRow createRow(Map<String, dynamic> data) =>
-      MissionRequestRow.fromJson(data);
+  FaqCategoryRow createRow(Map<String, dynamic> data) =>
+      FaqCategoryRow.fromJson(data);
 }
 
-/// Mission Request Row
-class MissionRequestRow extends SupabaseDataRow {
-  /// Mission Request Row
-  MissionRequestRow({
+/// Faq Category Row
+class FaqCategoryRow extends SupabaseDataRow {
+  /// Faq Category Row
+  FaqCategoryRow({
     String? id,
+    String? value,
     DateTime? createdAt,
-    String? mission,
     String? createdBy,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
+         if (value != null) 'value': supaSerialize(value),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (mission != null) 'mission': supaSerialize(mission),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
        });
 
-  /// Mission Request Row
-  const MissionRequestRow._(super.data);
+  /// Faq Category Row
+  const FaqCategoryRow._(super.data);
 
-  /// Create Mission Request Row from a [data] map
-  factory MissionRequestRow.fromJson(Map<String, dynamic> data) =>
-      MissionRequestRow._(data.cleaned);
+  /// Create Faq Category Row from a [data] map
+  factory FaqCategoryRow.fromJson(Map<String, dynamic> data) =>
+      FaqCategoryRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => MissionRequestTable();
+  SupabaseTable get table => FaqCategoryTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -56,6 +56,13 @@ class MissionRequestRow extends SupabaseDataRow {
   /// Id
   String get id => getField<String>(idField, defaultValue: '')!;
   set id(String value) => setField<String>(idField, value);
+
+  /// Value field name
+  static const String valueField = 'value';
+
+  /// Value
+  String? get value => getField<String>(valueField);
+  set value(String? value) => setField<String>(valueField, value);
 
   /// Created At field name
   static const String createdAtField = 'created_at';
@@ -65,13 +72,6 @@ class MissionRequestRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Mission field name
-  static const String missionField = 'mission';
-
-  /// Mission
-  String? get mission => getField<String>(missionField);
-  set mission(String? value) => setField<String>(missionField, value);
-
   /// Created By field name
   static const String createdByField = 'created_by';
 
@@ -80,20 +80,20 @@ class MissionRequestRow extends SupabaseDataRow {
       getField<String>(createdByField, defaultValue: 'auth.')!;
   set createdBy(String value) => setField<String>(createdByField, value);
 
-  /// Make a copy of the current [MissionRequestRow]
+  /// Make a copy of the current [FaqCategoryRow]
   /// overriding the provided fields
-  MissionRequestRow copyWith({
+  FaqCategoryRow copyWith({
     String? id,
+    String? value,
     DateTime? createdAt,
-    String? mission,
     String? createdBy,
-  }) => MissionRequestRow.fromJson({
+  }) => FaqCategoryRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
+    'value': supaSerialize(value) ?? data['value'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'mission': supaSerialize(mission) ?? data['mission'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-01 16:24:31.645845
+/// Date: 2025-12-01 16:24:31.634365

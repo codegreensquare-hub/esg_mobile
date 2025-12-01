@@ -3,6 +3,8 @@ import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/liked_stories_dialog.dart';
+import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
+import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +17,7 @@ class AccountTab extends StatefulWidget {
 
 class _AccountTabState extends State<AccountTab> {
   String? userName;
+  String? userId;
   int totalMileage = 0;
   List<Map<String, dynamic>> activeMissions = [];
   List<Map<String, dynamic>> participations = [];
@@ -34,6 +37,7 @@ class _AccountTabState extends State<AccountTab> {
         return;
       }
 
+      userId = user.id;
       userName = user.userMetadata?['name'] ?? user.email ?? '사용자';
 
       final client = Supabase.instance.client;
@@ -107,6 +111,24 @@ class _AccountTabState extends State<AccountTab> {
     setState(() => isLoading = false);
   }
 
+  void _openShippingAddressDialog() {
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => ShippingAddressesDialog(
+          userId: userId!,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -122,11 +144,23 @@ class _AccountTabState extends State<AccountTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Name
-          Text(
-            userName ?? '사용자',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  userName ?? '사용자',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              TextButton.icon(
+                onPressed: _openShippingAddressDialog,
+                icon: const Icon(Icons.location_on_outlined),
+                label: const Text('배송지 관리'),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           // Level
@@ -140,12 +174,7 @@ class _AccountTabState extends State<AccountTab> {
           const SizedBox(height: 24),
           // Manage shipping address button
           OutlinedButton(
-            onPressed: () {
-              // TODO: Navigate to shipping address management
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('배송지 관리 기능은 준비 중입니다.')),
-              );
-            },
+            onPressed: _openShippingAddressDialog,
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 48),
             ),
@@ -199,8 +228,20 @@ class _AccountTabState extends State<AccountTab> {
                   icon: Icons.favorite_outline,
                   label: '찜한 상품',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('찜한 상품 기능은 준비 중입니다.')),
+                    if (userId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('로그인이 필요합니다.')),
+                      );
+                      return;
+                    }
+
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => WishlistedProductsDialog(
+                          userId: userId!,
+                        ),
+                      ),
                     );
                   },
                 ),
