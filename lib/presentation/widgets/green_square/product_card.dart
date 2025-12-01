@@ -7,10 +7,12 @@ class ProductCard extends StatelessWidget {
     super.key,
     required this.productWithDetails,
     this.onWishlistToggle,
+    this.onTap,
   });
 
   final ProductWithOtherDetails productWithDetails;
   final VoidCallback? onWishlistToggle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -26,107 +28,113 @@ class ProductCard extends StatelessWidget {
           )
         : null;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image with Heart Button
-          AspectRatio(
-            aspectRatio: 1,
-            child: Stack(
-              children: [
-                // Image
-                Positioned.fill(
-                  child: imageUrl != null
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: cs.surfaceContainerHighest,
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                ),
-                              ),
-                        )
-                      : Container(
-                          color: cs.surfaceContainerHighest,
-                          child: const Icon(Icons.image),
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Image with Heart Button
+            AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                children: [
+                  // Image with Hero
+                  Positioned.fill(
+                    child: Hero(
+                      tag: 'product-image-${product.code}',
+                      child: imageUrl != null
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    color: cs.surfaceContainerHighest,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                    ),
+                                  ),
+                            )
+                          : Container(
+                              color: cs.surfaceContainerHighest,
+                              child: const Icon(Icons.image),
+                            ),
+                    ),
+                  ),
+                  // Heart Button
+                  if (onWishlistToggle != null)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: cs.surface.withValues(alpha: 0.8),
+                          shape: BoxShape.circle,
                         ),
-                ),
-                // Heart Button
-                if (onWishlistToggle != null)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: cs.surface.withValues(alpha: 0.8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: Icon(
-                          productWithDetails.isInWishlist
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: productWithDetails.isInWishlist
-                              ? Colors.red
-                              : cs.onSurface,
-                        ),
-                        onPressed: onWishlistToggle,
-                        iconSize: 20,
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
+                        child: IconButton(
+                          icon: Icon(
+                            productWithDetails.isInWishlist
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: productWithDetails.isInWishlist
+                                ? Colors.red
+                                : cs.onSurface,
+                          ),
+                          onPressed: onWishlistToggle,
+                          iconSize: 20,
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.code,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                if (product.description != null &&
-                    product.description!.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    product.description!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
+                    product.code,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 8,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
-                ],
-                Text(
-                  '${product.salesPrice ?? product.regularPrice ?? 0} P',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  if (product.description != null &&
+                      product.description!.isNotEmpty) ...[
+                    Text(
+                      product.description!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                      maxLines: 8,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  Text(
+                    '${product.salesPrice ?? product.regularPrice ?? 0} P',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
+import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -98,6 +99,22 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
         const SnackBar(content: Text('찜하기 처리 중 오류가 발생했습니다.')),
       );
     }
+  }
+
+  void _navigateToProductDetail(ProductWithOtherDetails productWithDetails) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => ProductDetailScreen(
+              productWithDetails: productWithDetails,
+            ),
+          ),
+        )
+        .then((_) {
+          // Refresh products when returning from detail screen
+          // to update wishlist status if it was changed
+          _loadProducts();
+        });
   }
 
   @override
@@ -224,6 +241,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
                   onWishlistToggle: userId != null
                       ? () => _toggleWishlist(productWithDetails)
                       : null,
+                  onTap: () => _navigateToProductDetail(productWithDetails),
                 );
               },
             ),
