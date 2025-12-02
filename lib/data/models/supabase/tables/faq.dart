@@ -116,4 +116,4 @@ class FaqRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-01 16:24:31.633790
+/// Date: 2025-12-01 17:41:38.040924

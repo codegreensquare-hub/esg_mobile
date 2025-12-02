@@ -98,7 +98,7 @@ class _StoryDialogState extends State<StoryDialog> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Hero(
-            tag: 'story-title-${story.id}',
+            tag: 'green-square-story-title-${story.id}',
             child: Text(
               story.title ?? 'Story',
               style: Theme.of(context).textTheme.titleMedium,
@@ -112,7 +112,7 @@ class _StoryDialogState extends State<StoryDialog> {
               if (story.thumbnailBucket != null &&
                   story.thumbnailFileName != null)
                 Hero(
-                  tag: 'story-image-${story.id}',
+                  tag: 'green-square-story-image-${story.id}',
                   child: Image.network(
                     getImageLink(
                       story.thumbnailBucket!,
@@ -133,7 +133,7 @@ class _StoryDialogState extends State<StoryDialog> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Hero(
-                          tag: 'story-subtitle-${story.id}',
+                          tag: 'green-square-story-subtitle-${story.id}',
                           child: Text(
                             story.subtitle!,
                             style: Theme.of(context).textTheme.bodyMedium,

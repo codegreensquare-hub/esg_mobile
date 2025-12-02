@@ -1,8 +1,10 @@
+import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
-import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,6 +24,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
   List<ProductWithOtherDetails> products = [];
   bool isLoading = true;
   String? userId;
+  int cartItemCount = 0;
 
   @override
   void initState() {
@@ -35,6 +38,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
       userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId != null) {
         awardPoints = await ProductService.instance.getUserAwardPoints(userId!);
+        _loadCartCount();
       }
 
       categories = await ProductService.instance.fetchCategories();
@@ -111,10 +115,41 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
           ),
         )
         .then((_) {
-          // Refresh products when returning from detail screen
-          // to update wishlist status if it was changed
           _loadProducts();
+          _loadCartCount();
         });
+  }
+
+  Future<void> _loadCartCount() async {
+    if (userId == null) {
+      return;
+    }
+    final items = await CartService.instance.fetchCartItems(userId!);
+    if (mounted) {
+      setState(() => cartItemCount = items.length);
+    }
+  }
+
+  Future<void> _showCart() async {
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    final items = await CartService.instance.fetchCartItems(userId!);
+    if (!mounted) {
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => CartBottomSheet(items: items),
+    );
+
+    _loadCartCount();
   }
 
   @override
@@ -122,8 +157,8 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+    final scrollContent = SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -246,6 +281,40 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
               },
             ),
         ],
+      ),
+    );
+
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final height = constraints.maxHeight.isInfinite
+              ? MediaQuery.of(context).size.height
+              : constraints.maxHeight;
+          return SizedBox(
+            height: height,
+            child: Stack(
+              children: [
+                Positioned.fill(child: scrollContent),
+                if (userId != null)
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton.extended(
+                      heroTag: 'green-square-cart-fab',
+                      onPressed: _showCart,
+                      icon: cartItemCount > 0
+                          ? Badge.count(
+                              count: cartItemCount,
+                              child: const Icon(Icons.shopping_cart),
+                            )
+                          : const Icon(Icons.shopping_cart_outlined),
+                      label: const Text('장바구니'),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

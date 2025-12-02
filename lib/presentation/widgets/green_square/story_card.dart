@@ -39,7 +39,7 @@ class StoryCard extends StatelessWidget {
             if (story.thumbnailBucket != null &&
                 story.thumbnailFileName != null)
               Hero(
-                tag: 'story-image-${story.id}',
+                tag: 'green-square-story-image-${story.id}',
                 child: Image.network(
                   getImageLink(
                     story.thumbnailBucket!,
@@ -57,7 +57,7 @@ class StoryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Hero(
-                    tag: 'story-title-${story.id}',
+                    tag: 'green-square-story-title-${story.id}',
                     child: Text(
                       story.title ?? '',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -67,7 +67,7 @@ class StoryCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Hero(
-                        tag: 'story-subtitle-${story.id}',
+                        tag: 'green-square-story-subtitle-${story.id}',
                         child: Text(
                           story.subtitle!,
                           style: Theme.of(context).textTheme.bodyMedium,

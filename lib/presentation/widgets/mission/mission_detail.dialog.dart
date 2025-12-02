@@ -80,7 +80,7 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
     return Scaffold(
       appBar: AppBar(
         title: Hero(
-          tag: 'mission_title_${widget.mission.id}',
+          tag: 'green-square-mission-title-${widget.mission.id}',
           child: Text(
             widget.mission.title ?? 'No Title',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -109,7 +109,7 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
               // Image with Hero - square, max 200x200
               if (imageUrl != null)
                 Hero(
-                  tag: 'mission_image_${widget.mission.id}',
+                  tag: 'green-square-mission-image-${widget.mission.id}',
                   child: CachedNetworkImage(
                     imageUrl: imageUrl,
                     height: 200,
@@ -133,7 +133,7 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
               const SizedBox(height: 16),
               // Description with Hero
               Hero(
-                tag: 'mission_text_${widget.mission.id}',
+                tag: 'green-square-mission-text-${widget.mission.id}',
                 child: Text(
                   widget.mission.text ?? 'No Description',
                   style: Theme.of(context).textTheme.bodyLarge,

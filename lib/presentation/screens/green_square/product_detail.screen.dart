@@ -1,5 +1,7 @@
+import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/enums/product_sale_status.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   late ProductWithOtherDetails productWithDetails;
   bool isInWishlist = false;
   String? userId;
+  int quantity = 1;
+  bool isAddingToCart = false;
+  bool isLoadingOptions = true;
+  List<ProductOptionDefinition> productOptions = [];
+  final Map<String, String> selectedOptionValues = {};
 
   @override
   void initState() {
@@ -28,6 +35,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     productWithDetails = widget.productWithDetails;
     userId = Supabase.instance.client.auth.currentUser?.id;
     isInWishlist = productWithDetails.isInWishlist;
+    _loadProductOptions();
   }
 
   Future<void> _toggleWishlist() async {
@@ -55,9 +63,102 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       });
     } catch (e) {
       debugPrint('Error toggling wishlist: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('찜하기 처리 중 오류가 발생했습니다.')),
       );
+    }
+  }
+
+  Future<void> _loadProductOptions() async {
+    setState(() => isLoadingOptions = true);
+    final options = await CartService.instance.fetchProductOptions(
+      productWithDetails.product.code,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      productOptions = options;
+      isLoadingOptions = false;
+    });
+  }
+
+  void _increaseQuantity() {
+    final stockLimit = productWithDetails.product.stockQuantity?.toInt();
+    setState(() {
+      final next = quantity + 1;
+      quantity = stockLimit != null ? next.clamp(1, stockLimit) : next;
+    });
+  }
+
+  void _decreaseQuantity() {
+    if (quantity == 1) {
+      return;
+    }
+    setState(() => quantity -= 1);
+  }
+
+  Future<void> _addToCart() async {
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    final hasMissingOption = productOptions.any(
+      (option) => (selectedOptionValues[option.id] ?? '').isEmpty,
+    );
+
+    if (hasMissingOption) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('모든 옵션을 선택해주세요.')),
+      );
+      return;
+    }
+
+    setState(() => isAddingToCart = true);
+    try {
+      final optionPayload = {
+        for (final option in productOptions)
+          if ((selectedOptionValues[option.id] ?? '').isNotEmpty)
+            option.label: selectedOptionValues[option.id]!,
+      };
+
+      final result = await CartService.instance.addItem(
+        userId: userId!,
+        productCode: productWithDetails.product.code,
+        quantity: quantity.toDouble(),
+        selectedOptions: optionPayload,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('장바구니 담기에 실패했습니다. 다시 시도해주세요.')),
+        );
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('장바구니에 담았습니다.')),
+      );
+    } catch (e) {
+      debugPrint('Error adding to cart: $e');
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('장바구니 담기 중 오류가 발생했습니다.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isAddingToCart = false);
+      }
     }
   }
 
@@ -97,7 +198,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             AspectRatio(
               aspectRatio: 1,
               child: Hero(
-                tag: 'product-image-${product.code}',
+                tag: 'green-square-product-image-${product.code}',
                 child: imageUrl != null
                     ? Image.network(
                         imageUrl,
@@ -240,9 +341,105 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   const SizedBox(height: 32),
 
+                  // Quantity Selector
+                  Text(
+                    '수량',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _decreaseQuantity,
+                        icon: const Icon(Icons.remove_circle_outline),
+                      ),
+                      Text(
+                        '$quantity',
+                        style: theme.textTheme.headlineSmall,
+                      ),
+                      IconButton(
+                        onPressed: _increaseQuantity,
+                        icon: const Icon(Icons.add_circle_outline),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  if (isLoadingOptions)
+                    const Center(child: CircularProgressIndicator())
+                  else if (productOptions.isNotEmpty) ...[
+                    Text(
+                      '옵션 선택',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...productOptions.map(
+                      (option) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: option.label,
+                            border: const OutlineInputBorder(),
+                          ),
+                          initialValue: selectedOptionValues[option.id],
+                          items: option.values
+                              .map(
+                                (valueRow) => DropdownMenuItem<String>(
+                                  value: valueRow.value ?? valueRow.id,
+                                  child: Text(valueRow.value ?? valueRow.id),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value == null || value.isEmpty) {
+                                selectedOptionValues.remove(option.id);
+                              } else {
+                                selectedOptionValues[option.id] = value;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ] else
+                    const SizedBox.shrink(),
+
                   // Action Buttons
                   Row(
                     children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed:
+                              isAddingToCart ||
+                                  product.saleStatus !=
+                                      ProductSaleStatus.on_sale
+                              ? null
+                              : _addToCart,
+                          icon: isAddingToCart
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.add_shopping_cart),
+                          label: Text(
+                            isAddingToCart ? '담는 중...' : '장바구니 담기',
+                          ),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {

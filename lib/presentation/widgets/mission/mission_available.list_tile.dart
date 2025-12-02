@@ -44,7 +44,7 @@ class MissionAvailableListTile extends StatelessWidget {
           children: [
             if (imageUrl != null)
               Hero(
-                tag: 'mission_image_${mission.id}',
+                tag: 'green-square-mission-image-${mission.id}',
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
@@ -80,7 +80,7 @@ class MissionAvailableListTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Hero(
-                    tag: 'mission_title_${mission.id}',
+                    tag: 'green-square-mission-title-${mission.id}',
                     child: Text(
                       mission.title ?? 'No Title',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -90,7 +90,7 @@ class MissionAvailableListTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Hero(
-                    tag: 'mission_text_${mission.id}',
+                    tag: 'green-square-mission-text-${mission.id}',
                     child: Text(
                       mission.text ?? 'No Description',
                       style: Theme.of(context).textTheme.bodyMedium,

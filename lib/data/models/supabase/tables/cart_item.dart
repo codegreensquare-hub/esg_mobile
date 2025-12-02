@@ -9,46 +9,48 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Product Wishlist Table
-class ProductWishlistTable extends SupabaseTable<ProductWishlistRow> {
+/// Cart Item Table
+class CartItemTable extends SupabaseTable<CartItemRow> {
   /// Table Name
   @override
-  String get tableName => 'product_wishlist';
+  String get tableName => 'cart_item';
 
-  /// Create a [ProductWishlistRow] from the [data] provided
+  /// Create a [CartItemRow] from the [data] provided
   @override
-  ProductWishlistRow createRow(Map<String, dynamic> data) =>
-      ProductWishlistRow.fromJson(data);
+  CartItemRow createRow(Map<String, dynamic> data) =>
+      CartItemRow.fromJson(data);
 }
 
-/// Product Wishlist Row
-class ProductWishlistRow extends SupabaseDataRow {
-  /// Product Wishlist Row
-  ProductWishlistRow({
+/// Cart Item Row
+class CartItemRow extends SupabaseDataRow {
+  /// Cart Item Row
+  CartItemRow({
     String? id,
     DateTime? createdAt,
     String? product,
-    String? wishlistBy,
+    double? quantity,
+    String? customer,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (product != null) 'product': supaSerialize(product),
-         if (wishlistBy != null) 'wishlist_by': supaSerialize(wishlistBy),
+         if (quantity != null) 'quantity': supaSerialize(quantity),
+         if (customer != null) 'customer': supaSerialize(customer),
        });
 
-  /// Product Wishlist Row
-  const ProductWishlistRow._(super.data);
+  /// Cart Item Row
+  const CartItemRow._(super.data);
 
-  /// Create Product Wishlist Row from a [data] map
-  factory ProductWishlistRow.fromJson(Map<String, dynamic> data) =>
-      ProductWishlistRow._(data.cleaned);
+  /// Create Cart Item Row from a [data] map
+  factory CartItemRow.fromJson(Map<String, dynamic> data) =>
+      CartItemRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => ProductWishlistTable();
+  SupabaseTable get table => CartItemTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -72,27 +74,36 @@ class ProductWishlistRow extends SupabaseDataRow {
   String? get product => getField<String>(productField);
   set product(String? value) => setField<String>(productField, value);
 
-  /// Wishlist By field name
-  static const String wishlistByField = 'wishlist_by';
+  /// Quantity field name
+  static const String quantityField = 'quantity';
 
-  /// Wishlist By
-  String? get wishlistBy => getField<String>(wishlistByField);
-  set wishlistBy(String? value) => setField<String>(wishlistByField, value);
+  /// Quantity
+  double get quantity => getField<double>(quantityField, defaultValue: 1)!;
+  set quantity(double value) => setField<double>(quantityField, value);
 
-  /// Make a copy of the current [ProductWishlistRow]
+  /// Customer field name
+  static const String customerField = 'customer';
+
+  /// Customer
+  String? get customer => getField<String>(customerField);
+  set customer(String? value) => setField<String>(customerField, value);
+
+  /// Make a copy of the current [CartItemRow]
   /// overriding the provided fields
-  ProductWishlistRow copyWith({
+  CartItemRow copyWith({
     String? id,
     DateTime? createdAt,
     String? product,
-    String? wishlistBy,
-  }) => ProductWishlistRow.fromJson({
+    double? quantity,
+    String? customer,
+  }) => CartItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'product': supaSerialize(product) ?? data['product'],
-    'wishlist_by': supaSerialize(wishlistBy) ?? data['wishlist_by'],
+    'quantity': supaSerialize(quantity) ?? data['quantity'],
+    'customer': supaSerialize(customer) ?? data['customer'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-01 17:41:38.060677
+/// Date: 2025-12-01 17:41:38.039231

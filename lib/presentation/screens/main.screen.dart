@@ -95,6 +95,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       floatingActionButton: isGreenSquare
           ? FloatingActionButton(
+              heroTag: 'green-square-knock-fab',
               onPressed: _onTapKnock,
               tooltip: 'Knock',
               child: const Icon(Icons.campaign_outlined),

@@ -10,4 +10,4 @@ export 'product_sale_status.dart';
 export 'user_type.dart';
 
 /// Tag: v2
-/// Date: 2025-12-01 16:24:31.616876
+/// Date: 2025-12-01 17:41:38.018385

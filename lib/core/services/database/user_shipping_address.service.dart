@@ -61,6 +61,41 @@ class UserShippingAddressService {
     }
   }
 
+  Future<UserShippingAddressRow?> updateAddress({
+    required String addressId,
+    required String name,
+    required String recipientName,
+    required String phoneNumber,
+    required String address,
+    String? detailedAddress,
+    String? requestsForDelivery,
+    bool reusableBoxesAreOkay = false,
+  }) async {
+    try {
+      final response = await _client
+          .from(UserShippingAddressTable().tableName)
+          .update({
+            UserShippingAddressRow.nameField: name,
+            UserShippingAddressRow.recipientNameField: recipientName,
+            UserShippingAddressRow.phoneNumberField: phoneNumber,
+            UserShippingAddressRow.addressField: address,
+            UserShippingAddressRow.detailedAddressField: detailedAddress,
+            UserShippingAddressRow.requestsForDeliveryField:
+                requestsForDelivery,
+            UserShippingAddressRow.reusableBoxesAreOkayField:
+                reusableBoxesAreOkay,
+          })
+          .eq(UserShippingAddressRow.idField, addressId)
+          .select()
+          .single();
+
+      return UserShippingAddressRow.fromJson(response);
+    } catch (e) {
+      debugPrint('Error updating shipping address: $e');
+      return null;
+    }
+  }
+
   Future<String?> fetchDefaultAddressId(String userId) async {
     try {
       final response = await _client

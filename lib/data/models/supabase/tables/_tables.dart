@@ -6,6 +6,8 @@
 
 export 'award_points.dart';
 export 'award_points_transaction.dart';
+export 'cart_item.dart';
+export 'cart_item_option.dart';
 export 'faq.dart';
 export 'faq_category.dart';
 export 'inquiry.dart';
@@ -41,4 +43,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2025-12-01 16:24:31.664919
+/// Date: 2025-12-01 17:41:38.069872

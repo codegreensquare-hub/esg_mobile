@@ -150,4 +150,4 @@ class TriggerEventLogRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-01 16:24:31.660329
+/// Date: 2025-12-01 17:41:38.066672
