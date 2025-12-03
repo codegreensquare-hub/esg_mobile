@@ -25,6 +25,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.onTapMenu,
     this.onTapCart,
     this.homeTab,
+    this.onSelectSubTab,
   });
 
   final ThemeData theme;
@@ -34,6 +35,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Map<String, String> labels;
   final int selectedIndex;
   final void Function(int index, String tab)? onTabSelected;
+  final void Function(String parentTab, String subTab)? onSelectSubTab;
   final void Function()? onTapMenu;
   final VoidCallback? onTapCart;
   final String? homeTab;
@@ -132,6 +134,8 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                             (codeGreenSubTabs[e.value] as List?)
                                 ?.cast<String>() ??
                             const <String>[],
+                        onSelectSubTab: (subTab) =>
+                            onSelectSubTab?.call(e.value, subTab),
                       ),
                     ),
                 GreenSquareLogo(),
@@ -182,6 +186,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.selectedIndex != selectedIndex ||
         oldDelegate.homeTab != homeTab ||
         oldDelegate.onTapCart != onTapCart ||
+        oldDelegate.onSelectSubTab != onSelectSubTab ||
         prevWide != nextWide;
   }
 
@@ -195,6 +200,7 @@ class _NavTabButton extends StatefulWidget {
   final ThemeData theme;
   final VoidCallback? onTap;
   final List<String> subTabs;
+  final void Function(String subTab)? onSelectSubTab;
 
   const _NavTabButton({
     required this.id,
@@ -203,6 +209,7 @@ class _NavTabButton extends StatefulWidget {
     required this.theme,
     this.onTap,
     this.subTabs = const <String>[],
+    this.onSelectSubTab,
   });
 
   @override
@@ -226,6 +233,7 @@ class _NavTabButtonState extends State<_NavTabButton> {
           child: _HoverMenu(
             items: widget.subTabs,
             onDismiss: _DropdownOverlay.hide,
+            onSelect: widget.onSelectSubTab,
           ),
         );
       },
@@ -274,8 +282,13 @@ class _NavTabButtonState extends State<_NavTabButton> {
 class _HoverMenu extends StatelessWidget {
   final List<String> items;
   final VoidCallback onDismiss;
+  final void Function(String value)? onSelect;
 
-  const _HoverMenu({required this.items, required this.onDismiss});
+  const _HoverMenu({
+    required this.items,
+    required this.onDismiss,
+    this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +310,10 @@ class _HoverMenu extends StatelessWidget {
             children: [
               for (final e in items)
                 InkWell(
-                  onTap: onDismiss,
+                  onTap: () {
+                    onSelect?.call(e);
+                    onDismiss();
+                  },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,

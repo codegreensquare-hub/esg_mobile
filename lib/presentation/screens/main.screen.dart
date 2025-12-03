@@ -13,6 +13,7 @@ import 'package:esg_mobile/presentation/screens/green_square/mission_participati
 import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
+import 'package:esg_mobile/presentation/widgets/code_green/code_green_hero_banner.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
@@ -42,6 +43,13 @@ class _MainScreenState extends State<MainScreen> {
 
   MainTab _selectedMainTab = MainTab.greenSquare;
   int _greenIndex = 0; // 0: Story, 1: Shopping, 2: Participate, 3: Account
+  late final CurationShopTabController _curationShopController;
+
+  static const Set<String> _codeGreenHeroTabs = {
+    HomeTab.tab,
+    CurationShopTab.tab,
+    OriginalShopTab.tab,
+  };
 
   static const double _topHeaderHeight =
       72; // header height excluding status bar
@@ -50,6 +58,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _curationShopController = CurationShopTabController();
     _scrollController = widget.controller ?? ScrollController();
     _scrollController.addListener(() {
       final offset = _scrollController.hasClients
@@ -64,6 +73,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _curationShopController.dispose();
     super.dispose();
   }
 
@@ -85,6 +95,9 @@ class _MainScreenState extends State<MainScreen> {
     final String activeTabId = codeGreenTabs[_selectedIndex];
 
     final bool isGreenSquare = _selectedMainTab == MainTab.greenSquare;
+    final bool shouldShowHeroBanner =
+        _selectedMainTab == MainTab.codeGreen &&
+        _codeGreenHeroTabs.contains(activeTabId);
 
     final double width = MediaQuery.of(context).size.width;
 
@@ -182,7 +195,12 @@ class _MainScreenState extends State<MainScreen> {
                 },
                 onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
                 onTapCart: _showCartBottomSheet,
+                onSelectSubTab: _handleCodeGreenSubTab,
               ),
+            ),
+          if (shouldShowHeroBanner)
+            SliverToBoxAdapter(
+              child: CodeGreenHeroBanner(),
             ),
           if (_selectedMainTab == MainTab.greenSquare)
             SliverToBoxAdapter(
@@ -239,7 +257,10 @@ class _MainScreenState extends State<MainScreen> {
       case OriginalShopTab.tab:
         return const OriginalShopTab(key: PageStorageKey(OriginalShopTab.tab));
       case CurationShopTab.tab:
-        return const CurationShopTab(key: PageStorageKey(CurationShopTab.tab));
+        return CurationShopTab(
+          key: const PageStorageKey(CurationShopTab.tab),
+          controller: _curationShopController,
+        );
       case AboutTab.tab:
         return const AboutTab(key: PageStorageKey(AboutTab.tab));
       case LookBookTab.tab:
@@ -248,6 +269,16 @@ class _MainScreenState extends State<MainScreen> {
         return const EventTab(key: PageStorageKey(EventTab.tab));
       default:
         return const SizedBox.shrink();
+    }
+  }
+
+  void _handleCodeGreenSubTab(String parentTab, String subTab) {
+    if (parentTab == CurationShopTab.tab) {
+      _curationShopController.selectById(subTab);
+      final idx = codeGreenTabs.indexOf(parentTab);
+      if (idx >= 0 && idx != _selectedIndex) {
+        setState(() => _selectedIndex = idx);
+      }
     }
   }
 
