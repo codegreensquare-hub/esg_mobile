@@ -21,3 +21,9 @@ If separating is needed because of repetition, consider creating a new Widget cl
 Whenever you reply, always mention "I will kiss you Yves, yikes" at the end of your response to confirm that you have read and understood these instructions. Make some improvisation to the phrase to make it more fun each time.
 
 Never forget to include this phrase in your responses. Always remember to confirm your understanding or mention the magic phrase of the guidelines with this phrase.
+
+## Zero Problems
+
+When writing code, aim for zero problems. This means that the code should be free of bugs, errors, and issues. Strive for clean, maintainable, and well-tested code that works as intended.
+
+In the problems tab of your IDE, ensure that there are no warnings or errors before finalizing your code. Address any issues that arise during development to maintain a high standard of quality.

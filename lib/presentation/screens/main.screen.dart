@@ -3,7 +3,7 @@ import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
-import 'package:esg_mobile/presentation/screens/code_green/curation_shop.tab.dart';
+import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
@@ -102,6 +102,7 @@ class _MainScreenState extends State<MainScreen> {
     final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surfaceContainer,
       key: _scaffoldKey,
       drawer: CodeGreenLeftDrawer(
         tabs: codeGreenTabs,
@@ -116,6 +117,7 @@ class _MainScreenState extends State<MainScreen> {
         onTapGreenSquare: () {
           setState(() => _selectedMainTab = MainTab.greenSquare);
         },
+        onSelectSubTab: _handleCodeGreenSubTab,
       ),
       floatingActionButton: isGreenSquare
           ? FloatingActionButton(
@@ -169,7 +171,8 @@ class _MainScreenState extends State<MainScreen> {
           : null,
       body: CustomScrollView(
         controller: _scrollController,
-        // physics: ClampingScrollPhysics(),
+
+        physics: ClampingScrollPhysics(),
         slivers: [
           CodeGreenTopHeader(
             initialValue: _selectedMainTab,
@@ -205,9 +208,11 @@ class _MainScreenState extends State<MainScreen> {
           if (_selectedMainTab == MainTab.greenSquare)
             SliverToBoxAdapter(
               child: Container(
-                constraints: const BoxConstraints(minHeight: 600),
+                // constraints: const BoxConstraints(minHeight: 600),
+                padding: EdgeInsets.zero,
+                margin: EdgeInsets.zero,
                 width: double.infinity,
-                color: theme.colorScheme.surface,
+                color: theme.colorScheme.surfaceContainer,
                 child: _buildGreenSquareContent(_greenIndex),
               ),
             ),

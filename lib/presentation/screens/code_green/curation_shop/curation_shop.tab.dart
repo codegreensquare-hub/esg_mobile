@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:esg_mobile/presentation/screens/code_green/curation_shop/all_curation_section.dart';
-import 'package:esg_mobile/presentation/screens/code_green/curation_shop/best_curation_section.dart';
-import 'package:esg_mobile/presentation/screens/code_green/curation_shop/style_curation_section.dart';
-import 'package:esg_mobile/presentation/screens/code_green/curation_shop/type_curation_section.dart';
+import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.all.dart';
+import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.best.dart';
+import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.style.dart';
+import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.type.dart';
 
 const List<String> _curationTabIds = ['all', 'best', 'style', 'type'];
 const List<String> _curationTabLabels = ['All', 'Best', 'Style', 'Type'];
@@ -124,14 +124,14 @@ class _CurationShopTabState extends State<CurationShopTab>
   Widget _buildSection(int index) {
     switch (index) {
       case 0:
-        return const AllCurationSection();
+        return const CurationSectionAll();
       case 1:
-        return const BestCurationSection();
+        return const CurationSectionBest();
       case 2:
-        return const StyleCurationSection();
+        return const CurationSectionStyle();
       case 3:
       default:
-        return const TypeCurationSection();
+        return const CurationSectionType();
     }
   }
 }

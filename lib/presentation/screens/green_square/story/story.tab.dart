@@ -17,7 +17,7 @@ class _StoryTabState extends State<StoryTab> {
     final theme = Theme.of(context);
     return SingleChildScrollView(
       controller: _scrollController,
-      physics: ClampingScrollPhysics(),
+      physics: const ClampingScrollPhysics(),
       child: Column(
         children: [
           // trees.png background image

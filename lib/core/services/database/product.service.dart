@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/entities/wishlisted_product.dart';
+import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,11 +16,19 @@ class ProductService {
     String? categoryId,
     String? searchQuery,
     String? userId,
+    VendorAdminType? vendor,
+    ProductStyle? style,
+    ProductMaterial? material,
+    String orderByField = ProductRow.createdAtField,
+    bool orderAscending = false,
+    int? limit,
   }) async {
     try {
       var query = _client
           .from(ProductTable().tableName)
-          .select('*, product_category(name), product_image(*)')
+          .select(
+            '*, product_category(name), product_image(*), user:product_by(*)',
+          )
           .eq(ProductRow.saleStatusField, 'on_sale');
 
       if (categoryId != null && categoryId != 'All') {
@@ -30,7 +39,25 @@ class ProductService {
         query = query.ilike(ProductRow.codeField, '%$searchQuery%');
       }
 
-      final response = await query.order('created_at', ascending: false);
+      if (vendor != null) {
+        query = query.eq(ProductRow.vendorField, vendor.name);
+      }
+
+      if (style != null) {
+        query = query.eq(ProductRow.styleField, style.name);
+      }
+
+      if (material != null) {
+        query = query.eq(ProductRow.typeField, material.name);
+      }
+
+      var finalQuery = query.order(orderByField, ascending: orderAscending);
+
+      if (limit != null) {
+        finalQuery = finalQuery.limit(limit);
+      }
+
+      final response = await finalQuery;
 
       // Get wishlist status for each product if user is logged in
       final wishlistStatuses = <String, bool>{};
@@ -55,9 +82,15 @@ class ProductService {
             .map((img) => ProductImageRow.fromJson(img as Map<String, dynamic>))
             .toList();
         final isInWishlist = wishlistStatuses[product.code] ?? false;
+        final sellerData = data['user'] as Map<String, dynamic>?;
+        if (sellerData == null) {
+          throw Exception('Seller data missing for product ${product.code}');
+        }
+        final seller = UserRow.fromJson(sellerData);
 
         return ProductWithOtherDetails(
           product: product,
+          seller: seller,
           categoryName: categoryName,
           images: images,
           isInWishlist: isInWishlist,
@@ -129,7 +162,7 @@ class ProductService {
       final response = await _client
           .from(ProductWishlistTable().tableName)
           .select(
-            'created_at, product:product(*, product_category(name), product_image(*))',
+            'created_at, product:product(*, product_category(name), product_image(*), user:product_by(*))',
           )
           .eq(ProductWishlistRow.wishlistByField, userId)
           .order(ProductWishlistRow.createdAtField, ascending: false);
@@ -149,10 +182,18 @@ class ProductService {
         final images = imagesData
             .map((img) => ProductImageRow.fromJson(img as Map<String, dynamic>))
             .toList();
+        final sellerData = productData['user'] as Map<String, dynamic>?;
+        if (sellerData == null) {
+          throw Exception(
+            'Seller data missing for wishlisted product ${product.code}',
+          );
+        }
+        final seller = UserRow.fromJson(sellerData);
 
         return WishlistedProduct(
           product: ProductWithOtherDetails(
             product: product,
+            seller: seller,
             categoryName: categoryName,
             images: images,
             isInWishlist: true,

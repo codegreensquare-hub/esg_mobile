@@ -13,6 +13,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
   final ValueChanged<int>? onSelect;
   final String? homeTab;
   final VoidCallback? onTapGreenSquare;
+  final void Function(String tab, String subTab)? onSelectSubTab;
 
   const CodeGreenLeftDrawer({
     super.key,
@@ -22,6 +23,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
     this.onSelect,
     this.homeTab,
     this.onTapGreenSquare,
+    this.onSelectSubTab,
   });
 
   @override
@@ -173,6 +175,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                                   onTap: () {
                                     Navigator.of(context).pop();
                                     onSelect?.call(index);
+                                    onSelectSubTab?.call(id, sub);
                                   },
                                 ),
                               )

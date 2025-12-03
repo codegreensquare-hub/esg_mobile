@@ -35,6 +35,7 @@ class UserRow extends SupabaseDataRow {
     DateTime? adminApprovalDate,
     String? adminApprovedBy,
     String? defaultShippingAddress,
+    VendorAdminType? vendorAdminType,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -51,6 +52,8 @@ class UserRow extends SupabaseDataRow {
            'admin_approved_by': supaSerialize(adminApprovedBy),
          if (defaultShippingAddress != null)
            'default_shipping_address': supaSerialize(defaultShippingAddress),
+         if (vendorAdminType != null)
+           'vendor_admin_type': supaSerialize(vendorAdminType),
        });
 
   /// User Row
@@ -154,6 +157,17 @@ class UserRow extends SupabaseDataRow {
   set defaultShippingAddress(String? value) =>
       setField<String>(defaultShippingAddressField, value);
 
+  /// Vendor Admin Type field name
+  static const String vendorAdminTypeField = 'vendor_admin_type';
+
+  /// Vendor Admin Type
+  VendorAdminType? get vendorAdminType => getField<VendorAdminType>(
+    vendorAdminTypeField,
+    enumValues: VendorAdminType.values,
+  );
+  set vendorAdminType(VendorAdminType? value) =>
+      setField<VendorAdminType>(vendorAdminTypeField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -168,6 +182,7 @@ class UserRow extends SupabaseDataRow {
     DateTime? adminApprovalDate,
     String? adminApprovedBy,
     String? defaultShippingAddress,
+    VendorAdminType? vendorAdminType,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -184,8 +199,10 @@ class UserRow extends SupabaseDataRow {
     'default_shipping_address':
         supaSerialize(defaultShippingAddress) ??
         data['default_shipping_address'],
+    'vendor_admin_type':
+        supaSerialize(vendorAdminType) ?? data['vendor_admin_type'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-01 17:41:38.067283
+/// Date: 2025-12-03 16:25:28.161331

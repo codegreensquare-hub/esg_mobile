@@ -1,5 +1,6 @@
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
@@ -56,6 +57,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         isInWishlist = !isInWishlist;
         productWithDetails = ProductWithOtherDetails(
           product: productWithDetails.product,
+          seller: productWithDetails.seller,
           categoryName: productWithDetails.categoryName,
           images: productWithDetails.images,
           isInWishlist: isInWishlist,
@@ -228,7 +230,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   // Product Code
                   Text(
-                    product.code,
+                    product.title ?? product.code,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -258,17 +260,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Price
                   Text(
-                    '${product.salesPrice ?? product.regularPrice ?? 0} P',
+                    formatKRW(product.regularPrice ?? 0),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (product.salesPrice != null &&
-                      product.regularPrice != null) ...[
+                  if (product.regularPrice != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '${product.regularPrice} P',
+                      formatKRW(product.regularPrice!),
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: cs.onSurfaceVariant,
                         decoration: TextDecoration.lineThrough,

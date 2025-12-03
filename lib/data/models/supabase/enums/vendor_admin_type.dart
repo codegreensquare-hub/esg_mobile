@@ -4,14 +4,14 @@
 //
 // ignore_for_file: require_trailing_commas, constant_identifier_names
 
-/// Mission Publicity enum
-enum MissionPublicity {
-  /// public
-  public,
+/// Vendor Admin Type enum
+enum VendorAdminType {
+  /// retailer
+  retailer,
 
-  /// all_staff
-  all_staff,
+  /// lgs
+  lgs,
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.103307
+/// Date: 2025-12-03 16:25:28.108762

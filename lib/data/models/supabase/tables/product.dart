@@ -31,13 +31,18 @@ class ProductRow extends SupabaseDataRow {
     String? productBy,
     String? category,
     double? regularPrice,
-    double? salesPrice,
+    double? minimumPriceMinusAwardPoints,
     double? stockQuantity,
     double? safeStockQuantity,
     String? mainImageBucket,
     String? mainImageFolderPath,
     String? mainImageFileName,
     String? description,
+    ProductMaterial? type,
+    ProductStyle? style,
+    VendorAdminType? vendor,
+    String? name,
+    String? title,
   }) : super({
          'sale_status': supaSerialize(saleStatus),
          if (code != null) 'code': supaSerialize(code),
@@ -46,7 +51,10 @@ class ProductRow extends SupabaseDataRow {
          if (productBy != null) 'product_by': supaSerialize(productBy),
          if (category != null) 'category': supaSerialize(category),
          if (regularPrice != null) 'regular_price': supaSerialize(regularPrice),
-         if (salesPrice != null) 'sales_price': supaSerialize(salesPrice),
+         if (minimumPriceMinusAwardPoints != null)
+           'minimum_price_minus_award_points': supaSerialize(
+             minimumPriceMinusAwardPoints,
+           ),
          if (stockQuantity != null)
            'stock_quantity': supaSerialize(stockQuantity),
          if (safeStockQuantity != null)
@@ -58,6 +66,11 @@ class ProductRow extends SupabaseDataRow {
          if (mainImageFileName != null)
            'main_image_file_name': supaSerialize(mainImageFileName),
          if (description != null) 'description': supaSerialize(description),
+         if (type != null) 'type': supaSerialize(type),
+         if (style != null) 'style': supaSerialize(style),
+         if (vendor != null) 'vendor': supaSerialize(vendor),
+         if (name != null) 'name': supaSerialize(name),
+         if (title != null) 'title': supaSerialize(title),
        });
 
   /// Product Row
@@ -130,12 +143,15 @@ class ProductRow extends SupabaseDataRow {
   double? get regularPrice => getField<double>(regularPriceField);
   set regularPrice(double? value) => setField<double>(regularPriceField, value);
 
-  /// Sales Price field name
-  static const String salesPriceField = 'sales_price';
+  /// Minimum Price Minus Award Points field name
+  static const String minimumPriceMinusAwardPointsField =
+      'minimum_price_minus_award_points';
 
-  /// Sales Price
-  double? get salesPrice => getField<double>(salesPriceField);
-  set salesPrice(double? value) => setField<double>(salesPriceField, value);
+  /// Minimum Price Minus Award Points
+  double? get minimumPriceMinusAwardPoints =>
+      getField<double>(minimumPriceMinusAwardPointsField);
+  set minimumPriceMinusAwardPoints(double? value) =>
+      setField<double>(minimumPriceMinusAwardPointsField, value);
 
   /// Stock Quantity field name
   static const String stockQuantityField = 'stock_quantity';
@@ -185,6 +201,49 @@ class ProductRow extends SupabaseDataRow {
   String? get description => getField<String>(descriptionField);
   set description(String? value) => setField<String>(descriptionField, value);
 
+  /// Type field name
+  static const String typeField = 'type';
+
+  /// Type
+  ProductMaterial? get type =>
+      getField<ProductMaterial>(typeField, enumValues: ProductMaterial.values);
+  set type(ProductMaterial? value) =>
+      setField<ProductMaterial>(typeField, value);
+
+  /// Style field name
+  static const String styleField = 'style';
+
+  /// Style
+  ProductStyle? get style =>
+      getField<ProductStyle>(styleField, enumValues: ProductStyle.values);
+  set style(ProductStyle? value) => setField<ProductStyle>(styleField, value);
+
+  /// Vendor field name
+  static const String vendorField = 'vendor';
+
+  /// Vendor
+  VendorAdminType get vendor => getField<VendorAdminType>(
+    vendorField,
+    enumValues: VendorAdminType.values,
+    defaultValue: VendorAdminType.retailer,
+  )!;
+  set vendor(VendorAdminType value) =>
+      setField<VendorAdminType>(vendorField, value);
+
+  /// Name field name
+  static const String nameField = 'name';
+
+  /// Name
+  String? get name => getField<String>(nameField);
+  set name(String? value) => setField<String>(nameField, value);
+
+  /// Title field name
+  static const String titleField = 'title';
+
+  /// Title
+  String? get title => getField<String>(titleField);
+  set title(String? value) => setField<String>(titleField, value);
+
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
   ProductRow copyWith({
@@ -195,13 +254,18 @@ class ProductRow extends SupabaseDataRow {
     String? productBy,
     String? category,
     double? regularPrice,
-    double? salesPrice,
+    double? minimumPriceMinusAwardPoints,
     double? stockQuantity,
     double? safeStockQuantity,
     String? mainImageBucket,
     String? mainImageFolderPath,
     String? mainImageFileName,
     String? description,
+    ProductMaterial? type,
+    ProductStyle? style,
+    VendorAdminType? vendor,
+    String? name,
+    String? title,
   }) => ProductRow.fromJson({
     'sale_status': supaSerialize(saleStatus) ?? data['sale_status'],
     'code': supaSerialize(code) ?? data['code'],
@@ -210,7 +274,9 @@ class ProductRow extends SupabaseDataRow {
     'product_by': supaSerialize(productBy) ?? data['product_by'],
     'category': supaSerialize(category) ?? data['category'],
     'regular_price': supaSerialize(regularPrice) ?? data['regular_price'],
-    'sales_price': supaSerialize(salesPrice) ?? data['sales_price'],
+    'minimum_price_minus_award_points':
+        supaSerialize(minimumPriceMinusAwardPoints) ??
+        data['minimum_price_minus_award_points'],
     'stock_quantity': supaSerialize(stockQuantity) ?? data['stock_quantity'],
     'safe_stock_quantity':
         supaSerialize(safeStockQuantity) ?? data['safe_stock_quantity'],
@@ -221,8 +287,13 @@ class ProductRow extends SupabaseDataRow {
     'main_image_file_name':
         supaSerialize(mainImageFileName) ?? data['main_image_file_name'],
     'description': supaSerialize(description) ?? data['description'],
+    'type': supaSerialize(type) ?? data['type'],
+    'style': supaSerialize(style) ?? data['style'],
+    'vendor': supaSerialize(vendor) ?? data['vendor'],
+    'name': supaSerialize(name) ?? data['name'],
+    'title': supaSerialize(title) ?? data['title'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-01 17:41:38.054557
+/// Date: 2025-12-03 16:25:28.153861

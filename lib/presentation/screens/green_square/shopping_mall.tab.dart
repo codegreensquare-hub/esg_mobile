@@ -5,6 +5,7 @@ import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
+import 'package:esg_mobile/presentation/widgets/small/text.chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -91,6 +92,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
         if (index != -1) {
           products[index] = ProductWithOtherDetails(
             product: productWithDetails.product,
+            seller: productWithDetails.seller,
             categoryName: productWithDetails.categoryName,
             images: productWithDetails.images,
             isInWishlist: !productWithDetails.isInWishlist,
@@ -99,6 +101,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
       });
     } catch (e) {
       debugPrint('Error toggling wishlist: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('찜하기 처리 중 오류가 발생했습니다.')),
       );
@@ -157,10 +160,14 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final scrollContent = SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+    return SingleChildScrollView(
+      // padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+      padding: EdgeInsets.zero,
+      primary: false,
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           // Award Points Display
           Container(
@@ -189,18 +196,21 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
           const SizedBox(height: 16),
 
           // Search Bar
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: '상품 검색',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '상품 검색',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
               ),
-              filled: true,
-              fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+              onChanged: (value) => _loadProducts(),
             ),
-            onChanged: (value) => _loadProducts(),
           ),
           const SizedBox(height: 16),
 
@@ -216,19 +226,14 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
                   final category = 'All';
                   final isSelected = selectedCategoryId == category;
                   return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(category),
+                    margin: const EdgeInsets.only(right: 8, left: 16),
+                    child: TextChip(
+                      label: '전체',
                       selected: isSelected,
                       onSelected: (selected) {
-                        setState(() {
-                          selectedCategoryId = selected ? category : 'All';
-                        });
+                        setState(() => selectedCategoryId = category);
                         _loadProducts();
                       },
-                      backgroundColor: cs.surfaceContainer,
-                      selectedColor: cs.primaryContainer,
-                      checkmarkColor: cs.onPrimaryContainer,
                     ),
                   );
                 } else {
@@ -236,8 +241,8 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
                   final isSelected = selectedCategoryId == category.id;
                   return Container(
                     margin: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(category.name),
+                    child: TextChip(
+                      label: category.name,
                       selected: isSelected,
                       onSelected: (selected) {
                         setState(() {
@@ -245,16 +250,12 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
                         });
                         _loadProducts();
                       },
-                      backgroundColor: cs.surfaceContainer,
-                      selectedColor: cs.primaryContainer,
-                      checkmarkColor: cs.onPrimaryContainer,
                     ),
                   );
                 }
               },
             ),
           ),
-          const SizedBox(height: 16),
 
           // Products Grid
           if (isLoading)
@@ -263,9 +264,10 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
             const Center(child: Text('상품이 없습니다.'))
           else
             MasonryGridView.count(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: products.length,
@@ -281,40 +283,6 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
               },
             ),
         ],
-      ),
-    );
-
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final height = constraints.maxHeight.isInfinite
-              ? MediaQuery.of(context).size.height
-              : constraints.maxHeight;
-          return SizedBox(
-            height: height,
-            child: Stack(
-              children: [
-                Positioned.fill(child: scrollContent),
-                if (userId != null)
-                  Positioned(
-                    right: 16,
-                    bottom: 16,
-                    child: FloatingActionButton.extended(
-                      heroTag: 'green-square-cart-fab',
-                      onPressed: _showCart,
-                      icon: cartItemCount > 0
-                          ? Badge.count(
-                              count: cartItemCount,
-                              child: const Icon(Icons.shopping_cart),
-                            )
-                          : const Icon(Icons.shopping_cart_outlined),
-                      label: const Text('장바구니'),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }

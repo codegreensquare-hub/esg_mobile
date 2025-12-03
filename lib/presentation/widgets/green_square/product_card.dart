@@ -1,3 +1,4 @@
+import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,16 @@ class ProductCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final product = productWithDetails.product;
+    final double? regularPrice = product.regularPrice;
+    final double? discountedPrice = product.minimumPriceMinusAwardPoints;
+    final hasDiscount =
+        regularPrice != null &&
+        discountedPrice != null &&
+        regularPrice > 0 &&
+        discountedPrice < regularPrice;
+    final int? discountPercentage = hasDiscount
+        ? (((regularPrice - discountedPrice) / regularPrice) * 100).round()
+        : null;
     final imageUrl =
         product.mainImageBucket != null && product.mainImageFileName != null
         ? getImageLink(
@@ -33,8 +44,10 @@ class ProductCard extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(4),
         ),
+        elevation: 0.1,
+        color: cs.surfaceContainerLowest,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -72,25 +85,25 @@ class ProductCard extends StatelessWidget {
                       right: 8,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: cs.surface.withValues(alpha: 0.8),
+                          color: cs.outline.withValues(alpha: 0.4),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
+                          visualDensity: VisualDensity(
+                            horizontal: -3,
+                            vertical: -3,
+                          ),
                           icon: Icon(
                             productWithDetails.isInWishlist
                                 ? Icons.favorite
                                 : Icons.favorite_border,
                             color: productWithDetails.isInWishlist
                                 ? Colors.red
-                                : cs.onSurface,
+                                : cs.surface,
                           ),
                           onPressed: onWishlistToggle,
                           iconSize: 20,
-                          padding: const EdgeInsets.all(8),
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
+                          padding: EdgeInsets.all(0),
                         ),
                       ),
                     ),
@@ -103,14 +116,35 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product.code,
+                    product.title ?? product.code,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 2,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        if (productWithDetails.seller.username != null &&
+                            productWithDetails.seller.username!.isNotEmpty)
+                          TextSpan(
+                            text:
+                                "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
+                          ),
+                        TextSpan(
+                          text: productWithDetails.product.name ?? '',
+                        ),
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   if (product.description != null &&
                       product.description!.isNotEmpty) ...[
                     Text(
@@ -124,12 +158,30 @@ class ProductCard extends StatelessWidget {
                     const SizedBox(height: 8),
                   ],
                   Text(
-                    '${product.salesPrice ?? product.regularPrice ?? 0} P',
+                    formatKRW(regularPrice ?? 0),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (discountPercentage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '친환경 소비자라면, $discountPercentage%↓',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.secondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatKRW(discountedPrice!),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: cs.secondary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

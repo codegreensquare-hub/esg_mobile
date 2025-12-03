@@ -1,5 +1,5 @@
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
-import 'package:esg_mobile/presentation/screens/code_green/curation_shop.tab.dart';
+import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
