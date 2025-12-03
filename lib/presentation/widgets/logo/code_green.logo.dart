@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CodeGreenLogo extends StatelessWidget {
   const CodeGreenLogo({super.key});
@@ -6,14 +7,15 @@ class CodeGreenLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Temporarily text
-    // TODO change to image asset
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Text(
-        'Code Green',
-        style: theme.textTheme.titleLarge?.copyWith(
-          color: theme.colorScheme.onSurface,
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: SvgPicture.asset(
+        'assets/images/logos/codegreen_logo.svg',
+        width: 168,
+        height: 50,
+        colorFilter: ColorFilter.mode(
+          theme.colorScheme.onSurface,
+          BlendMode.srcIn,
         ),
       ),
     );

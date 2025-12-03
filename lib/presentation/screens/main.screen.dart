@@ -1,4 +1,7 @@
 import 'package:esg_mobile/core/enums/navigations.dart';
+import 'package:esg_mobile/core/enums/mission_status.dart';
+import 'package:esg_mobile/core/services/database/cart.service.dart';
+import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
@@ -9,12 +12,17 @@ import 'package:esg_mobile/presentation/screens/green_square/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
+import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
+import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/nav_header.delegate.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:esg_mobile/data/models/supabase/database.dart';
 
 class MainScreen extends StatefulWidget {
   static const String route = '/';
@@ -91,6 +99,9 @@ class _MainScreenState extends State<MainScreen> {
           if (index != _selectedIndex) {
             setState(() => _selectedIndex = index);
           }
+        },
+        onTapGreenSquare: () {
+          setState(() => _selectedMainTab = MainTab.greenSquare);
         },
       ),
       floatingActionButton: isGreenSquare
@@ -170,6 +181,7 @@ class _MainScreenState extends State<MainScreen> {
                   }
                 },
                 onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                onTapCart: _showCartBottomSheet,
               ),
             ),
           if (_selectedMainTab == MainTab.greenSquare)
@@ -269,20 +281,80 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _onTapKnock() {
-    showModalBottomSheet<void>(
+  Future<void> _showCartBottomSheet() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    final items = await CartService.instance.fetchCartItems(userId);
+    if (!mounted) return;
+
+    await showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
-      builder: (ctx) => SizedBox(
-        height: 260,
-        child: Center(
-          child: Text(
-            'Knock! Coming soon…',
-            style: Theme.of(ctx).textTheme.titleMedium,
-          ),
-        ),
-      ),
+      isScrollControlled: true,
+      builder: (_) => CartBottomSheet(items: items),
     );
+  }
+
+  Future<void> _onTapKnock() async {
+    try {
+      final missions = await MissionService.instance.fetchList(
+        isPublished: true,
+        status: MissionStatus.current,
+        publicity: MissionPublicity.public,
+      );
+
+      if (!mounted) return;
+
+      await showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (ctx) {
+          if (missions.isEmpty) {
+            return SizedBox(
+              height: 200,
+              child: Center(
+                child: Text(
+                  '현재 진행 중인 미션이 없습니다.',
+                  style: Theme.of(ctx).textTheme.bodyLarge,
+                ),
+              ),
+            );
+          }
+
+          return SizedBox(
+            height: MediaQuery.of(ctx).size.height * 0.7,
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              itemCount: missions.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (_, index) => MissionAvailableListTile(
+                mission: missions[index],
+                onTap: (mission) {
+                  Navigator.of(ctx).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => MissionDetailDialog(mission: mission),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('미션 정보를 불러오지 못했습니다. 다시 시도해주세요.')),
+      );
+    }
   }
 
   Widget _buildGreenSquareContent(int index) {

@@ -23,6 +23,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.selectedIndex = 0,
     this.onTabSelected,
     this.onTapMenu,
+    this.onTapCart,
     this.homeTab,
   });
 
@@ -34,6 +35,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int selectedIndex;
   final void Function(int index, String tab)? onTabSelected;
   final void Function()? onTapMenu;
+  final VoidCallback? onTapCart;
   final String? homeTab;
   // Current layout width supplied by parent (e.g. LayoutBuilder). We only
   // rebuild when this crosses a breakpoint (narrow <-> wide) or other props change.
@@ -97,7 +99,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                     Icons.shopping_bag_outlined,
                     color: theme.colorScheme.onSurface,
                   ),
-                  onPressed: onTapMenu,
+                  onPressed: onTapCart ?? onTapMenu,
                 ),
               ],
               // Expanded region for tabs or spacer.
@@ -156,10 +158,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                 NavHeaderButton(
                   icon: Icons.shopping_bag_outlined,
                   title: 'Cart',
-                  onTap: () {
-                    // TODO
-                    throw UnimplementedError();
-                  },
+                  onTap: onTapCart,
                 ),
               ],
             ],
@@ -182,6 +181,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.labels != labels ||
         oldDelegate.selectedIndex != selectedIndex ||
         oldDelegate.homeTab != homeTab ||
+        oldDelegate.onTapCart != onTapCart ||
         prevWide != nextWide;
   }
 

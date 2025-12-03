@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GreenSquareLogo extends StatelessWidget {
   const GreenSquareLogo({super.key});
@@ -6,14 +7,15 @@ class GreenSquareLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Temporarily text
-    // TODO change to image asset
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Text(
-        'Green Square',
-        style: theme.textTheme.titleLarge?.copyWith(
-          color: theme.colorScheme.onSurface,
+      padding: const EdgeInsets.fromLTRB(0, 22, 0, 2),
+      child: SvgPicture.asset(
+        'assets/images/logos/greensquare_logo.svg',
+
+        height: 22,
+        colorFilter: ColorFilter.mode(
+          theme.colorScheme.onSurface,
+          BlendMode.srcIn,
         ),
       ),
     );

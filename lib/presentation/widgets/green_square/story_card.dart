@@ -1,6 +1,8 @@
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:flutter/material.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/text.story.dart';
+
 import 'story_dialog.dart';
 
 class StoryCard extends StatelessWidget {
@@ -16,6 +18,8 @@ class StoryCard extends StatelessWidget {
     final story = storyWithTags.story;
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
+    final hasStoryContent =
+        (storyWithTags.story.content?.trim().isNotEmpty ?? false);
 
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
@@ -74,13 +78,11 @@ class StoryCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (storyWithTags.story.content != null &&
-                      storyWithTags.story.content!.isNotEmpty) ...[
+                  if (hasStoryContent) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      story.content ?? '',
+                    TextStory(
+                      content: storyWithTags.story.content,
                       maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                   if (storyWithTags.tags.isNotEmpty) ...[

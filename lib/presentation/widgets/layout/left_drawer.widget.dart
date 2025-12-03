@@ -12,6 +12,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
   final Map<String, String> labels;
   final ValueChanged<int>? onSelect;
   final String? homeTab;
+  final VoidCallback? onTapGreenSquare;
 
   const CodeGreenLeftDrawer({
     super.key,
@@ -20,6 +21,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
     required this.labels,
     this.onSelect,
     this.homeTab,
+    this.onTapGreenSquare,
   });
 
   @override
@@ -181,19 +183,15 @@ class CodeGreenLeftDrawer extends StatelessWidget {
 
                 InkWell(
                   onTap: () {
-                    if (homeTab == null) return;
-                    final idx = tabs.indexOf(homeTab!);
-                    if (idx >= 0) {
-                      Navigator.of(context).pop();
-                      if (idx != selectedIndex) {
-                        onSelect?.call(idx);
-                      }
-                    }
+                    Navigator.of(context).pop();
+                    onTapGreenSquare?.call();
                   },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: SafeArea(top: false, child: GreenSquareLogo()),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+                      child: GreenSquareLogo(),
+                    ),
                   ),
                 ),
 

@@ -29,6 +29,14 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
   }
 
   @override
+  void didUpdateWidget(covariant CodeGreenTopHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      setState(() => _selectedTab = widget.initialValue);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SliverAppBar(

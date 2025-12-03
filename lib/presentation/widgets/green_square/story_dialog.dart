@@ -3,6 +3,7 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/text.story.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -141,9 +142,8 @@ class _StoryDialogState extends State<StoryDialog> {
                         ),
                       ),
                     if (story.content != null && story.content!.isNotEmpty)
-                      Text(
-                        story.content!,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                      TextStory(
+                        content: story.content,
                       ),
                     if (widget.tags.isNotEmpty) ...[
                       const SizedBox(height: 16),
