@@ -19,9 +19,20 @@ import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.da
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/nav_header.delegate.dart';
+import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
+import 'package:esg_mobile/core/constants/green_square_navigation.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/brand_story.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/partnership_inquiry.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/about_cog.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/terms.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/privacy_policy.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/notices.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/faq.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/contact.screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 
@@ -119,6 +130,11 @@ class _MainScreenState extends State<MainScreen> {
         },
         onSelectSubTab: _handleCodeGreenSubTab,
       ),
+      endDrawer: isGreenSquare
+          ? GreenSquareRightDrawer(
+              onSelect: _handleGreenSquareDrawerSelection,
+            )
+          : null,
       floatingActionButton: isGreenSquare
           ? FloatingActionButton(
               heroTag: 'green-square-knock-fab',
@@ -177,6 +193,17 @@ class _MainScreenState extends State<MainScreen> {
           CodeGreenTopHeader(
             initialValue: _selectedMainTab,
             onChanged: (tab) => setState(() => _selectedMainTab = tab),
+            actions: [
+              if (_selectedMainTab == MainTab.greenSquare)
+                IconButton(
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Colors.white,
+                  ),
+                  tooltip: '그린스퀘어 메뉴',
+                  onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                ),
+            ],
           ),
           if (_selectedMainTab == MainTab.codeGreen)
             SliverPersistentHeader(
@@ -389,6 +416,107 @@ class _MainScreenState extends State<MainScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('미션 정보를 불러오지 못했습니다. 다시 시도해주세요.')),
+      );
+    }
+  }
+
+  Future<void> _handleGreenSquareDrawerSelection(
+    GreenSquareDrawerDestination destination,
+  ) async {
+    if (!mounted) return;
+
+    switch (destination.target) {
+      case GreenSquareDrawerTarget.brandStory:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareBrandStoryScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.partnershipInquiry:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquarePartnershipInquiryScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.aboutCog:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareAboutCogScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.squareTerms:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareTermsScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.privacyPolicy:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquarePrivacyPolicyScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.notices:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareNoticesScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.faq:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareFaqScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.openInApp:
+        await _launchExternal(
+          Uri.parse(
+            'https://apps.apple.com/kr/app/%EC%BD%94%EB%93%9C%EA%B7%B8%EB%A6%B0%EC%8A%A4%ED%80%98%EC%96%B4/id1597090322',
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.contact:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareContactScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.kakaoContact:
+        await _launchExternal(
+          Uri.parse('https://pf.kakao.com/_taxoxdG'),
+        );
+        break;
+    }
+  }
+
+  Future<void> _launchExternal(Uri uri) async {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('링크를 열 수 없습니다. 다시 시도해주세요.'),
+          ),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('링크를 열 수 없습니다. 다시 시도해주세요.'),
+        ),
       );
     }
   }

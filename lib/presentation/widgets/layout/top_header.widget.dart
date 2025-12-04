@@ -8,10 +8,12 @@ class CodeGreenTopHeader extends StatefulWidget {
     super.key,
     this.initialValue = MainTab.greenSquare,
     this.onChanged,
+    this.actions,
   });
 
   final MainTab initialValue;
   final ValueChanged<MainTab>? onChanged;
+  final List<Widget>? actions;
 
   @override
   State<CodeGreenTopHeader> createState() => _CodeGreenTopHeaderState();
@@ -45,6 +47,7 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
       snap: false,
       leading: SizedBox.shrink(),
       backgroundColor: theme.colorScheme.primary,
+      actions: widget.actions,
       title: SizedBox(
         width: 200,
         child: Center(

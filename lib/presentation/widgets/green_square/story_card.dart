@@ -53,6 +53,8 @@ class StoryCard extends StatelessWidget {
                   height: screenWidth * 4 / 5,
                   width: screenWidth,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      SizedBox.shrink(),
                 ),
               ),
             Padding(

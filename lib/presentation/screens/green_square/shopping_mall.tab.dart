@@ -5,7 +5,6 @@ import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
-import 'package:esg_mobile/presentation/widgets/small/text.chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,7 +16,8 @@ class ShoppingMallTab extends StatefulWidget {
   State<ShoppingMallTab> createState() => _ShoppingMallTabState();
 }
 
-class _ShoppingMallTabState extends State<ShoppingMallTab> {
+class _ShoppingMallTabState extends State<ShoppingMallTab>
+    with TickerProviderStateMixin {
   int awardPoints = 0;
   final TextEditingController _searchController = TextEditingController();
   String selectedCategoryId = 'All';
@@ -26,11 +26,81 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
   bool isLoading = true;
   String? userId;
   int cartItemCount = 0;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
+    _createOrUpdateTabController();
     _loadData();
+  }
+
+  void _createOrUpdateTabController() {
+    final desiredLength = categories.length + 1;
+
+    if (desiredLength <= 0) {
+      _tabController?.removeListener(_handleTabChange);
+      _tabController?.dispose();
+      _tabController = null;
+      return;
+    }
+
+    if (_tabController != null && _tabController!.length == desiredLength) {
+      _syncSelectedTab();
+      return;
+    }
+
+    _tabController?.removeListener(_handleTabChange);
+    _tabController?.dispose();
+
+    final controller = TabController(length: desiredLength, vsync: this);
+    controller.addListener(_handleTabChange);
+    _tabController = controller;
+    _syncSelectedTab();
+  }
+
+  void _syncSelectedTab() {
+    final controller = _tabController;
+    if (controller == null) {
+      return;
+    }
+
+    var targetIndex = 0;
+    if (selectedCategoryId != 'All') {
+      final matchIndex = categories.indexWhere(
+        (category) => category.id == selectedCategoryId,
+      );
+      if (matchIndex != -1) {
+        targetIndex = matchIndex + 1;
+      } else {
+        selectedCategoryId = 'All';
+      }
+    }
+
+    if (targetIndex >= controller.length) {
+      targetIndex = 0;
+      selectedCategoryId = 'All';
+    }
+
+    if (controller.index != targetIndex) {
+      controller.index = targetIndex;
+    }
+  }
+
+  void _handleTabChange() {
+    if (!mounted || _tabController == null || _tabController!.indexIsChanging) {
+      return;
+    }
+
+    final index = _tabController!.index;
+    final newCategoryId = index == 0 ? 'All' : categories[index - 1].id;
+
+    if (newCategoryId == selectedCategoryId) {
+      return;
+    }
+
+    setState(() => selectedCategoryId = newCategoryId);
+    _loadProducts();
   }
 
   Future<void> _loadData() async {
@@ -42,7 +112,17 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
         _loadCartCount();
       }
 
-      categories = await ProductService.instance.fetchCategories();
+      final fetchedCategories = await ProductService.instance.fetchCategories();
+      setState(() {
+        categories = fetchedCategories;
+        final categoryStillExists =
+            selectedCategoryId == 'All' ||
+            categories.any((category) => category.id == selectedCategoryId);
+        if (!categoryStillExists) {
+          selectedCategoryId = 'All';
+        }
+        _createOrUpdateTabController();
+      });
 
       await _loadProducts();
     } catch (e) {
@@ -156,6 +236,14 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
   }
 
   @override
+  void dispose() {
+    _tabController?.removeListener(_handleTabChange);
+    _tabController?.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
@@ -214,57 +302,51 @@ class _ShoppingMallTabState extends State<ShoppingMallTab> {
           ),
           const SizedBox(height: 16),
 
-          // Category Chips
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length + 1, // +1 for 'All'
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  // 'All' category
-                  final category = 'All';
-                  final isSelected = selectedCategoryId == category;
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8, left: 16),
-                    child: TextChip(
-                      label: '전체',
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() => selectedCategoryId = category);
-                        _loadProducts();
-                      },
-                    ),
-                  );
-                } else {
-                  final category = categories[index - 1];
-                  final isSelected = selectedCategoryId == category.id;
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: TextChip(
-                      label: category.name,
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          selectedCategoryId = selected ? category.id : 'All';
-                        });
-                        _loadProducts();
-                      },
-                    ),
-                  );
-                }
-              },
+          // Category Tabs
+          if (_tabController != null &&
+              _tabController!.length == categories.length + 1)
+            SizedBox(
+              height: 30,
+              child: TabBar(
+                padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                controller: _tabController,
+                dividerColor: Colors.transparent,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: cs.secondary,
+                indicatorWeight: 3,
+                labelColor: cs.onSurface,
+                unselectedLabelColor: cs.outline,
+                labelPadding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                labelStyle: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+                unselectedLabelStyle: theme.textTheme.bodySmall,
+                tabs: [
+                  const Tab(text: '전체'),
+                  ...categories.map((category) => Tab(text: category.name)),
+                ],
+              ),
             ),
-          ),
 
           // Products Grid
           if (isLoading)
-            const Center(child: CircularProgressIndicator())
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
           else if (products.isEmpty)
-            const Center(child: Text('상품이 없습니다.'))
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('상품이 없습니다.'),
+              ),
+            )
           else
             MasonryGridView.count(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               crossAxisCount: 2,
               mainAxisSpacing: 4,
               crossAxisSpacing: 4,

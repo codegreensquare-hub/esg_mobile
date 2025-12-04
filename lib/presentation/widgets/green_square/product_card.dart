@@ -152,7 +152,7 @@ class ProductCard extends StatelessWidget {
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
-                      maxLines: 8,
+                      maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
