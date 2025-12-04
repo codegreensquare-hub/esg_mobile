@@ -9,12 +9,18 @@ class GreenSquareFaqScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return GreenSquareInfoPage(
       title: '자주 묻는 질문(FAQ)',
-      children: [
-        Text(
-          'FAQ 콘텐츠를 준비 중입니다.',
-          style: theme.textTheme.bodyLarge,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'FAQ 콘텐츠를 준비 중입니다.',
+              style: theme.textTheme.bodyLarge,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -9,12 +9,992 @@ class GreenSquareTermsScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return GreenSquareInfoPage(
       title: '스퀘어 이용 약관',
-      children: [
-        Text(
-          '스퀘어 이용 약관 콘텐츠를 준비 중입니다.',
-          style: theme.textTheme.bodyLarge,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1장 총칙
+            Text(
+              '1장 총칙',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제1조(목적)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '본 약관은 ㈜ 리더스 오브 그린 소사이어티(이하 "회사")가 운영하는 "Code Green square"를 통해서 제공하는 전자상거래 관련 서비스 및 기타 서비스(이하 "서비스")를 이용함에 있어서의 회사와 회원 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제2조(용어의 정의)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 본 약관에서 사용되는 용어의 정의는 다음과 같습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1. "서비스"란 회원의 단말기(모바일, 태블릿PC 등 각종 유무선 장치를 포함)를 통하여 회사가 제공하는 코드 그린 스퀘어 관련 서비스 일체를 말합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '2."회원"이란 서비스에 카카오계정 로그인 접속하여 이용계약을 체결하고 서비스를 이용하는 고객을 말합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '3."제휴 판매자"란 회사가 제공하는 서비스를 통하여 자신의 상품, 서비스 등을 판매할 목적으로 판매자 약관을 승인 하거나 회사와 서비스 이용계약을 체결한 자를 말합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '4."마일리지"란 코드그린 스퀘어 서비스를 이용하는 과정에서 상품 구매 또는 각종 미션을 마친 후 평가를 통과하면 시스템에 적립되는 형태의 적립금의 일종이며, 서비스에서 결제수단으로 이용 가능합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '5."쿠폰"이란 회사 또는 제휴 판매자가 회원을 대상으로 하는 서비스의 제공 혹은 프로모션 등을 목적으로 회원의 구매 절차 없이 회원에게 발급하는 것을 말합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '6."배송상품"이란 코드그린 스퀘어 쇼핑몰을 통해 회원과 계약된 유형의 재화를 배송하는 상품 등을 말합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 이 약관에 사용되는 용어 중 본 조에서 정하지 않은 부분은 관계법령 및 일반 관례에 따릅니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제3조(약관 등의 명시와 설명 및 개정)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 본 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 화면에 게시합니다. 또한, 약관의 내용은 이용자가 연결화면을 통하여 볼 수 있도록 할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회사는 전자상거래 등에서의 소비자보호에 관한 법률, 약관의 규제에 관한 법률, 전자거래기본법, 전자서명법, 정보통신망 이용촉진에 관한 법률, 소비자보호법 등 관련법을 위배하지 않는 범위에서 본 약관을 개정할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 본 약관은 수시로 변경될 수 있고 회사가 약관을 변경하고자 할 경우에는 적용일자 및 변경사유를 명시하여 적용일자 7일 전부터 적용일자 전일까지 서비스 내 적절한 장소에 게시 또는 이메일 발송 등의 방법으로 회원에게 공지합니다. 다만, 고객에게 불리한 약관내용을 변경하는 경우에는 최소한 30일 전부터 사전 유예기간을 두고 공지 및 통지합니다. 이 경우 회사는 개정 전 내용과 개정 후 내용을 명확히 비교하여 회원이 알기 쉽도록 표시합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '④ 본 조의 규정에 의한 개정된 약관은 원칙적으로 그 변경되는 약관의 적용일로부터 장래를 향하여 유효합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑤ 변경된 약관 사항에 동의하지 않을 경우, 약관 변경 적용일 전일까지 서비스 이용을 중단하거나 회원 탈퇴 함으로써 이용 계약을 해지할 수 있으며, 약관의 개정과 관련하여 적용일 까지 이의를 제기하지 않는 경우에는 개정된 약관에 동의한 것으로 간주합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑥ 이 약관에서 정하지 아니한 사항과 이 약관의 해석에 관하여는 전자상거래 등에서의 소비자보호에 관한 법률, 약관의 규제 등에 관한 법률, 공정거래 위원회가 정하는 전자상거래 등에서의 소비자보호지침 및 관계법령 또는 상관례에 따릅니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            // 2장 회사의 서비스
+            Text(
+              '2장 회사의 서비스',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제4조(서비스의 제공 및 변경)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1. 상품 또는 서비스에 대한 정보 제공 및 구매계약의 체결',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '2. 쇼핑 서비스(중개판매 서비스 포함)',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '3. 기타 회사가 정하는 서비스 또는 업무',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회사는 운영상, 기술상의 필요에 따라 제공하는 상품 및 서비스의 전부 또는 일부를 변경할 수 있습니다. 이에 대하여 약관에 다른 규정이 없는 한 회원에게 별도의 보상을 하지는 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 이 경우에는 변경된 상품 또는 서비스의 내용 및 제공일자를 명시하여 현재의 상품 또는 서비스의 내용을 게시한 곳에 즉시 공지합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '④ 전항의 경우 회사는 이로 인하여 이용자가 입은 손해를 배상합니다. 다만, 회사가 고의 또는 과실이 없음을 입증한 경우에는 아무런 책임을 부담하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제5조 (서비스의 중단)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 서비스관련설비 보수점검, 교체 및 고장, 통신두절 등 기술상 업무상의 이유로 서비스의 제공을 일시적으로 중단할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 제1항에 의한 서비스 중단은 이메일 또는 서비스 내 공지사항, 서비스 웹사이트에 게시하는 방법으로 통지하는 것을 원칙으로 하지만, 부득이한 사유가 있는 경우 사후에 통지할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회사는 서비스의 중단으로 인하여 회원이 입은 손해에 대하여 회사의 고의성이 없는 경우에는 배상하지 아니합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            // 3장 서비스 이용계약
+            Text(
+              '제 3장 서비스 이용계약',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제6조(회원가입)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 이용자는 회사가 정한 약관에 동의한다는 의사표시를 함으로서 회원가입을 신청합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 가입 신청 시 허위 정보를 기재함으로 인한 불이익 및 법적 책임은 가입 신청자에게 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회사는 제1항과 같이 회원으로 가입할 것을 신청한 이용자가 다음 각호에 해당하는 경우 신청을 승낙하지 않거나 사후에 이용계약을 해지할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1. 가입 신청자가 이전에 회원자격을 상실한 적이 있는 경우. 다만, 회원 자격 상실 후 3년이 경과한 자로서 회사의 회원 재가입 승낙을 얻은 자는 예외로 한다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '2.허위의 명의 또는 타인의 명의를 이용한 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '3.기타 승낙이 불가능한 사유가 있는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '4.회원 가입 신청일 현재 만14세 미만의 아동이 법정대리인의 동의를 받지 않은 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '④ 회사는 서비스 관련설비의 여유 기타 기술상 또는 업무상의 이유로 승낙을 유보할 수 있으며, 그 결과를 가입신청자에게 알려드립니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑤회원가입계약의 성립 시기는 회사의 승낙이 회원에게 도달한 시점으로 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑥회원은 등록사항에 변경이 있는 경우, 즉시 내용을 변경하거나 전자우편 기타 방법으로 회사에 변경사항을 알려야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제7조(회원 탈퇴 및 자격 상실 등)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회원은 회사에 언제든지 탈퇴를 요청할 수 있으며 회사는 신속히 회원 탈퇴를 처리합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '다만, 탈퇴 처리시점에 회원의 상품 등 구매 절차가 완료되지 않은 경우, 회사는 해당 상품 등의 구매가 완료된 후 탈퇴 처리 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회원이 다음 각호의 사유에 해당하는 경우, 회사는 회원자격을 제한 및 정지시킬 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1. 가입 신청 시에 허위 내용을 등록한 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '2. 회사를 이용하여 구입한 상품 등의 대금, 기타 회원이 부담하는 채무를 기일에 지급하지 않는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '3. 다른 사람의 서비스 이용을 방해하거나 그 정보를 도용하는 등 전자거래질서에 장애를 일으키거나 전자거래질서를 위협하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '4. 법령과 본 약관이 금지하거나 공서양속에 반하는 행위를 하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '5. 기타 다음과 같은 행위 등으로 회사의 건전한 운영을 해하거나 회사의 업무를 방해하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '가. 회사의 운영에 관련하여 근거 없는 사실 또는 허위의 사실을 적시하거나 유포하여 회사의 명예를 실추시키고 회사의 신뢰성을 해하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '나. 회사의 운영과정에서 직원에게 폭언 또는 음란한 언행을 하여 업무환경을 심각히 해하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '다. 회사의 운영과정에서 이유 없는 잦은 연락이나 소란 또는 협박, 인과관계가 입증되지 않는 피해에 대한 보상(현금, 상품) 요구 등으로 업무를 방해하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 회사가 회원 자격을 제한 정지시킨 후, 동일한 행위가 2회 이상 반복되거나 30일 이내에 그 사유가 시정되지 아니하는 경우 회사는 회원자격을 상실 시킬 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '④ 회사가 회원자격을 상실시키는 경우에는 회원등록을 말소합니다. 이 경우 회원에게 이를 통지하고, 회원등록 말소 전에 최소한 30일 이상의 기간을 정하여 소명할 기회를 부여합니다. 단 회원이 사망한 경우에는 별도의 통보 없이 당연히 자격이 상실됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제8조(회원에 대한 통지)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사가 회원에 대한 통지를 하는 경우, 이 약관에 별도 구정이 없는 한 회원이 회사에 제공한 이메일, 휴대폰 번호 등으로 할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회사는 불특정 다수 회원에 대한 통지의 경우 1주일 이상 앱 서비스 내 공지사항 메뉴에 게시함으로써 개별 통지에 갈음할 수 있습니다. 다만, 회원 본인의 거래와 관련하여 중대한 영향을 미치는 사항에 대하여는 개별통지를 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회사는 회원의 연락처 미 기재, 변경 후 미 수정 등으로 인하여 개별 통지가 어려운 경우에 한하여 전항의 공지를 함으로써 개별 통지 한 것으로 간주합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            // 4장 계약당사자의 의무
+            Text(
+              '제4장 계약당사자의 의무',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제21조 (개인정보보호)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 이용자의 개인정보 수집 시 서비스제공을 위하여 필요한 범위에서 최소한의 개인정보를 수집합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '다만 관련 법령상 의무이행을 위하여 본인확인이 필요한 경우 해당 개인정보를 수집합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회사는 이용자의 개인정보를 수집·이용하는 때에는 당해 이용자에게 그 목적을 고지하고 동의를 받습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 회사는 수집된 개인정보를 목적 외의 용도로 이용할 수 없으며, 새로운 이용목적이 발생한 경우 또는 제3자에게 제공하는 경우에는 이용·제공 단계에서 당해 이용자에게 그 목적을 고지하고 동의를 받습니다. 다만, 관련 법령에 달리 정함이 있는 경우에는 예외로 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '⑤ 회사가 제3항과 제4항에 의해 이용자의 동의를 받아야 하는 경우에는 개인정보관리 책임자의 신원(소속, 성명 및 전화번호, 기타 연락처), 정보의 수집목적 및 이용목적, 제3자에 대한 정보제공 관련사항(제공받은 자, 제공목적 및 제공할 정보의 내용) 등 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 제23조 제2항이 규정한 사항을 미리 명시하거나 고지해야 하며 이용자는 언제든지 이 동의를 철회할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '⑥ 이용자는 언제든지 회사가 가지고 있는 자신의 개인정보에 대해 열람 및 오류정정을 요구할 수 있으며 회사는 이에 대해 지체 없이 필요한 조치를 취할 의무를 집니다. 이용자가 오류의 정정을 요구한 경우에 회사는 그 오류를 정정할 때까지 해당 개인정보를 이용하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '⑦ 회사는 개인정보 보호를 위하여 이용자의 개인정보를 취급하는 자를 최소한으로 제한하여야 하며 신용카드, 은행계좌 등을 포함한 이용자의 개인정보의 분실, 도난, 유출, 동의 없는 제3자 제공, 변조 등으로 인한 이용자의 손해에 대하여 모든 책임을 집니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '⑧ 회사 또는 그로부터 개인정보를 제공받은 제3자는 개인정보의 수집목적 또는 제공받은 목적을 달성한 때에는 당해 개인정보를 지체 없이 파기합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '⑨회사가 회원의 개인정보를 수집, 이용, 제공 등을 할 경우에는 정보통신망 이용촉진 및 정보보호등에 관한 법률에 따라 회원의 동의를 받습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '⑩회원은 원하는 경우 언제든 회사에 제공한 개인정보의 수집과 이용에 대한 동의를 철회할 수 있으며 동의의 철회는 회원 탈퇴를 하는 것으로 이루어 집니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '* 개인정보와 관련된 보다 구체적인 사항은 \'개인정보 처리방침\'을 따릅니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제10조(회사의 의무)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를 하지 않으며 이 약관이 정하는 바에 따라 지속적이고, 안정적으로 상품 및 서비스를 제공하는데 최선을 다하여야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회사는 회원이 안전하게 인터넷 서비스를 이용할 수 있도록 개인정보(신용정보 포함) 보호를 위한 보안 시스템을 갖추며, 개인정보 처리방침을 공지하고 이를 준수합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회사가 상품이나 서비스에 대하여 ⌈표시 광고의 공정화에 관한 법률⌋ 제3조 소정의 부당한 표시 광고행위를 함으로써 회원이 손해를 입은 때에는 이를 배상할 책임을 집니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '④ 회사는 회원이 원하지 않을 경우 영리 목적의 광고성 전자우편을 발송하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제11조(회원의 ID 및 비밀번호에 대한 의무)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 제 9조의 경우를 제외한 회원의 ID, 비밀번호, 기타 서비스 이용을 위해 필요한 정보에 관한 관리책임은 회원에게 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회원은 자신의 ID 및 비밀번호를 제3자에게 이용하게 해서는 안됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회원이 자신의 ID 및 비밀번호를 도난 당하거나 제3자가 사용하고 있음을 인지한 경우에는 바로 회사에 통보하여 피해가 발생하지 않도록 하여야 하고 회사의 안내가 있는 경우에는 그에 따라야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제12조(이용자의 의무)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'a. 이용자는 관계법령, 이 약관의 규정, 이용안내 등 회사가 통지하는 사항을 준수하여야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'b. 이용자는 다음의 행위를 하여서는 안됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1. 신청 또는 변경 시 허위내용의 등록',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '2. 타인의 정보 도용',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '3. 회사에 게시된 정보의 변경',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '4. 회사가 정한 정보 이외의 정보(컴퓨터 프로그램 등)의 송신 또는 게시',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '5. 회사 기타 제3자의 저작권 등 지적재산권에 대한 침해',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '6. 회사 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '7. 외설 또는 폭력적인 메시지, 화상, 음성, 기타 공서양속에 반하는 정보를 회사 서비스에 공개 또는 게시하는 행위',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '8. 본 약관에 따라 제공되는 서비스를 부정하게 이용하는 행위',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            // 5장 구매계약 및 대금 결제
+            Text(
+              '제 5장 구매계약 및 대금 결제',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제13조 (구매신청 및 개인정보 제공 동의 등)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 이용자는 회사에서 다음 또는 이와 유사한 방법에 의하여 구매를 신청하며, 회사는 이용자가 구매신청을 함에 있어서 다음의 각 내용을 알기 쉽게 제공하여야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'a. 재화 등의 검색 및 선택',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'b.받는 사람의 성명, 주소, 전화번호(또는 휴대폰번호), 이메일 주소 등의 입력',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'c. 약관내용, 청약철회권이 제한되는 서비스, 배송료, 설치비 등의 비용부담과 관련한 내용에 대한 확인',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'd. 이 약관에 동의하고 위 3호의 사항을 확인하거나 거부하는 표시',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'e. 재화 등의 구매신청 및 이에 관한 확인 또는 회사의 확인에 대한 동의',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'f. 결제방법의 선택',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회사가 제3자에게 구매자 개인정보를 제공할 필요가 있는 경우 1) 개인정보를 제공받는 자, 2) 개인정보를 제공받는 자의 개인정보 이용목적, 3) 제공하는 개인정보의 항목을 구매자에게 알리고 동의를 받아야 합니다. (동의를 받은 사항이 변경되는 경우에도 같습니다.)',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 회사가 제3자에게 구매자의 개인정보를 취급할 수 있도록 업무를 위탁하는 경우에는 1) 개인정보 취급위탁을 받는 자, 2) 개인정보 취급위탁을 하는 업무의 내용을 구매자에게 알리고 동의를 받아야 합니다. (동의를 받은 사항이 변경되는 경우에도 같습니다.) 다만, 서비스제공에 관한 계약이행을 위해 필요하고 구매자의 편의 증진과 관련된 경우에는 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」에서 정하고 있는 방법으로 개인정보 취급방침을 통해 알림으로써 고지절차와 동의절차를 거치지 않아도 됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제14조 (계약의 성립)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 제9조와 같은 구매신청에 대하여 다음 각 호에 해당하면 승낙하지 않을 수 있습니다. 다만, 미성년자와 계약을 체결하는 경우에는 법정대리인의 동의를 얻지 못하면 미성년자 본인 또는 법정대리인이 계약을 취소할 수 있다는 내용을 고지하여야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'a. 신청 내용에 허위, 기재누락, 오기가 있는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'b. 미성년자가 담배, 주류 등 청소년보호법에서 금지하는 재화 및 용역을 구매하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'c. 기타 구매신청에 승낙하는 것이 회사 기술상 현저히 지장이 있다고 판단하는 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회사의 승낙이 제12조 제1항의 수신확인통지형태로 이용자에게 도달한 시점에 계약이 성립한 것으로 봅니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 회사의 승낙의 의사표시에는 이용자의 구매 신청에 대한 확인 및 판매가능 여부, 구매신청의 정정 취소 등에 관한 정보 등을 포함하여야 합니다',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제15조 (지급방법)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사에서 구매한 상품 또는 서비스에 대한 대금지급방법은 다음 각 호의 방법 중 가용한 방법으로 할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '단, 회사는 이용자의 지급방법에 대하여 재화 등의 대금에 어떠한 명목의 수수료도 추가하여 징수할 수 없습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'a. 폰뱅킹, 인터넷뱅킹, 메일 뱅킹 등의 각종 계좌이체',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'b. 선불카드, 직불카드, 신용카드 등의 각종 카드 결제',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'c. 온라인 무통장입금',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'd. 전자화폐에 의한 결제',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'e. 수령 시 대금지급',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'f. 마일리지 등 회사가 지급한 포인트에 의한 결제',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'g. 회사와 계약을 맺었거나 회사가 인정한 상품권에 의한 결제',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'h. 기타 전자적 지급 방법에 의한 대금 지급 등',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 구매대금의 결제와 관련하여 이용자가 입력한 정보 및 그와 관련된 책임은 이용자에게 있으며, 상품 또는 서비스의 정약 후 합리적인 일정 기간 내에 결제가 이루어 지지 않는 경우 회사는 이에 해당주문을 취소할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 회사는 구매자의 결제수단에 대하여 정당한 사용권한 보유여부를 확인할 수 있으며 필요한 경우 해당 거래진행의 정지 및 소명자료의 제출을 요청할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제16조 (수신확인통지·구매신청 변경 및 취소)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 이용자의 구매신청이 있는 경우 이용자에게 수신확인통지를 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 수신확인통지를 받은 이용자는 의사표시의 불일치 등이 있는 경우에는 수신확인통지를 받은 후 즉시 구매신청 변경 및 취소를 요청할 수 있고 회사는 배송 전에 이용자의 요청이 있는 경우에는 지체 없이 그 요청에 따라 처리하여야 합니다. 다만, 이미 대금을 지불한 경우에는 제16조의 청약철회 등에 관한 규정에 따릅니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제17조 (재화 등의 공급)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 이용자와 상품 등의 공급시기에 관하여 별도의 약정이 없는 이상, 이용자가 청약을 한 날부터 7일 이내에 상품 등을 배송할 수 있도록 주문제작, 포장 등 기타의 필요한 조치를 취합니다. 다만, 회사가 이미 상품 등의 대금의 전부 또는 일부를 받은 경우에는 대금의 전부 또는 일부를 받은 날부터 3영업일 이내에 조치를 취합니다. 이때 회사는 이용자가 상품 등의 공급 절차 및 진행 사항을 확인할 수 있도록 적절한 조치를 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회사는 이용자가 구매한 상품에 대해 배송수단, 수단별 배송비용 부담자, 수단별 배송기간 등을 명시합니다. 만약 회사가 약정 배송기간을 초과한 경우에는 그로 인한 이용자의 손해를 배상하여야 합니다. 다만 회사가 고의·과실이 없음을 입증한 경우에는 그러하지 아니합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ ‘이용자’가 7일 이내에 단순 변심 등의 사유로 상품의 공급을 취소하길 원할 경우, 회사는 관련 법률에 의거해 의사 전달을 받은 후 가능한 빨리 취소하는 절차를 진행해야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제18조 (환급)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '회사는 이용자가 구매신청한 상품 등이 품절 등의 사유로 인도 또는 제공을 할 수 없을 때에는 지체 없이 그 사유를 이용자에게 통지하고 사전에 상품 등의 대금을 받은 경우에는 대금을 받은 날부터 3영업일 이내에 환급하거나 환급에 필요한 조치를 취합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제19조 (청약철회 등)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사와 상품 등의 구매에 관한 계약을 체결한 이용자는 수신확인의 통지를 받는 날로부터 7일 이내에는 청약의 철회를 할 수 있습니다. 다만, 통지를 받은 때보다 공급이 늦게 이루어진 경우에는 재화 등의 공급을 받은 날로부터 7일 이내에 청약 철회를 할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 이용자는 재화 등을 배송 받은 경우 다음 각 호의 1에 해당하는 경우에는 반품 및 교환을 할 수 없습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'a. 이용자에게 책임 있는 사유로 재화 등이 멸실 또는 훼손된 경우 (다만, 재화 등의 내용을 확인하기 위하여 포장 등을 훼손한 경우에는 청약철회를 할 수 있습니다)',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'b. 이용자의 사용 또는 일부 소비에 의하여 재화 등의 가치가 현저히 감소한 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'c. 시간의 경과에 의하여 재판매가 곤란할 정도로 재화 등의 가치가 현저히 감소한 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'd. 같은 성능을 지닌 재화 등으로 복제가 가능한 경우 그 원본인 재화 등의 포장을 훼손한 경우',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 제2항 제2호 내지 제4호의 경우에 회사가 사전에 청약 철회 등이 제한되는 사실을 소비자가 쉽게 알 수 있는 곳에 명기하거나 시용상품을 제공하는 등의 조치를 하지 않았다면 이용자의 청약철회 등이 제한되지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '④ 이용자는 제1항 및 제2항의 규정에 불구하고 재화 등의 내용이 표시·광고 내용과 다르거나 계약내용과 다르게 이행된 때에는 당해 재화 등을 공급받은 날부터 3월 이내, 그 사실을 안 날 또는 알 수 있었던 날부터 30일 이내에 청약철회 등을 할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제20조 (청약철회 등의 효과)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 이용자로부터 재화 등을 반환 받은 경우 3영업일 이내에 이미 지급받은 재화 등의 대금을 환급합니다. 이 경우 회사가 이용자에게 재화 등의 환급을 지연한 때에는 그 지연기간에 대하여 「전자상거래 등에서의 소비자보호에 관한 법률 시행령」제21조의 2에서 정하는 지연이자율을 곱하여 산정한 지연이자를 지급합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '② 회사는 위 대금을 환급함에 있어서 이용자가 신용카드 또는 전자화폐 등의 결제수단으로 재화 등의 대금을 지급한 때에는 지체 없이 당해 결제수단을 제공한 사업자로 하여금 재화 등의 대금의 청구를 정지 또는 취소하도록 요청합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '③ 청약철회 등의 경우 공급받은 재화 등의 반환에 필요한 비용은 이용자가 부담합니다. 회사는 이용자에게 청약철회 등을 이유로 위약금 또는 손해배상을 청구하지 않습니다. 다만, 재화 등의 내용이 표시·광고 내용과 다르거나 계약내용과 다르게 이행되어 청약철회 등을 하는 경우 재화 등의 반환에 필요한 비용은 회사가 부담합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '④ 이용자가 재화 등을 제공받을 때 발송비를 부담한 경우에 회사는 청약 철회 시 그 비용을 누가 부담하는지를 알기 쉽도록 명확하게 표시합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            // 6장 부가서비스의 이용
+            Text(
+              '제 6장 부가서비스의 이용',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제 21조 (마일리지)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '1. 회원이 코드 그린 스퀘어 서비스에서 주최하는 여러 이벤트 활동에 참여하거나 상품을 구매하는 등의 경우 소정의 마일리지가 적립됩니다. 구체적인 운영방법은 회사의 운영정책에 의합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '2. 적립된 마일리지 내역은 나의 콕 페이지를 포함하여 여러 페이지 화면에서 확인 가능합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '마일리지는 상품 구매 시 사용 가능하며 최대 상품 금액의 정해진 요율까지 현금 가액과 동일하게 사용 할 수 있습니다. 마일리지는 현금이 아닌, 서비스에서만 상용가능한 포인트이며, 현금으로 환불은 불가합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '3. 회사는 마일리지의 적립기준, 사용방법, 사용기한 및 제한에 대한 사항을 서비스 화면에 별도로 게시하거나 통지하며, 마일리지의 적립기준, 사용방법, 사용기한 및 제한에 대한 정책에 따라 달라질 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '4.회사가 승인하지 않은 방법 또는 허위 정보 제공, 본 약관에 위배되는 등의 부정한 방법으로 마일리지를 획득하거나, 부정한 목적이나 용도로 마일리지를 사용하는 경우 마일리지 사용을 제한 또는 회사가 정한 방법으로 회수할 수 있으며, 마일리지를 사용한 구매신청을 취소하거나 "회원" 자격을 정지할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '5.적립된 마일리지에 오류가 있을 경우 회원은 오류발생 시점부터 30일 이내에 회사에 정정 신청을 하여야 하며, 회사는 회원의 정정 신청일로부터 최대 1개월 이내에 정정절차를 마쳐야 합니다. 단, 회원은 필요한 경우 마일리지 적립 오류를 증명할 수 있는 객관적인 자료를 제시하여야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '6. 회원 탈퇴 시 사용하지 않은 마일리지는 즉시 소멸되며, 탈퇴 후 재가입하더라도 소멸된 마일리지는 복구되지 아니합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '7. 획득한 마일리지는 획득일로부터 2년 후, 소멸됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제 22조 (할인쿠폰)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '회사는 구매서비스를 이용하는 회원에게 지정된 상품 구매 시 일정액 또는 일정비율을 할인 받을 수 있는 할인쿠폰을 발급할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '할인쿠폰은 보너스 쿠폰, 브랜드 쿠폰 및 기타 회사의 서비스 내 할인 혜택을 주는 모든 쿠폰을 통칭합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '회원은 할인쿠폰이 발급된 계정을 통해 회원 본인의 구매에 한해서만 사용할 수 있으며, 어떠한 경우에도 이를 타인에게 실질적으로 매매 또는 양도할 수 없습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '할인쿠폰은 일부 품목이나 금액 또는 회원별 사용가능 수량에 따라 사용이 제한될 수 있으며, 유효기간이 지난 후에는 사용할 수 없습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '할인쿠폰을 사용하여 상품을 구입한 후 취소나 반품으로 인하여 환불이 이루어진 경우에는 원칙적으로 할인쿠폰의 재사용이 가능하나, 재사용이 불가능한 일부 쿠폰 및 단순변심에 의한 구매취소 등의 경우에는 회사의 운영정책에 따라 재사용이 불가할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '회원을 탈퇴할 경우 할인쿠폰은 즉시 소멸됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            // 7장 기타
+            Text(
+              '제 7장 기타',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제23조 (저작권의 귀속 및 이용제한)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사가 작성한 저작물에 대한 저작권 기타 지적재산권은 회사에 귀속합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 이용자는 회사의 서비스를 이용함으로써 얻은 정보 중 회사에 지적재산권이 귀속된 정보를 회사의 사전 승낙 없이 복제, 송신, 출판, 배포, 방송 기타 방법에 의하여 영리목적으로 이용하거나 제3자에게 이용하게 하여서는 안됩니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③회사는 약정에 따라 이용자에게 귀속된 저작권을 사용하는 경우 당해 이용자에게 통보하여야 합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '④ ’이용자‘가 ’서비스‘ 내에 게시하는 저작물은 검색결과 내지 ’서비스‘ 및 관련 프로모션 등에 노출될 수 있으며, 해당 노출을 위해 필요한 범위 내에서는 일부 수정, 복제, 편집되어 게시될 수 있다. 이 경우, 회사는 저작권법 규정을 준수하며, ’이용자‘는 언제든지 고객센터 또는 ’서비스‘ 내 관리기능을 통해 해당 게시물에 대해 삭제, 검색결과 제외, 비공개 등의 조치를 취할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑤ ’회사‘는 제4항 이외의 방법으로 ’이용자‘의 저작물을 이용하고자 하는 경우에는 전화, 팩스, 전자우편 등을 통해 사전에 이용자의 동의를 얻어야 한다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑥ ’회원‘의 게시한 ’콘텐츠‘가 개인정보보호법 및 저작권법 등 관련 법에 위반되는 내용을 포함하는 경우, ’몰‘은 관련 법이 정한 절차에 따라 해당 ’콘텐츠‘의 게시중단 및 삭제 등을 요청할 수 있다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑦ ’몰‘은 ’이용자‘가 작성한 ’콘텐츠‘ 등이 저작권법, 정보통신망 이용촉진 및 정보보호 등에 관한 법률 등을 위반하는 등으로 인해 ‘회원’이 민·형사상 책임을 지는 것으로부터 면책된다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑧ ’몰‘은 6항에 따른 권리자의 요청이 없는 경우라도 권리침해가 인정될 만한 사유가 있거나 기타 회사 정책 및 관련 법에 위반되는 경우에는 관련 법에 따라 해당 ’콘텐츠‘에 대해 임시조치 등을 취할 수 있다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제24조 (분쟁해결)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 이용자가 제기하는 정당한 의견이나 불만을 반영하고 그 피해를 보상처리하기 위하여 고객센터를 운영합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회사는 이용자로부터 제출되는 불만사항 및 의견은 우선적으로 처리합니다. 다만, 신속한 처리가 곤란한 경우에는 이용자에게 그 사유와 처리일정을 즉시 통보해 드립니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회사와 이용자 간에 발생한 전자상거래 분쟁과 관련하여 이용자의 피해구제신청이 있는 경우에는 공정거래위원회 또는 시·도지사가 의뢰하는 분쟁조정기관의 조정에 따를 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제25조 (재판권 및 준거법)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사와 이용자 간에 발생한 전자상거래 분쟁에 관한 소송은 제소 당시의 이용자의 주소에 의하고, 주소가 없는 경우에는 거소를 관할하는 지방법원의 전속관할로 합니다. 다만, 제소 당시 이용자의 주소 또는 거소가 분명하지 않거나 외국 거주자의 경우에는 민사소송법상의 관할법원에 제기합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회사와 이용자 간에 제기된 전자상거래 소송에는 대한민국법을 적용합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제26조 광고의 게재',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 서비스를 운영함에 있어 각종 정보를 서비스 화면에 게재하거나 이메일 등의 방법으로 회원에게 제공할 수 있습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 회사는 회원이 이용약관에 동의함으로써 전항에 대해 동의한 것으로 간주한다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제27조 책임제한(면책)',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사는 천재지변, 불가항력 기타 회사의 합리적인 통제범위를 벗어난 사유로 인하여 서비스를 제공할 수 없는 경우에는 그에 대한 책임을 부담하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '②회사는 이용자가 서비스를 이용함으로써 기대되는 수익을 얻지 못하거나 서비스를 통해 얻은 자료를 이용하여 발생한 손해에 대해서는 책임을 부담하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③이용자가 화면에 게재한 정보, 자료, 사실 등의 내용에 관한 신뢰도 또는 정확성에 대하여는 해당 이용자가 책임을 부담하며, 회사는 내용의 부정확 또는 허위로 인해 이용자 또는 제3자에게 발생한 손해에 대하여는 아무런 책임을 부담하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '④회사는 서비스 이용과 관련하여 이용자의 고의 또는 과실로 인하여 이용자 또는 제3자에게 발생한 손해에 대하여는 아무런 책임을 부담하지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '⑤ ‘회원’이 공공질서 및 미풍양속에 위반되는 ‘컨텐츠’를 업로드한 경우, 타인의 명예를 훼손하거나, 사생활을 침해 했을 경우, 동의없이 제 3자의 사진을 공유 하였을 경우, 저작권법에 위반하는 행위를 했을 경우, 그 밖의 타인의 권리를 침해했을 경우에는 해당 회원은 본인의 책임과 비용하에 이를 해결하야 하며 ‘몰’은 그 결과에 대하여 책임지지 않는다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '제28조 긴급조치',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '① 회사가 회원이 위법, 불법 또는 부당한 목적을 위해 서비스를 이용한다고 판단하는 때에 회사는 관련 물품의 수취나 배송을 거절할 권리를 가진다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '② 관할관청 또는 당국에 의해 회사에 의해 서비스되는 물품에 대해 제재를 받았을 때 회사는 해당물품을 관할관청 또는 당국에 인도하는 것을 원칙으로 한다. 이로 인하여 회원이 손해를 입었다고 할지라도 해당 손해에 대해서는 회사는 일체의 책임을 지지 않으며 또한 회원은 해당 물품에 대한 서비스 이용요금 및 관련비용 등 의 지급의무를 면하지 아니한다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              '③ 회사 주소로 배송된 물품에 악취, 액체누수 그 외 이상이 있다고 인정됐을 경우 및 기타 긴급을 필요로 하고 정당한 이유가 있다고 인정됐을 경우 회사는 회원에게 해당사실을 통지하고 해당물품을 별도 장소로 이동 보관하는 등 임시조치를 취할 수 있다. 이로 인해 발생하는 추가비용은 회원이 부담하여야 하며 또한 회원에게 손해가 발생하더라도 해당 손해에 대하여 회사는 일체의 책임을 지지 않습니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              '부칙',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '본 이용 약관은 2021년 6월 7일부터 시행합니다.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 32),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () => throw UnimplementedError(),
+                child: const Text('회원탈퇴'),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

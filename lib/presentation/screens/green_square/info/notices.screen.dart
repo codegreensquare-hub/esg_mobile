@@ -9,12 +9,18 @@ class GreenSquareNoticesScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return GreenSquareInfoPage(
       title: '공지사항',
-      children: [
-        Text(
-          '공지사항 콘텐츠를 준비 중입니다.',
-          style: theme.textTheme.bodyLarge,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '공지사항 콘텐츠를 준비 중입니다.',
+              style: theme.textTheme.bodyLarge,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

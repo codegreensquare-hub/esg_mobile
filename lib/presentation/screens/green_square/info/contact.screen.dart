@@ -9,12 +9,18 @@ class GreenSquareContactScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return GreenSquareInfoPage(
       title: '문의하기',
-      children: [
-        Text(
-          '문의하기 콘텐츠를 준비 중입니다.',
-          style: theme.textTheme.bodyLarge,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '문의하기 콘텐츠를 준비 중입니다.',
+              style: theme.textTheme.bodyLarge,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

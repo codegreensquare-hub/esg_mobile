@@ -97,11 +97,6 @@ const greenSquareDrawerDestinations = <GreenSquareDrawerDestination>[
     target: GreenSquareDrawerTarget.faq,
   ),
   GreenSquareDrawerDestination(
-    label: '앱에서 보기',
-    icon: Icons.phone_iphone,
-    target: GreenSquareDrawerTarget.openInApp,
-  ),
-  GreenSquareDrawerDestination(
     label: '문의하기',
     icon: Icons.mail_outline,
     target: GreenSquareDrawerTarget.contact,
@@ -110,5 +105,10 @@ const greenSquareDrawerDestinations = <GreenSquareDrawerDestination>[
     label: '카카오톡으로 문의하기',
     icon: Icons.chat_bubble_outline,
     target: GreenSquareDrawerTarget.kakaoContact,
+  ),
+  GreenSquareDrawerDestination(
+    label: '앱에서 보기',
+    icon: Icons.phone_iphone,
+    target: GreenSquareDrawerTarget.openInApp,
   ),
 ];
