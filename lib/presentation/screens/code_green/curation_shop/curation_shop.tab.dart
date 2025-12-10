@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:esg_mobile/data/models/supabase/enums/product_material.dart';
+import 'package:esg_mobile/data/models/supabase/enums/product_style.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.all.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.best.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.style.dart';
@@ -45,6 +47,8 @@ class _CurationShopTabState extends State<CurationShopTab>
   late final TabController _tabController;
   late final CurationShopTabController _controller;
   late final bool _ownsController;
+  String _styleSubTab = ProductStyle.values.first.name;
+  String _typeSubTab = ProductMaterial.values.first.name;
 
   @override
   void initState() {
@@ -73,14 +77,24 @@ class _CurationShopTabState extends State<CurationShopTab>
 
   void _handleTabChange() {
     if (_tabController.indexIsChanging) return;
+    _ensureDefaultForIndex(_tabController.index);
     _controller.selectIndex(_tabController.index);
     setState(() {});
   }
 
   void _handleControllerChange() {
     if (_controller.currentIndex == _tabController.index) return;
+    _ensureDefaultForIndex(_controller.currentIndex);
     _tabController.animateTo(_controller.currentIndex);
     setState(() {});
+  }
+
+  void _ensureDefaultForIndex(int index) {
+    if (index == 2 && !_isValidStyle(_styleSubTab)) {
+      _styleSubTab = ProductStyle.values.first.name;
+    } else if (index == 3 && !_isValidMaterial(_typeSubTab)) {
+      _typeSubTab = ProductMaterial.values.first.name;
+    }
   }
 
   @override
@@ -99,6 +113,7 @@ class _CurationShopTabState extends State<CurationShopTab>
               isScrollable: false,
               tabAlignment: TabAlignment.center,
               indicatorColor: theme.colorScheme.primary,
+              indicatorSize: TabBarIndicatorSize.label,
               labelColor: theme.colorScheme.primary,
               unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
               labelStyle: theme.textTheme.titleMedium?.copyWith(
@@ -128,10 +143,38 @@ class _CurationShopTabState extends State<CurationShopTab>
       case 1:
         return const CurationSectionBest();
       case 2:
-        return const CurationSectionStyle();
+        return CurationSectionStyle(
+          selectedSlug: _styleSubTab,
+          onSubTabChanged: (value) {
+            if (_isValidStyle(value)) {
+              setState(() {
+                _styleSubTab = value;
+              });
+            }
+          },
+        );
       case 3:
       default:
-        return const CurationSectionType();
+        return CurationSectionType(
+          selectedSlug: _typeSubTab,
+          onSubTabChanged: (value) {
+            if (_isValidMaterial(value)) {
+              setState(() {
+                _typeSubTab = value;
+              });
+            }
+          },
+        );
     }
+  }
+
+  bool _isValidStyle(String? slug) {
+    if (slug == null) return false;
+    return ProductStyle.values.any((style) => style.name == slug);
+  }
+
+  bool _isValidMaterial(String? slug) {
+    if (slug == null) return false;
+    return ProductMaterial.values.any((material) => material.name == slug);
   }
 }
