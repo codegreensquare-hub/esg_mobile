@@ -134,10 +134,9 @@ class _CurationQueryConfig {
   const _CurationQueryConfig({
     this.style,
     this.material,
-    this.orderByField = ProductRow.createdAtField,
-    this.orderAscending = false,
-    this.limit = _defaultGridLimit,
-  });
+  }) : orderByField = ProductRow.createdAtField,
+       orderAscending = false,
+       limit = _defaultGridLimit;
 
   final ProductStyle? style;
   final ProductMaterial? material;

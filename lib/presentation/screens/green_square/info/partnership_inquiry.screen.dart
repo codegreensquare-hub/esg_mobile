@@ -1,7 +1,6 @@
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class GreenSquarePartnershipInquiryScreen extends StatelessWidget {
   const GreenSquarePartnershipInquiryScreen({super.key});

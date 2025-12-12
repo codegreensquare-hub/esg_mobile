@@ -87,10 +87,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _increaseQuantity() {
-    final stockLimit = productWithDetails.product.stockQuantity?.toInt();
+    final stockLimit = productWithDetails.product.stockQuantity.toInt();
     setState(() {
-      final next = quantity + 1;
-      quantity = stockLimit != null ? next.clamp(1, stockLimit) : next;
+      quantity = (quantity + 1).clamp(1, stockLimit).toInt();
     });
   }
 

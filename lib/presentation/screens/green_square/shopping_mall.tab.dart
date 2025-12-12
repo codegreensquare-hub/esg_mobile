@@ -3,7 +3,6 @@ import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
-import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -211,28 +210,6 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     if (mounted) {
       setState(() => cartItemCount = items.length);
     }
-  }
-
-  Future<void> _showCart() async {
-    if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다.')),
-      );
-      return;
-    }
-
-    final items = await CartService.instance.fetchCartItems(userId!);
-    if (!mounted) {
-      return;
-    }
-
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => CartBottomSheet(items: items),
-    );
-
-    _loadCartCount();
   }
 
   @override
