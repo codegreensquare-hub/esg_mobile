@@ -42,7 +42,7 @@ class _WishlistedProductsDialogState extends State<WishlistedProductsDialog> {
 
   Future<void> _toggleWishlist(WishlistedProduct wishlistedProduct) async {
     await ProductService.instance.toggleWishlist(
-      wishlistedProduct.product.product.code,
+      wishlistedProduct.product.product.id,
       widget.userId,
     );
 

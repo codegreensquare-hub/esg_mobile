@@ -2,8 +2,8 @@ import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
-import 'package:esg_mobile/presentation/screens/green_square/account_logged_in_content.dart';
-import 'package:esg_mobile/presentation/screens/green_square/account_logged_out_content.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/liked_stories_dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
@@ -20,7 +20,7 @@ class AccountTab extends StatefulWidget {
 class _AccountTabState extends State<AccountTab> {
   String? userName;
   String? userId;
-  int totalMileage = 0;
+  double totalMileage = 0;
   List<Map<String, dynamic>> activeMissions = [];
   List<Map<String, dynamic>> participations = [];
   bool isLoading = true;
@@ -45,18 +45,15 @@ class _AccountTabState extends State<AccountTab> {
 
       final client = Supabase.instance.client;
 
-      // Fetch total mileage (award points from participations)
-      final participationResponse = await client
-          .from(MissionParticipationTable().tableName)
-          .select('mission(award_points)')
-          .eq(MissionParticipationRow.participatedByField, user.id);
+      // Fetch total mileage from award_points balance
+      final pointsRow = await client
+          .from(AwardPointsTable().tableName)
+          .select(AwardPointsRow.pointsField)
+          .eq(AwardPointsRow.userField, user.id)
+          .maybeSingle();
 
-      totalMileage = participationResponse
-          .map(
-            (p) =>
-                (p['mission'] as Map<String, dynamic>)['award_points'] as int,
-          )
-          .fold(0, (sum, points) => sum + points);
+      totalMileage =
+          (pointsRow?[AwardPointsRow.pointsField] as num?)?.toDouble() ?? 0;
 
       // Fetch all active missions
       final missionList = await MissionService.instance.fetchList(
@@ -95,16 +92,41 @@ class _AccountTabState extends State<AccountTab> {
       // Fetch user's participations with mission details
       final participationsResponse = await client
           .from(MissionParticipationTable().tableName)
-          .select('id, mission(title), created_at')
+          .select(
+            'id, mission(title), created_at, approved_at, rejected_at, rejected_by, rejection_reason, photo_bucket, photo_folder_path, photo_file_name',
+          )
           .eq(MissionParticipationRow.participatedByField, user.id)
           .order('created_at', ascending: false);
 
       participations = participationsResponse.map((p) {
+        final approvedAt = p['approved_at'];
+        final rejectedBy = p['rejected_by'];
+        final rejectionReason = p['rejection_reason'] as String?;
+        final status = approvedAt != null
+            ? 'approved'
+            : (rejectedBy != null || rejectionReason != null)
+            ? 'rejected'
+            : 'pending';
+        final bucket = p['photo_bucket'] as String?;
+        final folder = p['photo_folder_path'] as String?;
+        final fileName = p['photo_file_name'] as String?;
+        String? photoUrl;
+        if (bucket != null && fileName != null) {
+          final path = folder != null && folder.isNotEmpty
+              ? '$folder/$fileName'
+              : fileName;
+          photoUrl = Supabase.instance.client.storage
+              .from(bucket)
+              .getPublicUrl(path);
+        }
+        final missionData = p['mission'] as Map<String, dynamic>?;
         return {
           'id': p['id'],
-          'mission_title': (p['mission'] as Map<String, dynamic>)['title'],
-          'status': 'approved', // Assume approved for now
+          'mission_title': missionData != null ? missionData['title'] : '미션',
+          'status': status,
           'created_at': p['created_at'],
+          'photo_url': photoUrl,
+          'rejection_reason': rejectionReason,
         };
       }).toList();
     } catch (e) {

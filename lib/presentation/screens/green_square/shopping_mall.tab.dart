@@ -1,6 +1,7 @@
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
@@ -140,6 +141,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
           ? null
           : _searchController.text,
       userId: userId,
+      vendor: VendorAdminType.retailer,
     );
     if (mounted) {
       setState(() => products = fetchedProducts);
@@ -159,7 +161,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
 
     try {
       await ProductService.instance.toggleWishlist(
-        productWithDetails.product.code,
+        productWithDetails.product.id,
         userId!,
       );
 

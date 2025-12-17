@@ -9,8 +9,8 @@ enum UserType {
   /// user
   user,
 
-  /// client_admin
-  client_admin,
+  /// standard_client_admin
+  standard_client_admin,
 
   /// integrated_admin
   integrated_admin,
@@ -20,7 +20,10 @@ enum UserType {
 
   /// platform_admin
   platform_admin,
+
+  /// super_client_admin
+  super_client_admin,
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.108465
+/// Date: 2025-12-17 09:43:01.601109

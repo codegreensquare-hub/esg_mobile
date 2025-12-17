@@ -24,16 +24,12 @@ class ProductTable extends SupabaseTable<ProductRow> {
 class ProductRow extends SupabaseDataRow {
   /// Product Row
   ProductRow({
-    required ProductSaleStatus saleStatus,
-    String? code,
     DateTime? createdAt,
     String? createdBy,
     String? productBy,
     String? category,
     double? regularPrice,
     double? minimumPriceMinusAwardPoints,
-    double? stockQuantity,
-    double? safeStockQuantity,
     String? mainImageBucket,
     String? mainImageFolderPath,
     String? mainImageFileName,
@@ -43,9 +39,12 @@ class ProductRow extends SupabaseDataRow {
     VendorAdminType? vendor,
     String? name,
     String? title,
+    String? company,
+    String? id,
+    String? code,
+    int? stockQuantity,
+    ProductSaleStatus? saleStatus,
   }) : super({
-         'sale_status': supaSerialize(saleStatus),
-         if (code != null) 'code': supaSerialize(code),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (productBy != null) 'product_by': supaSerialize(productBy),
@@ -55,10 +54,6 @@ class ProductRow extends SupabaseDataRow {
            'minimum_price_minus_award_points': supaSerialize(
              minimumPriceMinusAwardPoints,
            ),
-         if (stockQuantity != null)
-           'stock_quantity': supaSerialize(stockQuantity),
-         if (safeStockQuantity != null)
-           'safe_stock_quantity': supaSerialize(safeStockQuantity),
          if (mainImageBucket != null)
            'main_image_bucket': supaSerialize(mainImageBucket),
          if (mainImageFolderPath != null)
@@ -71,6 +66,12 @@ class ProductRow extends SupabaseDataRow {
          if (vendor != null) 'vendor': supaSerialize(vendor),
          if (name != null) 'name': supaSerialize(name),
          if (title != null) 'title': supaSerialize(title),
+         if (company != null) 'company': supaSerialize(company),
+         if (id != null) 'id': supaSerialize(id),
+         if (code != null) 'code': supaSerialize(code),
+         if (stockQuantity != null)
+           'stock_quantity': supaSerialize(stockQuantity),
+         if (saleStatus != null) 'sale_status': supaSerialize(saleStatus),
        });
 
   /// Product Row
@@ -86,13 +87,6 @@ class ProductRow extends SupabaseDataRow {
   /// Get the [SupabaseTable] for this row
   @override
   SupabaseTable get table => ProductTable();
-
-  /// Code field name
-  static const String codeField = 'code';
-
-  /// Code
-  String get code => getField<String>(codeField, defaultValue: '()')!;
-  set code(String value) => setField<String>(codeField, value);
 
   /// Created At field name
   static const String createdAtField = 'created_at';
@@ -125,17 +119,6 @@ class ProductRow extends SupabaseDataRow {
   String? get category => getField<String>(categoryField);
   set category(String? value) => setField<String>(categoryField, value);
 
-  /// Sale Status field name
-  static const String saleStatusField = 'sale_status';
-
-  /// Sale Status
-  ProductSaleStatus get saleStatus => getField<ProductSaleStatus>(
-    saleStatusField,
-    enumValues: ProductSaleStatus.values,
-  )!;
-  set saleStatus(ProductSaleStatus value) =>
-      setField<ProductSaleStatus>(saleStatusField, value);
-
   /// Regular Price field name
   static const String regularPriceField = 'regular_price';
 
@@ -152,23 +135,6 @@ class ProductRow extends SupabaseDataRow {
       getField<double>(minimumPriceMinusAwardPointsField);
   set minimumPriceMinusAwardPoints(double? value) =>
       setField<double>(minimumPriceMinusAwardPointsField, value);
-
-  /// Stock Quantity field name
-  static const String stockQuantityField = 'stock_quantity';
-
-  /// Stock Quantity
-  double get stockQuantity =>
-      getField<double>(stockQuantityField, defaultValue: 0)!;
-  set stockQuantity(double value) =>
-      setField<double>(stockQuantityField, value);
-
-  /// Safe Stock Quantity field name
-  static const String safeStockQuantityField = 'safe_stock_quantity';
-
-  /// Safe Stock Quantity
-  double? get safeStockQuantity => getField<double>(safeStockQuantityField);
-  set safeStockQuantity(double? value) =>
-      setField<double>(safeStockQuantityField, value);
 
   /// Main Image Bucket field name
   static const String mainImageBucketField = 'main_image_bucket';
@@ -244,19 +210,55 @@ class ProductRow extends SupabaseDataRow {
   String? get title => getField<String>(titleField);
   set title(String? value) => setField<String>(titleField, value);
 
+  /// Company field name
+  static const String companyField = 'company';
+
+  /// Company
+  String? get company => getField<String>(companyField);
+  set company(String? value) => setField<String>(companyField, value);
+
+  /// Id field name
+  static const String idField = 'id';
+
+  /// Id
+  String get id => getField<String>(idField, defaultValue: '')!;
+  set id(String value) => setField<String>(idField, value);
+
+  /// Code field name
+  static const String codeField = 'code';
+
+  /// Code
+  String get code => getField<String>(codeField, defaultValue: '')!;
+  set code(String value) => setField<String>(codeField, value);
+
+  /// Stock Quantity field name
+  static const String stockQuantityField = 'stock_quantity';
+
+  /// Stock Quantity
+  int get stockQuantity => getField<int>(stockQuantityField, defaultValue: 0)!;
+  set stockQuantity(int value) => setField<int>(stockQuantityField, value);
+
+  /// Sale Status field name
+  static const String saleStatusField = 'sale_status';
+
+  /// Sale Status
+  ProductSaleStatus get saleStatus => getField<ProductSaleStatus>(
+    saleStatusField,
+    enumValues: ProductSaleStatus.values,
+    defaultValue: ProductSaleStatus.on_sale,
+  )!;
+  set saleStatus(ProductSaleStatus value) =>
+      setField<ProductSaleStatus>(saleStatusField, value);
+
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
   ProductRow copyWith({
-    ProductSaleStatus? saleStatus,
-    String? code,
     DateTime? createdAt,
     String? createdBy,
     String? productBy,
     String? category,
     double? regularPrice,
     double? minimumPriceMinusAwardPoints,
-    double? stockQuantity,
-    double? safeStockQuantity,
     String? mainImageBucket,
     String? mainImageFolderPath,
     String? mainImageFileName,
@@ -266,9 +268,12 @@ class ProductRow extends SupabaseDataRow {
     VendorAdminType? vendor,
     String? name,
     String? title,
+    String? company,
+    String? id,
+    String? code,
+    int? stockQuantity,
+    ProductSaleStatus? saleStatus,
   }) => ProductRow.fromJson({
-    'sale_status': supaSerialize(saleStatus) ?? data['sale_status'],
-    'code': supaSerialize(code) ?? data['code'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'product_by': supaSerialize(productBy) ?? data['product_by'],
@@ -277,9 +282,6 @@ class ProductRow extends SupabaseDataRow {
     'minimum_price_minus_award_points':
         supaSerialize(minimumPriceMinusAwardPoints) ??
         data['minimum_price_minus_award_points'],
-    'stock_quantity': supaSerialize(stockQuantity) ?? data['stock_quantity'],
-    'safe_stock_quantity':
-        supaSerialize(safeStockQuantity) ?? data['safe_stock_quantity'],
     'main_image_bucket':
         supaSerialize(mainImageBucket) ?? data['main_image_bucket'],
     'main_image_folder_path':
@@ -292,8 +294,13 @@ class ProductRow extends SupabaseDataRow {
     'vendor': supaSerialize(vendor) ?? data['vendor'],
     'name': supaSerialize(name) ?? data['name'],
     'title': supaSerialize(title) ?? data['title'],
+    'company': supaSerialize(company) ?? data['company'],
+    'id': supaSerialize(id) ?? data['id'],
+    'code': supaSerialize(code) ?? data['code'],
+    'stock_quantity': supaSerialize(stockQuantity) ?? data['stock_quantity'],
+    'sale_status': supaSerialize(saleStatus) ?? data['sale_status'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.153861
+/// Date: 2025-12-17 09:43:01.651240

@@ -46,6 +46,7 @@ enum GreenSquareDrawerTarget {
   openInApp,
   contact,
   kakaoContact,
+  cart,
 }
 
 class GreenSquareDrawerDestination {

@@ -4,8 +4,17 @@
 //
 // ignore_for_file: require_trailing_commas, constant_identifier_names
 
-export 'enums/_enums.dart';
-export 'tables/_tables.dart';
+/// Interval Unit enum
+enum IntervalUnit {
+  /// day
+  day,
+
+  /// hour
+  hour,
+
+  /// minute
+  minute,
+}
 
 /// Tag: v2
-/// Date: 2025-12-17 09:43:01.662238
+/// Date: 2025-12-17 09:43:01.598305

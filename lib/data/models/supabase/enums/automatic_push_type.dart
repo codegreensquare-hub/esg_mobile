@@ -4,8 +4,14 @@
 //
 // ignore_for_file: require_trailing_commas, constant_identifier_names
 
-export 'enums/_enums.dart';
-export 'tables/_tables.dart';
+/// Automatic Push Type enum
+enum AutomaticPushType {
+  /// user_behavior
+  user_behavior,
+
+  /// campaign
+  campaign,
+}
 
 /// Tag: v2
-/// Date: 2025-12-17 09:43:01.662238
+/// Date: 2025-12-17 09:43:01.594448

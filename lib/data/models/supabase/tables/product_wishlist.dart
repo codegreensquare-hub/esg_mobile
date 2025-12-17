@@ -27,13 +27,13 @@ class ProductWishlistRow extends SupabaseDataRow {
   ProductWishlistRow({
     String? id,
     DateTime? createdAt,
-    String? product,
     String? wishlistBy,
+    String? product,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (product != null) 'product': supaSerialize(product),
          if (wishlistBy != null) 'wishlist_by': supaSerialize(wishlistBy),
+         if (product != null) 'product': supaSerialize(product),
        });
 
   /// Product Wishlist Row
@@ -65,13 +65,6 @@ class ProductWishlistRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Product field name
-  static const String productField = 'product';
-
-  /// Product
-  String? get product => getField<String>(productField);
-  set product(String? value) => setField<String>(productField, value);
-
   /// Wishlist By field name
   static const String wishlistByField = 'wishlist_by';
 
@@ -79,20 +72,27 @@ class ProductWishlistRow extends SupabaseDataRow {
   String? get wishlistBy => getField<String>(wishlistByField);
   set wishlistBy(String? value) => setField<String>(wishlistByField, value);
 
+  /// Product field name
+  static const String productField = 'product';
+
+  /// Product
+  String? get product => getField<String>(productField);
+  set product(String? value) => setField<String>(productField, value);
+
   /// Make a copy of the current [ProductWishlistRow]
   /// overriding the provided fields
   ProductWishlistRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? product,
     String? wishlistBy,
+    String? product,
   }) => ProductWishlistRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'product': supaSerialize(product) ?? data['product'],
     'wishlist_by': supaSerialize(wishlistBy) ?? data['wishlist_by'],
+    'product': supaSerialize(product) ?? data['product'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.155831
+/// Date: 2025-12-17 09:43:01.653485

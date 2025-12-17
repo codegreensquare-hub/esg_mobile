@@ -26,18 +26,18 @@ class ProductOptionParameterTable
 class ProductOptionParameterRow extends SupabaseDataRow {
   /// Product Option Parameter Row
   ProductOptionParameterRow({
-    required String product,
     String? id,
     DateTime? createdAt,
     String? createdBy,
     String? optionParameter,
+    String? product,
   }) : super({
-         'product': supaSerialize(product),
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (optionParameter != null)
            'option_parameter': supaSerialize(optionParameter),
+         if (product != null) 'product': supaSerialize(product),
        });
 
   /// Product Option Parameter Row
@@ -76,13 +76,6 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   String? get createdBy => getField<String>(createdByField);
   set createdBy(String? value) => setField<String>(createdByField, value);
 
-  /// Product field name
-  static const String productField = 'product';
-
-  /// Product
-  String get product => getField<String>(productField)!;
-  set product(String value) => setField<String>(productField, value);
-
   /// Option Parameter field name
   static const String optionParameterField = 'option_parameter';
 
@@ -91,23 +84,30 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   set optionParameter(String? value) =>
       setField<String>(optionParameterField, value);
 
+  /// Product field name
+  static const String productField = 'product';
+
+  /// Product
+  String? get product => getField<String>(productField);
+  set product(String? value) => setField<String>(productField, value);
+
   /// Make a copy of the current [ProductOptionParameterRow]
   /// overriding the provided fields
   ProductOptionParameterRow copyWith({
-    String? product,
     String? id,
     DateTime? createdAt,
     String? createdBy,
     String? optionParameter,
+    String? product,
   }) => ProductOptionParameterRow.fromJson({
-    'product': supaSerialize(product) ?? data['product'],
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'option_parameter':
         supaSerialize(optionParameter) ?? data['option_parameter'],
+    'product': supaSerialize(product) ?? data['product'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.155201
+/// Date: 2025-12-17 09:43:01.652857

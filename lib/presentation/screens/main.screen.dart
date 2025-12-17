@@ -8,7 +8,7 @@ import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
-import 'package:esg_mobile/presentation/screens/green_square/account.tab.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
@@ -493,6 +493,9 @@ class _MainScreenState extends State<MainScreen> {
         await _launchExternal(
           Uri.parse('https://pf.kakao.com/_taxoxdG'),
         );
+        break;
+      case GreenSquareDrawerTarget.cart:
+        await _showCartBottomSheet();
         break;
     }
   }

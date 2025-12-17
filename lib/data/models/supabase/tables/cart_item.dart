@@ -27,15 +27,15 @@ class CartItemRow extends SupabaseDataRow {
   CartItemRow({
     String? id,
     DateTime? createdAt,
-    String? product,
     double? quantity,
     String? customer,
+    String? product,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (product != null) 'product': supaSerialize(product),
          if (quantity != null) 'quantity': supaSerialize(quantity),
          if (customer != null) 'customer': supaSerialize(customer),
+         if (product != null) 'product': supaSerialize(product),
        });
 
   /// Cart Item Row
@@ -67,13 +67,6 @@ class CartItemRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Product field name
-  static const String productField = 'product';
-
-  /// Product
-  String? get product => getField<String>(productField);
-  set product(String? value) => setField<String>(productField, value);
-
   /// Quantity field name
   static const String quantityField = 'quantity';
 
@@ -88,22 +81,29 @@ class CartItemRow extends SupabaseDataRow {
   String? get customer => getField<String>(customerField);
   set customer(String? value) => setField<String>(customerField, value);
 
+  /// Product field name
+  static const String productField = 'product';
+
+  /// Product
+  String? get product => getField<String>(productField);
+  set product(String? value) => setField<String>(productField, value);
+
   /// Make a copy of the current [CartItemRow]
   /// overriding the provided fields
   CartItemRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? product,
     double? quantity,
     String? customer,
+    String? product,
   }) => CartItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'product': supaSerialize(product) ?? data['product'],
     'quantity': supaSerialize(quantity) ?? data['quantity'],
     'customer': supaSerialize(customer) ?? data['customer'],
+    'product': supaSerialize(product) ?? data['product'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.131839
+/// Date: 2025-12-17 09:43:01.628822

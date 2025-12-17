@@ -15,7 +15,7 @@ class AccountLoggedInContent extends StatelessWidget {
   });
 
   final String userName;
-  final int totalMileage;
+  final double totalMileage;
   final List<Map<String, dynamic>> activeMissions;
   final List<Map<String, dynamic>> participations;
   final VoidCallback onManageShipping;
@@ -28,6 +28,9 @@ class AccountLoggedInContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final mileageText = totalMileage == totalMileage.roundToDouble()
+        ? totalMileage.toInt().toString()
+        : totalMileage.toStringAsFixed(1);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -82,7 +85,7 @@ class AccountLoggedInContent extends StatelessWidget {
                   style: theme.textTheme.titleMedium,
                 ),
                 Text(
-                  '$totalMileage P',
+                  '$mileageText P',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: cs.primary,
@@ -199,6 +202,9 @@ class AccountLoggedInContent extends StatelessWidget {
                 final status = participation['status'] as String;
                 final isApproved = status == 'approved';
                 final isPending = status == 'pending';
+                final photoUrl = participation['photo_url'] as String?;
+                final rejectionReason =
+                    participation['rejection_reason'] as String?;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -209,6 +215,23 @@ class AccountLoggedInContent extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: photoUrl != null
+                            ? Image.network(
+                                photoUrl,
+                                width: 72,
+                                height: 72,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 72,
+                                height: 72,
+                                color: cs.surfaceTint.withOpacity(0.1),
+                                child: const Icon(Icons.photo_outlined),
+                              ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,6 +247,16 @@ class AccountLoggedInContent extends StatelessWidget {
                               '참여일: ${DateTime.parse(participation['created_at']).toLocal().toString().split(' ')[0]}',
                               style: theme.textTheme.bodySmall,
                             ),
+                            if (!isApproved && rejectionReason != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  '사유: $rejectionReason',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: Colors.red.shade700,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

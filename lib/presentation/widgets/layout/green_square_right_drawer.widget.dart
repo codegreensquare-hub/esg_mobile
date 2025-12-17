@@ -1,4 +1,5 @@
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareRightDrawer extends StatelessWidget {
@@ -14,6 +15,17 @@ class GreenSquareRightDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
+    final destinations = kDebugMode
+        ? [
+            ...greenSquareDrawerDestinations,
+            const GreenSquareDrawerDestination(
+              label: '장바구니',
+              icon: Icons.shopping_cart_outlined,
+              target: GreenSquareDrawerTarget.cart,
+            ),
+          ]
+        : greenSquareDrawerDestinations;
 
     return Drawer(
       elevation: 16,
@@ -37,10 +49,10 @@ class GreenSquareRightDrawer extends StatelessWidget {
             const Divider(height: 1),
             Expanded(
               child: ListView.separated(
-                itemCount: greenSquareDrawerDestinations.length,
+                itemCount: destinations.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, index) {
-                  final destination = greenSquareDrawerDestinations[index];
+                  final destination = destinations[index];
                   final isExternal =
                       destination.target == GreenSquareDrawerTarget.openInApp ||
                       destination.target ==

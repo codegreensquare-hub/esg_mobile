@@ -59,7 +59,7 @@ class ProductCard extends StatelessWidget {
                   // Image with Hero
                   Positioned.fill(
                     child: Hero(
-                      tag: 'green-square-product-image-${product.code}',
+                      tag: 'green-square-product-image-${product.id}',
                       child: imageUrl != null
                           ? Image.network(
                               imageUrl,

@@ -28,8 +28,7 @@ class ProductService {
           .from(ProductTable().tableName)
           .select(
             '*, product_category(name), product_image(*), user:product_by(*)',
-          )
-          .eq(ProductRow.saleStatusField, 'on_sale');
+          );
 
       if (categoryId != null && categoryId != 'All') {
         query = query.eq(ProductRow.categoryField, categoryId);
@@ -81,10 +80,10 @@ class ProductService {
         final images = imagesData
             .map((img) => ProductImageRow.fromJson(img as Map<String, dynamic>))
             .toList();
-        final isInWishlist = wishlistStatuses[product.code] ?? false;
+        final isInWishlist = wishlistStatuses[product.id] ?? false;
         final sellerData = data['user'] as Map<String, dynamic>?;
         if (sellerData == null) {
-          throw Exception('Seller data missing for product ${product.code}');
+          throw Exception('Seller data missing for product ${product.id}');
         }
         final seller = UserRow.fromJson(sellerData);
 
@@ -185,7 +184,7 @@ class ProductService {
         final sellerData = productData['user'] as Map<String, dynamic>?;
         if (sellerData == null) {
           throw Exception(
-            'Seller data missing for wishlisted product ${product.code}',
+            'Seller data missing for wishlisted product ${product.id}',
           );
         }
         final seller = UserRow.fromJson(sellerData);

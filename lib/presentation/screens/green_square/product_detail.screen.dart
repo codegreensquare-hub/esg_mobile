@@ -49,7 +49,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       await ProductService.instance.toggleWishlist(
-        productWithDetails.product.code,
+        productWithDetails.product.id,
         userId!,
       );
 
@@ -75,7 +75,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> _loadProductOptions() async {
     setState(() => isLoadingOptions = true);
     final options = await CartService.instance.fetchProductOptions(
-      productWithDetails.product.code,
+      productWithDetails.product.id,
     );
     if (!mounted) {
       return;
@@ -129,7 +129,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       final result = await CartService.instance.addItem(
         userId: userId!,
-        productCode: productWithDetails.product.code,
+        productCode: productWithDetails.product.id,
         quantity: quantity.toDouble(),
         selectedOptions: optionPayload,
       );
@@ -199,7 +199,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             AspectRatio(
               aspectRatio: 1,
               child: Hero(
-                tag: 'green-square-product-image-${product.code}',
+                tag: 'green-square-product-image-${product.id}',
                 child: imageUrl != null
                     ? Image.network(
                         imageUrl,

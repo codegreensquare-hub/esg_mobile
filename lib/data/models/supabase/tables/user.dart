@@ -36,6 +36,7 @@ class UserRow extends SupabaseDataRow {
     String? adminApprovedBy,
     String? defaultShippingAddress,
     VendorAdminType? vendorAdminType,
+    String? company,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -54,6 +55,7 @@ class UserRow extends SupabaseDataRow {
            'default_shipping_address': supaSerialize(defaultShippingAddress),
          if (vendorAdminType != null)
            'vendor_admin_type': supaSerialize(vendorAdminType),
+         if (company != null) 'company': supaSerialize(company),
        });
 
   /// User Row
@@ -168,6 +170,13 @@ class UserRow extends SupabaseDataRow {
   set vendorAdminType(VendorAdminType? value) =>
       setField<VendorAdminType>(vendorAdminTypeField, value);
 
+  /// Company field name
+  static const String companyField = 'company';
+
+  /// Company
+  String? get company => getField<String>(companyField);
+  set company(String? value) => setField<String>(companyField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -183,6 +192,7 @@ class UserRow extends SupabaseDataRow {
     String? adminApprovedBy,
     String? defaultShippingAddress,
     VendorAdminType? vendorAdminType,
+    String? company,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -201,8 +211,9 @@ class UserRow extends SupabaseDataRow {
         data['default_shipping_address'],
     'vendor_admin_type':
         supaSerialize(vendorAdminType) ?? data['vendor_admin_type'],
+    'company': supaSerialize(company) ?? data['company'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.161331
+/// Date: 2025-12-17 09:43:01.660593

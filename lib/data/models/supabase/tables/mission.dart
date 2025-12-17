@@ -50,6 +50,8 @@ class MissionRow extends SupabaseDataRow {
     String? approvedBy,
     DateTime? rejectedAt,
     String? rejectedBy,
+    bool? isDeleted,
+    String? rejectedReason,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -89,6 +91,9 @@ class MissionRow extends SupabaseDataRow {
          if (approvedBy != null) 'approved_by': supaSerialize(approvedBy),
          if (rejectedAt != null) 'rejected_at': supaSerialize(rejectedAt),
          if (rejectedBy != null) 'rejected_by': supaSerialize(rejectedBy),
+         if (isDeleted != null) 'is_deleted': supaSerialize(isDeleted),
+         if (rejectedReason != null)
+           'rejected_reason': supaSerialize(rejectedReason),
        });
 
   /// Mission Row
@@ -316,6 +321,21 @@ class MissionRow extends SupabaseDataRow {
   String? get rejectedBy => getField<String>(rejectedByField);
   set rejectedBy(String? value) => setField<String>(rejectedByField, value);
 
+  /// Is Deleted field name
+  static const String isDeletedField = 'is_deleted';
+
+  /// Is Deleted
+  bool get isDeleted => getField<bool>(isDeletedField, defaultValue: false)!;
+  set isDeleted(bool value) => setField<bool>(isDeletedField, value);
+
+  /// Rejected Reason field name
+  static const String rejectedReasonField = 'rejected_reason';
+
+  /// Rejected Reason
+  String? get rejectedReason => getField<String>(rejectedReasonField);
+  set rejectedReason(String? value) =>
+      setField<String>(rejectedReasonField, value);
+
   /// Make a copy of the current [MissionRow]
   /// overriding the provided fields
   MissionRow copyWith({
@@ -345,6 +365,8 @@ class MissionRow extends SupabaseDataRow {
     String? approvedBy,
     DateTime? rejectedAt,
     String? rejectedBy,
+    bool? isDeleted,
+    String? rejectedReason,
   }) => MissionRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -384,8 +406,10 @@ class MissionRow extends SupabaseDataRow {
     'approved_by': supaSerialize(approvedBy) ?? data['approved_by'],
     'rejected_at': supaSerialize(rejectedAt) ?? data['rejected_at'],
     'rejected_by': supaSerialize(rejectedBy) ?? data['rejected_by'],
+    'is_deleted': supaSerialize(isDeleted) ?? data['is_deleted'],
+    'rejected_reason': supaSerialize(rejectedReason) ?? data['rejected_reason'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-03 16:25:28.142754
+/// Date: 2025-12-17 09:43:01.641201
