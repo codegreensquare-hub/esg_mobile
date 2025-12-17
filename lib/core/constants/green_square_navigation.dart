@@ -47,6 +47,7 @@ enum GreenSquareDrawerTarget {
   contact,
   kakaoContact,
   cart,
+  myOrders,
 }
 
 class GreenSquareDrawerDestination {
@@ -111,5 +112,15 @@ const greenSquareDrawerDestinations = <GreenSquareDrawerDestination>[
     label: '앱에서 보기',
     icon: Icons.phone_iphone,
     target: GreenSquareDrawerTarget.openInApp,
+  ),
+  GreenSquareDrawerDestination(
+    label: '장바구니',
+    icon: Icons.shopping_cart_outlined,
+    target: GreenSquareDrawerTarget.cart,
+  ),
+  GreenSquareDrawerDestination(
+    label: '주문 내역',
+    icon: Icons.receipt_long_outlined,
+    target: GreenSquareDrawerTarget.myOrders,
   ),
 ];

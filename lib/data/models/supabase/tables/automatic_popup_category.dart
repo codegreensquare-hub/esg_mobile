@@ -9,49 +9,47 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Automatic Push Category Table
-class AutomaticPushCategoryTable
-    extends SupabaseTable<AutomaticPushCategoryRow> {
+/// Automatic Popup Category Table
+class AutomaticPopupCategoryTable
+    extends SupabaseTable<AutomaticPopupCategoryRow> {
   /// Table Name
   @override
-  String get tableName => 'automatic_push_category';
+  String get tableName => 'automatic_popup_category';
 
-  /// Create a [AutomaticPushCategoryRow] from the [data] provided
+  /// Create a [AutomaticPopupCategoryRow] from the [data] provided
   @override
-  AutomaticPushCategoryRow createRow(Map<String, dynamic> data) =>
-      AutomaticPushCategoryRow.fromJson(data);
+  AutomaticPopupCategoryRow createRow(Map<String, dynamic> data) =>
+      AutomaticPopupCategoryRow.fromJson(data);
 }
 
-/// Automatic Push Category Row
-class AutomaticPushCategoryRow extends SupabaseDataRow {
-  /// Automatic Push Category Row
-  AutomaticPushCategoryRow({
+/// Automatic Popup Category Row
+class AutomaticPopupCategoryRow extends SupabaseDataRow {
+  /// Automatic Popup Category Row
+  AutomaticPopupCategoryRow({
+    required String key,
     String? id,
-    String? key,
     String? labelKo,
     DateTime? createdAt,
-    AutomaticPushType? type,
   }) : super({
+         'key': supaSerialize(key),
          if (id != null) 'id': supaSerialize(id),
-         if (key != null) 'key': supaSerialize(key),
          if (labelKo != null) 'label_ko': supaSerialize(labelKo),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (type != null) 'type': supaSerialize(type),
        });
 
-  /// Automatic Push Category Row
-  const AutomaticPushCategoryRow._(super.data);
+  /// Automatic Popup Category Row
+  const AutomaticPopupCategoryRow._(super.data);
 
-  /// Create Automatic Push Category Row from a [data] map
-  factory AutomaticPushCategoryRow.fromJson(Map<String, dynamic> data) =>
-      AutomaticPushCategoryRow._(data.cleaned);
+  /// Create Automatic Popup Category Row from a [data] map
+  factory AutomaticPopupCategoryRow.fromJson(Map<String, dynamic> data) =>
+      AutomaticPopupCategoryRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => AutomaticPushCategoryTable();
+  SupabaseTable get table => AutomaticPopupCategoryTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -64,8 +62,8 @@ class AutomaticPushCategoryRow extends SupabaseDataRow {
   static const String keyField = 'key';
 
   /// Key
-  String? get key => getField<String>(keyField);
-  set key(String? value) => setField<String>(keyField, value);
+  String get key => getField<String>(keyField)!;
+  set key(String value) => setField<String>(keyField, value);
 
   /// Label Ko field name
   static const String labelKoField = 'label_ko';
@@ -82,33 +80,20 @@ class AutomaticPushCategoryRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Type field name
-  static const String typeField = 'type';
-
-  /// Type
-  AutomaticPushType? get type => getField<AutomaticPushType>(
-    typeField,
-    enumValues: AutomaticPushType.values,
-  );
-  set type(AutomaticPushType? value) =>
-      setField<AutomaticPushType>(typeField, value);
-
-  /// Make a copy of the current [AutomaticPushCategoryRow]
+  /// Make a copy of the current [AutomaticPopupCategoryRow]
   /// overriding the provided fields
-  AutomaticPushCategoryRow copyWith({
-    String? id,
+  AutomaticPopupCategoryRow copyWith({
     String? key,
+    String? id,
     String? labelKo,
     DateTime? createdAt,
-    AutomaticPushType? type,
-  }) => AutomaticPushCategoryRow.fromJson({
-    'id': supaSerialize(id) ?? data['id'],
+  }) => AutomaticPopupCategoryRow.fromJson({
     'key': supaSerialize(key) ?? data['key'],
+    'id': supaSerialize(id) ?? data['id'],
     'label_ko': supaSerialize(labelKo) ?? data['label_ko'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'type': supaSerialize(type) ?? data['type'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:24.978156
+/// Date: 2025-12-17 14:31:24.976896

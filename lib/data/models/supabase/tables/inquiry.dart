@@ -28,11 +28,13 @@ class InquiryRow extends SupabaseDataRow {
     DateTime? createdAt,
     String? createdBy,
     String? content,
+    String? title,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (content != null) 'content': supaSerialize(content),
+         if (title != null) 'title': supaSerialize(title),
        });
 
   /// Inquiry Row
@@ -79,6 +81,13 @@ class InquiryRow extends SupabaseDataRow {
   String? get content => getField<String>(contentField);
   set content(String? value) => setField<String>(contentField, value);
 
+  /// Title field name
+  static const String titleField = 'title';
+
+  /// Title
+  String? get title => getField<String>(titleField);
+  set title(String? value) => setField<String>(titleField, value);
+
   /// Make a copy of the current [InquiryRow]
   /// overriding the provided fields
   InquiryRow copyWith({
@@ -86,13 +95,15 @@ class InquiryRow extends SupabaseDataRow {
     DateTime? createdAt,
     String? createdBy,
     String? content,
+    String? title,
   }) => InquiryRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'content': supaSerialize(content) ?? data['content'],
+    'title': supaSerialize(title) ?? data['title'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 09:43:01.632101
+/// Date: 2025-12-17 14:31:24.984158

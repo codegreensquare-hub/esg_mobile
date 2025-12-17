@@ -10,6 +10,7 @@ import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
+import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
@@ -496,6 +497,13 @@ class _MainScreenState extends State<MainScreen> {
         break;
       case GreenSquareDrawerTarget.cart:
         await _showCartBottomSheet();
+        break;
+      case GreenSquareDrawerTarget.myOrders:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const MyOrdersScreen(),
+          ),
+        );
         break;
     }
   }

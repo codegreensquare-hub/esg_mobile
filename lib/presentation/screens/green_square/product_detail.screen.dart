@@ -179,7 +179,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.code),
+        title: Text(product.title ?? product.code),
         actions: [
           if (userId != null)
             IconButton(

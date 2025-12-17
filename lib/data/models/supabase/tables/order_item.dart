@@ -9,46 +9,48 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Product Wishlist Table
-class ProductWishlistTable extends SupabaseTable<ProductWishlistRow> {
+/// Order Item Table
+class OrderItemTable extends SupabaseTable<OrderItemRow> {
   /// Table Name
   @override
-  String get tableName => 'product_wishlist';
+  String get tableName => 'order_item';
 
-  /// Create a [ProductWishlistRow] from the [data] provided
+  /// Create a [OrderItemRow] from the [data] provided
   @override
-  ProductWishlistRow createRow(Map<String, dynamic> data) =>
-      ProductWishlistRow.fromJson(data);
+  OrderItemRow createRow(Map<String, dynamic> data) =>
+      OrderItemRow.fromJson(data);
 }
 
-/// Product Wishlist Row
-class ProductWishlistRow extends SupabaseDataRow {
-  /// Product Wishlist Row
-  ProductWishlistRow({
+/// Order Item Row
+class OrderItemRow extends SupabaseDataRow {
+  /// Order Item Row
+  OrderItemRow({
     String? id,
     DateTime? createdAt,
-    String? wishlistBy,
     String? product,
+    double? quantity,
+    String? order,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (wishlistBy != null) 'wishlist_by': supaSerialize(wishlistBy),
          if (product != null) 'product': supaSerialize(product),
+         if (quantity != null) 'quantity': supaSerialize(quantity),
+         if (order != null) 'order': supaSerialize(order),
        });
 
-  /// Product Wishlist Row
-  const ProductWishlistRow._(super.data);
+  /// Order Item Row
+  const OrderItemRow._(super.data);
 
-  /// Create Product Wishlist Row from a [data] map
-  factory ProductWishlistRow.fromJson(Map<String, dynamic> data) =>
-      ProductWishlistRow._(data.cleaned);
+  /// Create Order Item Row from a [data] map
+  factory OrderItemRow.fromJson(Map<String, dynamic> data) =>
+      OrderItemRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => ProductWishlistTable();
+  SupabaseTable get table => OrderItemTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -65,13 +67,6 @@ class ProductWishlistRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Wishlist By field name
-  static const String wishlistByField = 'wishlist_by';
-
-  /// Wishlist By
-  String? get wishlistBy => getField<String>(wishlistByField);
-  set wishlistBy(String? value) => setField<String>(wishlistByField, value);
-
   /// Product field name
   static const String productField = 'product';
 
@@ -79,20 +74,36 @@ class ProductWishlistRow extends SupabaseDataRow {
   String? get product => getField<String>(productField);
   set product(String? value) => setField<String>(productField, value);
 
-  /// Make a copy of the current [ProductWishlistRow]
+  /// Quantity field name
+  static const String quantityField = 'quantity';
+
+  /// Quantity
+  double? get quantity => getField<double>(quantityField);
+  set quantity(double? value) => setField<double>(quantityField, value);
+
+  /// Order field name
+  static const String orderField = 'order';
+
+  /// Order
+  String? get order => getField<String>(orderField);
+  set order(String? value) => setField<String>(orderField, value);
+
+  /// Make a copy of the current [OrderItemRow]
   /// overriding the provided fields
-  ProductWishlistRow copyWith({
+  OrderItemRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? wishlistBy,
     String? product,
-  }) => ProductWishlistRow.fromJson({
+    double? quantity,
+    String? order,
+  }) => OrderItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'wishlist_by': supaSerialize(wishlistBy) ?? data['wishlist_by'],
     'product': supaSerialize(product) ?? data['product'],
+    'quantity': supaSerialize(quantity) ?? data['quantity'],
+    'order': supaSerialize(order) ?? data['order'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:25.003142
+/// Date: 2025-12-17 14:31:24.999591

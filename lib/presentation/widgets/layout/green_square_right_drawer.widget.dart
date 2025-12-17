@@ -1,5 +1,4 @@
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareRightDrawer extends StatelessWidget {
@@ -16,16 +15,7 @@ class GreenSquareRightDrawer extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final destinations = kDebugMode
-        ? [
-            ...greenSquareDrawerDestinations,
-            const GreenSquareDrawerDestination(
-              label: '장바구니',
-              icon: Icons.shopping_cart_outlined,
-              target: GreenSquareDrawerTarget.cart,
-            ),
-          ]
-        : greenSquareDrawerDestinations;
+    final destinations = greenSquareDrawerDestinations;
 
     return Drawer(
       elevation: 16,

@@ -29,11 +29,13 @@ class InquiryResponseRow extends SupabaseDataRow {
     DateTime? createdAt,
     String? inquiry,
     String? createdBy,
+    String? content,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (inquiry != null) 'inquiry': supaSerialize(inquiry),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (content != null) 'content': supaSerialize(content),
        });
 
   /// Inquiry Response Row
@@ -80,6 +82,13 @@ class InquiryResponseRow extends SupabaseDataRow {
       getField<String>(createdByField, defaultValue: 'auth.')!;
   set createdBy(String value) => setField<String>(createdByField, value);
 
+  /// Content field name
+  static const String contentField = 'content';
+
+  /// Content
+  String? get content => getField<String>(contentField);
+  set content(String? value) => setField<String>(contentField, value);
+
   /// Make a copy of the current [InquiryResponseRow]
   /// overriding the provided fields
   InquiryResponseRow copyWith({
@@ -87,13 +96,15 @@ class InquiryResponseRow extends SupabaseDataRow {
     DateTime? createdAt,
     String? inquiry,
     String? createdBy,
+    String? content,
   }) => InquiryResponseRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'inquiry': supaSerialize(inquiry) ?? data['inquiry'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'content': supaSerialize(content) ?? data['content'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 09:43:01.632605
+/// Date: 2025-12-17 14:31:24.986172

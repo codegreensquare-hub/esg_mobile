@@ -111,6 +111,29 @@ class UserShippingAddressService {
     }
   }
 
+  Future<UserShippingAddressRow?> fetchAddressById({
+    required String userId,
+    required String addressId,
+  }) async {
+    try {
+      final response = await _client
+          .from(UserShippingAddressTable().tableName)
+          .select('*')
+          .eq(UserShippingAddressRow.idField, addressId)
+          .eq(UserShippingAddressRow.addressByField, userId)
+          .maybeSingle();
+
+      if (response == null) {
+        return null;
+      }
+
+      return UserShippingAddressRow.fromJson(response);
+    } catch (e) {
+      debugPrint('Error fetching shipping address by id: $e');
+      return null;
+    }
+  }
+
   Future<void> setDefaultAddress({
     required String userId,
     String? addressId,
