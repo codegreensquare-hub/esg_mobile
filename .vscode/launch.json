@@ -16,6 +16,12 @@
       "deviceId": "chrome"
     },
     {
+      "name": "RT7 TITAN 5G (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "RT7TITAN5G008792"
+    },
+    {
       "name": "iPhone 17 Pro Max",
       "request": "launch",
       "type": "dart",

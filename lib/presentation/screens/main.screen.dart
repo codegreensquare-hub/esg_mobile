@@ -139,9 +139,19 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButton: isGreenSquare
           ? FloatingActionButton(
               heroTag: 'green-square-knock-fab',
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32),
+              ),
               onPressed: _onTapKnock,
               tooltip: 'Knock',
-              child: const Icon(Icons.campaign_outlined),
+              child: const Text(
+                "콕!",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             )
           : null,
       floatingActionButtonLocation: isGreenSquare

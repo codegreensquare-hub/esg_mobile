@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "885232472112",
+    "project_id": "esg-main-8e4bd",
+    "storage_bucket": "esg-main-8e4bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885232472112:android:e420758673dd7eae8eddf5",
+        "android_client_info": {
+          "package_name": "com.esg.green"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACxJCpUlhBc5AIUxqUAGbT0sU-HamSIcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

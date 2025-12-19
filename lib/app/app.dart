@@ -26,9 +26,10 @@ class App extends StatelessWidget {
         title: 'ESG Mobile',
         theme: materialTheme.light(),
         darkTheme: materialTheme.dark(),
-        themeMode: brightness == Brightness.light
-            ? ThemeMode.light
-            : ThemeMode.dark,
+        // themeMode: brightness == Brightness.light
+        //     ? ThemeMode.light
+        //     : ThemeMode.dark,
+        themeMode: ThemeMode.light,
         routerConfig: router,
       ),
     );

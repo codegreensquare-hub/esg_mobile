@@ -4,6 +4,7 @@ import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
+import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/liked_stories_dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
@@ -41,7 +42,7 @@ class _AccountTabState extends State<AccountTab> {
       }
 
       userId = user.id;
-      userName = user.userMetadata?['name'] ?? user.email ?? '사용자';
+      userName = UserAuthService.instance.displayName;
 
       final client = Supabase.instance.client;
 
@@ -187,8 +188,10 @@ class _AccountTabState extends State<AccountTab> {
   }
 
   void _handleOrderLookup() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('주문배송조회 기능은 준비 중입니다.')),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const MyOrdersScreen(),
+      ),
     );
   }
 

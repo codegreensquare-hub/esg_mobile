@@ -48,9 +48,9 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
       leading: SizedBox.shrink(),
       backgroundColor: theme.colorScheme.primary,
       actions: widget.actions,
-      title: SizedBox(
-        width: 200,
-        child: Center(
+      title: Center(
+        child: SizedBox(
+          width: 200,
           child: AnimatedToggleSwitch<bool>.dual(
             current: _switchValue,
             customIconBuilder: (context, local, global) {

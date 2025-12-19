@@ -152,32 +152,35 @@ class AccountLoggedInContent extends StatelessWidget {
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               children: activeMissions.map((mission) {
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        mission['title'] ?? '미션',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                return Card(
+                  // padding: const EdgeInsets.all(16),
+                  // decoration: BoxDecoration(
+                  //   color: cs.surface,
+                  //   borderRadius: BorderRadius.circular(12),
+                  // ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          mission['title'] ?? '미션',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Spacer(),
-                      Text(
-                        '+${mission['earned']} P',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: cs.primary,
-                          fontWeight: FontWeight.bold,
+                        const Spacer(),
+                        Text(
+                          '+${mission['earned']} P',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: cs.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }).toList(),

@@ -177,6 +177,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           )
         : null;
 
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = bottomInset > 0 ? bottomInset : 16.0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(product.title ?? product.code),
@@ -223,7 +226,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: bottomPadding,
+                top: 16,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
