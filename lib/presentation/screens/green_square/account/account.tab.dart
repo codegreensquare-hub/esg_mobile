@@ -1,6 +1,7 @@
 import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
+import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
@@ -142,6 +143,8 @@ class _AccountTabState extends State<AccountTab> {
     setState(() => _authInProgress = true);
     try {
       await UserAuthService.instance.signIn(email, password);
+      // Save push notification token on login
+      await PushNotificationService.instance.saveTokenOnLogin();
       if (!mounted) return;
       setState(() => isLoading = true);
       await _fetchAccountData();

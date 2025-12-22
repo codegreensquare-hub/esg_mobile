@@ -173,4 +173,4 @@ class UserShippingAddressRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:25.010344
+/// Date: 2025-12-19 15:29:31.038295

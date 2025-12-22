@@ -87,7 +87,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _increaseQuantity() {
-    final stockLimit = productWithDetails.product.stockQuantity.toInt();
+    final stockLimit = productWithDetails.product.stockQuantity?.toInt() ?? 999;
     setState(() {
       quantity = (quantity + 1).clamp(1, stockLimit).toInt();
     });
@@ -182,7 +182,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.title ?? product.code),
+        title: Text(product.title ?? product.code ?? '제품명 없음'),
         actions: [
           if (userId != null)
             IconButton(
@@ -237,7 +237,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   // Product Code
                   Text(
-                    product.title ?? product.code,
+                    product.title ?? product.code ?? '제품명 없음',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -312,7 +312,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '재고: ${product.stockQuantity.toInt()}개',
+                        '재고: ${product.stockQuantity?.toInt() ?? 0}개',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),

@@ -109,4 +109,4 @@ class OrderItemOptionRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:24.999861
+/// Date: 2025-12-19 15:29:31.024506

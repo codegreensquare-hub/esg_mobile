@@ -96,4 +96,4 @@ class AwardPointsRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:24.980216
+/// Date: 2025-12-19 15:29:31.004635

@@ -30,12 +30,16 @@ class InquiryResponseRow extends SupabaseDataRow {
     String? inquiry,
     String? createdBy,
     String? content,
+    dynamic images,
+    String? title,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (inquiry != null) 'inquiry': supaSerialize(inquiry),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (content != null) 'content': supaSerialize(content),
+         if (images != null) 'images': supaSerialize(images),
+         if (title != null) 'title': supaSerialize(title),
        });
 
   /// Inquiry Response Row
@@ -89,6 +93,20 @@ class InquiryResponseRow extends SupabaseDataRow {
   String? get content => getField<String>(contentField);
   set content(String? value) => setField<String>(contentField, value);
 
+  /// Images field name
+  static const String imagesField = 'images';
+
+  /// Images
+  dynamic get images => getField<dynamic>(imagesField, defaultValue: null);
+  set images(dynamic value) => setField<dynamic>(imagesField, value);
+
+  /// Title field name
+  static const String titleField = 'title';
+
+  /// Title
+  String? get title => getField<String>(titleField);
+  set title(String? value) => setField<String>(titleField, value);
+
   /// Make a copy of the current [InquiryResponseRow]
   /// overriding the provided fields
   InquiryResponseRow copyWith({
@@ -97,14 +115,18 @@ class InquiryResponseRow extends SupabaseDataRow {
     String? inquiry,
     String? createdBy,
     String? content,
+    dynamic images,
+    String? title,
   }) => InquiryResponseRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'inquiry': supaSerialize(inquiry) ?? data['inquiry'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'content': supaSerialize(content) ?? data['content'],
+    'images': supaSerialize(images) ?? data['images'],
+    'title': supaSerialize(title) ?? data['title'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:24.986172
+/// Date: 2025-12-19 15:29:31.011215

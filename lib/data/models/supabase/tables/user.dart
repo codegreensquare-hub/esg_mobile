@@ -37,6 +37,8 @@ class UserRow extends SupabaseDataRow {
     String? defaultShippingAddress,
     VendorAdminType? vendorAdminType,
     String? company,
+    DateTime? adminRejectedAt,
+    String? adminRejectedBy,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -56,6 +58,10 @@ class UserRow extends SupabaseDataRow {
          if (vendorAdminType != null)
            'vendor_admin_type': supaSerialize(vendorAdminType),
          if (company != null) 'company': supaSerialize(company),
+         if (adminRejectedAt != null)
+           'admin_rejected_at': supaSerialize(adminRejectedAt),
+         if (adminRejectedBy != null)
+           'admin_rejected_by': supaSerialize(adminRejectedBy),
        });
 
   /// User Row
@@ -177,6 +183,22 @@ class UserRow extends SupabaseDataRow {
   String? get company => getField<String>(companyField);
   set company(String? value) => setField<String>(companyField, value);
 
+  /// Admin Rejected At field name
+  static const String adminRejectedAtField = 'admin_rejected_at';
+
+  /// Admin Rejected At
+  DateTime? get adminRejectedAt => getField<DateTime>(adminRejectedAtField);
+  set adminRejectedAt(DateTime? value) =>
+      setField<DateTime>(adminRejectedAtField, value);
+
+  /// Admin Rejected By field name
+  static const String adminRejectedByField = 'admin_rejected_by';
+
+  /// Admin Rejected By
+  String? get adminRejectedBy => getField<String>(adminRejectedByField);
+  set adminRejectedBy(String? value) =>
+      setField<String>(adminRejectedByField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -193,6 +215,8 @@ class UserRow extends SupabaseDataRow {
     String? defaultShippingAddress,
     VendorAdminType? vendorAdminType,
     String? company,
+    DateTime? adminRejectedAt,
+    String? adminRejectedBy,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -212,8 +236,12 @@ class UserRow extends SupabaseDataRow {
     'vendor_admin_type':
         supaSerialize(vendorAdminType) ?? data['vendor_admin_type'],
     'company': supaSerialize(company) ?? data['company'],
+    'admin_rejected_at':
+        supaSerialize(adminRejectedAt) ?? data['admin_rejected_at'],
+    'admin_rejected_by':
+        supaSerialize(adminRejectedBy) ?? data['admin_rejected_by'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:25.009607
+/// Date: 2025-12-19 15:29:31.036571

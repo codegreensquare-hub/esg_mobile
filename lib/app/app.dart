@@ -16,7 +16,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
     final materialTheme = _materialTheme(context);
     // Configure GoRouter (provided by router.dart import) and themes.
     return DefaultTextStyle(

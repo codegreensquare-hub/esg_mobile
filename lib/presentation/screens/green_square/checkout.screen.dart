@@ -392,7 +392,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        item.product.title ?? item.product.code,
+                                        item.product.title ??
+                                            item.product.code ??
+                                            '제품명 없음',
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(
                                               fontWeight: FontWeight.bold,

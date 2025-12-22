@@ -225,7 +225,9 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        item.product.title ?? item.product.code,
+                                        item.product.title ??
+                                            item.product.code ??
+                                            '제품명 없음',
                                         style: theme.textTheme.titleMedium
                                             ?.copyWith(
                                               fontWeight: FontWeight.bold,

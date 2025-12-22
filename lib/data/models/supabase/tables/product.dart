@@ -40,10 +40,10 @@ class ProductRow extends SupabaseDataRow {
     String? name,
     String? title,
     String? company,
+    String? id,
     String? code,
     int? stockQuantity,
     ProductSaleStatus? saleStatus,
-    String? id,
   }) : super({
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
@@ -67,11 +67,11 @@ class ProductRow extends SupabaseDataRow {
          if (name != null) 'name': supaSerialize(name),
          if (title != null) 'title': supaSerialize(title),
          if (company != null) 'company': supaSerialize(company),
+         if (id != null) 'id': supaSerialize(id),
          if (code != null) 'code': supaSerialize(code),
          if (stockQuantity != null)
            'stock_quantity': supaSerialize(stockQuantity),
          if (saleStatus != null) 'sale_status': supaSerialize(saleStatus),
-         if (id != null) 'id': supaSerialize(id),
        });
 
   /// Product Row
@@ -217,38 +217,37 @@ class ProductRow extends SupabaseDataRow {
   String? get company => getField<String>(companyField);
   set company(String? value) => setField<String>(companyField, value);
 
-  /// Code field name
-  static const String codeField = 'code';
-
-  /// Code
-  String get code => getField<String>(codeField, defaultValue: '')!;
-  set code(String value) => setField<String>(codeField, value);
-
-  /// Stock Quantity field name
-  static const String stockQuantityField = 'stock_quantity';
-
-  /// Stock Quantity
-  int get stockQuantity => getField<int>(stockQuantityField, defaultValue: 0)!;
-  set stockQuantity(int value) => setField<int>(stockQuantityField, value);
-
-  /// Sale Status field name
-  static const String saleStatusField = 'sale_status';
-
-  /// Sale Status
-  ProductSaleStatus get saleStatus => getField<ProductSaleStatus>(
-    saleStatusField,
-    enumValues: ProductSaleStatus.values,
-    defaultValue: ProductSaleStatus.on_sale,
-  )!;
-  set saleStatus(ProductSaleStatus value) =>
-      setField<ProductSaleStatus>(saleStatusField, value);
-
   /// Id field name
   static const String idField = 'id';
 
   /// Id
   String get id => getField<String>(idField, defaultValue: '')!;
   set id(String value) => setField<String>(idField, value);
+
+  /// Code field name
+  static const String codeField = 'code';
+
+  /// Code
+  String? get code => getField<String>(codeField);
+  set code(String? value) => setField<String>(codeField, value);
+
+  /// Stock Quantity field name
+  static const String stockQuantityField = 'stock_quantity';
+
+  /// Stock Quantity
+  int? get stockQuantity => getField<int>(stockQuantityField);
+  set stockQuantity(int? value) => setField<int>(stockQuantityField, value);
+
+  /// Sale Status field name
+  static const String saleStatusField = 'sale_status';
+
+  /// Sale Status
+  ProductSaleStatus? get saleStatus => getField<ProductSaleStatus>(
+    saleStatusField,
+    enumValues: ProductSaleStatus.values,
+  );
+  set saleStatus(ProductSaleStatus? value) =>
+      setField<ProductSaleStatus>(saleStatusField, value);
 
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
@@ -269,10 +268,10 @@ class ProductRow extends SupabaseDataRow {
     String? name,
     String? title,
     String? company,
+    String? id,
     String? code,
     int? stockQuantity,
     ProductSaleStatus? saleStatus,
-    String? id,
   }) => ProductRow.fromJson({
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
@@ -295,12 +294,12 @@ class ProductRow extends SupabaseDataRow {
     'name': supaSerialize(name) ?? data['name'],
     'title': supaSerialize(title) ?? data['title'],
     'company': supaSerialize(company) ?? data['company'],
+    'id': supaSerialize(id) ?? data['id'],
     'code': supaSerialize(code) ?? data['code'],
     'stock_quantity': supaSerialize(stockQuantity) ?? data['stock_quantity'],
     'sale_status': supaSerialize(saleStatus) ?? data['sale_status'],
-    'id': supaSerialize(id) ?? data['id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-17 14:31:25.001525
+/// Date: 2025-12-19 15:29:31.026547
