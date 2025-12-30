@@ -16,6 +16,9 @@ class ProductCard extends StatelessWidget {
     const double aspectRatio = 152 / 244;
     // Image takes 202/244 of the height, text takes 42/244
 
+    final isNetworkImage =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: Column(
@@ -26,22 +29,36 @@ class ProductCard extends StatelessWidget {
             flex: 202,
             child: SizedBox(
               width: double.infinity,
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.error),
-                  );
-                },
-              ),
+              child: isNetworkImage
+                  ? Image.network(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.error),
+                        );
+                      },
+                    )
+                  : Image.asset(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.error),
+                        );
+                      },
+                    ),
             ),
           ),
+          SizedBox(height: 12), // spacing between image and text
           // Text container: takes 42/244 of the card height
           Text(
             productName,
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),

@@ -95,4 +95,4 @@ class ProductCategoryRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.027262
+/// Date: 2025-12-23 14:25:57.806003

@@ -4,9 +4,10 @@ import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
-import 'package:esg_mobile/data/models/supabase/enums/product_sale_status.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({
@@ -29,6 +30,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isLoadingOptions = true;
   List<ProductOptionDefinition> productOptions = [];
   final Map<String, String> selectedOptionValues = {};
+  double currentAwardPoints = 0.0;
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     userId = Supabase.instance.client.auth.currentUser?.id;
     isInWishlist = productWithDetails.isInWishlist;
     _loadProductOptions();
+    _loadAwardPoints();
   }
 
   Future<void> _toggleWishlist() async {
@@ -84,6 +87,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       productOptions = options;
       isLoadingOptions = false;
     });
+  }
+
+  Future<void> _loadAwardPoints() async {
+    if (userId == null) return;
+    try {
+      currentAwardPoints = await ProductService.instance.getUserAwardPoints(
+        userId!,
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Error loading award points: $e');
+      currentAwardPoints = 0.0;
+    }
   }
 
   void _increaseQuantity() {
@@ -176,6 +194,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             folderPath: product.mainImageFolderPath,
           )
         : null;
+    final double? regularPrice = product.regularPrice;
+    final double? discountedPrice = product.minimumPriceMinusAwardPoints;
+    final hasDiscount =
+        regularPrice != null &&
+        discountedPrice != null &&
+        regularPrice > 0 &&
+        discountedPrice < regularPrice;
+    final int? discountPercentage = hasDiscount
+        ? (((regularPrice - discountedPrice) / regularPrice) * 100).round()
+        : null;
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = bottomInset > 0 ? bottomInset : 16.0;
@@ -235,146 +263,76 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product Code
                   Text(
-                    product.title ?? product.code ?? '제품명 없음',
+                    product.title ?? '제품명 없음',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
-
-                  // Category
-                  if (productWithDetails.categoryName != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.primaryContainer,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        productWithDetails.categoryName!,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: cs.onPrimaryContainer,
+                  const SizedBox(height: 4),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        if (productWithDetails.seller.username != null &&
+                            productWithDetails.seller.username!.isNotEmpty)
+                          TextSpan(
+                            text:
+                                "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
+                          ),
+                        TextSpan(
+                          text: productWithDetails.product.name ?? '',
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (product.description != null &&
+                      product.description!.isNotEmpty) ...[
+                    Text(
+                      product.description!,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
                   ],
-
-                  // Price
                   Text(
-                    formatKRW(product.regularPrice ?? 0),
+                    formatKRW(regularPrice ?? 0),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (product.regularPrice != null) ...[
+                  if (hasDiscount) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '친환경 소비자라면, $discountPercentage%↓',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.secondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
-                      formatKRW(product.regularPrice!),
+                      formatKRW(discountedPrice),
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        decoration: TextDecoration.lineThrough,
+                        color: cs.secondary,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 16),
 
-                  // Description
-                  if (product.description != null &&
-                      product.description!.isNotEmpty) ...[
+                  if (userId != null) ...[
                     Text(
-                      '상품 설명',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      '보유 마일리지 (c) ${formatKRW(currentAwardPoints.toInt())}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      product.description!,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
                   ],
-
-                  // Stock Information
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.inventory,
-                        size: 20,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '재고: ${product.stockQuantity?.toInt() ?? 0}개',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Sale Status
-                  Row(
-                    children: [
-                      Icon(
-                        product.saleStatus == ProductSaleStatus.on_sale
-                            ? Icons.check_circle
-                            : Icons.cancel,
-                        size: 20,
-                        color: product.saleStatus == ProductSaleStatus.on_sale
-                            ? Colors.green
-                            : cs.error,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        product.saleStatus == ProductSaleStatus.on_sale
-                            ? '판매 중'
-                            : '판매 중지',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: product.saleStatus == ProductSaleStatus.on_sale
-                              ? Colors.green
-                              : cs.error,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Quantity Selector
-                  Text(
-                    '수량',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: _decreaseQuantity,
-                        icon: const Icon(Icons.remove_circle_outline),
-                      ),
-                      Text(
-                        '$quantity',
-                        style: theme.textTheme.headlineSmall,
-                      ),
-                      IconButton(
-                        onPressed: _increaseQuantity,
-                        icon: const Icon(Icons.add_circle_outline),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   if (isLoadingOptions)
                     const Center(child: CircularProgressIndicator())
@@ -419,17 +377,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ] else
                     const SizedBox.shrink(),
 
+                  const SizedBox(height: 16),
+
+                  // Quantity Selector
+                  Text(
+                    '수량',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _decreaseQuantity,
+                        icon: const Icon(Icons.remove_circle_outline),
+                      ),
+                      Text(
+                        '$quantity',
+                        style: theme.textTheme.headlineSmall,
+                      ),
+                      IconButton(
+                        onPressed: _increaseQuantity,
+                        icon: const Icon(Icons.add_circle_outline),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   // Action Buttons
                   Row(
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed:
-                              isAddingToCart ||
-                                  product.saleStatus !=
-                                      ProductSaleStatus.on_sale
-                              ? null
-                              : _addToCart,
+                          onPressed: isAddingToCart ? null : _addToCart,
                           icon: isAddingToCart
                               ? const SizedBox(
                                   width: 16,
@@ -464,6 +444,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
                     ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  DefaultTabController(
+                    length: 2,
+                    child: Column(
+                      children: [
+                        const TabBar(
+                          tabs: [
+                            Tab(text: '제품 설명'),
+                            Tab(text: '리뷰 (0)'),
+                          ],
+                        ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height * 0.6,
+                            minHeight: 100,
+                          ),
+                          child: TabBarView(
+                            children: [
+                              ProductDescriptionTab(product: product),
+                              ReviewsTab(product: product),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

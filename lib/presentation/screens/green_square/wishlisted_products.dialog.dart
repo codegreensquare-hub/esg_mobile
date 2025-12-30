@@ -51,8 +51,7 @@ class _WishlistedProductsDialogState extends State<WishlistedProductsDialog> {
       wishlistedProducts = wishlistedProducts
           .where(
             (item) =>
-                item.product.product.code !=
-                wishlistedProduct.product.product.code,
+                item.product.product.id != wishlistedProduct.product.product.id,
           )
           .toList();
     });

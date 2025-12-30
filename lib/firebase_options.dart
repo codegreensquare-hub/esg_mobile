@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'esg-main-8e4bd.firebasestorage.app',
     measurementId: 'G-SLSQS0EQWP',
   );
+
 }

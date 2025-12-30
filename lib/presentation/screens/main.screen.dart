@@ -13,6 +13,7 @@ import 'package:esg_mobile/presentation/screens/green_square/mission_participati
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/story_dialog.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/code_green/code_green_hero_banner.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
@@ -36,6 +37,7 @@ import 'package:esg_mobile/presentation/screens/green_square/info/contact.screen
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
+import 'package:esg_mobile/data/entities/story_with_tags.dart';
 
 class MainScreen extends StatefulWidget {
   static const String route = '/';
@@ -296,7 +298,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildTabContent(String tabId) {
     switch (tabId) {
       case HomeTab.tab:
-        return const HomeTab(key: PageStorageKey(HomeTab.tab));
+        return HomeTab(
+          key: const PageStorageKey(HomeTab.tab),
+          onTapNatureMaterial: _openOriginalShop,
+          onTapVeganMaterial: _openOriginalShop,
+          onTapBiodegradableMaterial: _openOriginalShop,
+          onTapGreenSquare: _openGreenSquare,
+          onTapStory: _openGreenSquareStory,
+        );
       case OriginalShopTab.tab:
         return const OriginalShopTab(key: PageStorageKey(OriginalShopTab.tab));
       case CurationShopTab.tab:
@@ -313,6 +322,44 @@ class _MainScreenState extends State<MainScreen> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  void _openOriginalShop() {
+    final idx = codeGreenTabs.indexOf(OriginalShopTab.tab);
+    if (idx < 0) return;
+    if (idx == _selectedIndex) return;
+    setState(() {
+      _selectedMainTab = MainTab.codeGreen;
+      _selectedIndex = idx;
+    });
+  }
+
+  void _openGreenSquare() {
+    setState(() {
+      _selectedMainTab = MainTab.greenSquare;
+      _selectedIndex = 0;
+    });
+  }
+
+  void _openGreenSquareStory(StoryWithTags storyWithTags) {
+    setState(() {
+      _selectedMainTab = MainTab.greenSquare;
+      _selectedIndex = 0;
+      _greenIndex = 0; // ensure Green Square "스토리" tab
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => StoryDialog(
+            story: storyWithTags.story,
+            tags: storyWithTags.tags,
+          ),
+        ),
+      );
+    });
   }
 
   void _handleCodeGreenSubTab(String parentTab, String subTab) {

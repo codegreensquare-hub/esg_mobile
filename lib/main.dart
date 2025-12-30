@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
+import 'package:esg_mobile/firebase_options.dart';
 
 // Re-export App and MyApp for tests referencing symbols from main.dart.
 export 'package:esg_mobile/app/app.dart' show App, MyApp;
@@ -13,7 +14,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Load environment variables
   await dotenv.load(fileName: '.env');

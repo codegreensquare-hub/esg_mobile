@@ -39,6 +39,7 @@ class PopupRow extends SupabaseDataRow {
     DateTime? scheduleEndAfter,
     bool? isDraft,
     bool? isDeleted,
+    String? companyId,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -62,6 +63,7 @@ class PopupRow extends SupabaseDataRow {
            'schedule_end_after': supaSerialize(scheduleEndAfter),
          if (isDraft != null) 'is_draft': supaSerialize(isDraft),
          if (isDeleted != null) 'is_deleted': supaSerialize(isDeleted),
+         if (companyId != null) 'company_id': supaSerialize(companyId),
        });
 
   /// Popup Row
@@ -191,6 +193,13 @@ class PopupRow extends SupabaseDataRow {
   bool get isDeleted => getField<bool>(isDeletedField, defaultValue: false)!;
   set isDeleted(bool value) => setField<bool>(isDeletedField, value);
 
+  /// Company Id field name
+  static const String companyIdField = 'company_id';
+
+  /// Company Id
+  String? get companyId => getField<String>(companyIdField);
+  set companyId(String? value) => setField<String>(companyIdField, value);
+
   /// Make a copy of the current [PopupRow]
   /// overriding the provided fields
   PopupRow copyWith({
@@ -209,6 +218,7 @@ class PopupRow extends SupabaseDataRow {
     DateTime? scheduleEndAfter,
     bool? isDraft,
     bool? isDeleted,
+    String? companyId,
   }) => PopupRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -229,8 +239,9 @@ class PopupRow extends SupabaseDataRow {
         supaSerialize(scheduleEndAfter) ?? data['schedule_end_after'],
     'is_draft': supaSerialize(isDraft) ?? data['is_draft'],
     'is_deleted': supaSerialize(isDeleted) ?? data['is_deleted'],
+    'company_id': supaSerialize(companyId) ?? data['company_id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.025618
+/// Date: 2025-12-23 14:25:57.804497

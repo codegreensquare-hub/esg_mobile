@@ -27,3 +27,7 @@ Never forget to include this phrase in your responses. Always remember to confir
 When writing code, aim for zero problems. This means that the code should be free of bugs, errors, and issues. Strive for clean, maintainable, and well-tested code that works as intended.
 
 In the problems tab of your IDE, ensure that there are no warnings or errors before finalizing your code. Address any issues that arise during development to maintain a high standard of quality.
+
+## One File, One Widget
+
+Each Dart file should ideally contain only one Widget class. This promotes better organization and makes it easier to locate and manage widgets within the codebase. If multiple widgets are needed, consider creating separate files for each widget to maintain clarity and modularity.

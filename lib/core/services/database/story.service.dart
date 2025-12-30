@@ -1,6 +1,8 @@
 import 'package:esg_mobile/data/entities/liked_story.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
+import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/data/models/supabase/database.dart';
@@ -117,5 +119,127 @@ class StoryService {
       final story = StoryRow.fromJson(json['story']);
       return LikedStory(like: like, story: story);
     }).toList();
+  }
+
+  Future<List<ProductWithOtherDetails>> fetchRelatedProducts(
+    String storyId, {
+    String? userId,
+    int limit = 10,
+  }) async {
+    try {
+      final response = await _client
+          .from(StoryRelatedProductTable().tableName)
+          .select(
+            '${StoryRelatedProductRow.productField}, ${StoryRelatedProductRow.createdAtField}',
+          )
+          .eq(StoryRelatedProductRow.storyField, storyId)
+          .order(StoryRelatedProductRow.createdAtField, ascending: true);
+
+      final productIds = (response as List)
+          .whereType<Map<String, dynamic>>()
+          .map((row) => row[StoryRelatedProductRow.productField] as String)
+          .toList();
+
+      if (productIds.isEmpty) {
+        return [];
+      }
+
+      final products = await ProductService.instance.fetchProductsByIds(
+        productIds: productIds,
+        userId: userId,
+        limit: limit,
+      );
+
+      return products;
+    } catch (e) {
+      // Keep story dialog resilient; just return empty.
+      // ignore: avoid_print
+      print('Error fetching related products: $e');
+      return [];
+    }
+  }
+
+  Future<List<MissionRow>> fetchRelatedMissions(
+    String storyId, {
+    int limit = 10,
+  }) async {
+    try {
+      final response = await _client
+          .from(StoryRelatedMissionTable().tableName)
+          .select(
+            '${StoryRelatedMissionRow.missionField}, ${StoryRelatedMissionRow.createdAtField}',
+          )
+          .eq(StoryRelatedMissionRow.storyField, storyId)
+          .order(StoryRelatedMissionRow.createdAtField, ascending: true);
+
+      final missionIds = (response as List)
+          .whereType<Map<String, dynamic>>()
+          .map((row) => row[StoryRelatedMissionRow.missionField] as String)
+          .toList();
+
+      if (missionIds.isEmpty) {
+        return [];
+      }
+
+      final uniqueIds = missionIds.toSet().toList();
+      final missionsResponse = await _client
+          .from(MissionTable().tableName)
+          .select('*')
+          .inFilter(MissionRow.idField, uniqueIds);
+
+      final missions = (missionsResponse as List)
+          .whereType<Map<String, dynamic>>()
+          .map(MissionRow.fromJson)
+          .toList();
+
+      final indexById = missionIds.asMap().map(
+        (index, id) => MapEntry(id, index),
+      );
+
+      missions.sort(
+        (a, b) =>
+            (indexById[a.id] ?? 1 << 30).compareTo(indexById[b.id] ?? 1 << 30),
+      );
+
+      return missions.take(limit).toList();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching related missions: $e');
+      return [];
+    }
+  }
+
+  Future<List<StoryWithTags>> fetchPreviousStories(
+    StoryRow currentStory, {
+    int limit = 4,
+  }) async {
+    try {
+      final response = await _client
+          .from(StoryTable().tableName)
+          .select('*, story_tag(*)')
+          .eq(StoryRow.isPublishedField, true)
+          .neq(StoryRow.idField, currentStory.id)
+          .lt(
+            StoryRow.createdAtField,
+            currentStory.createdAt.toUtc().toIso8601String(),
+          )
+          .order(StoryRow.createdAtField, ascending: false)
+          .limit(limit);
+
+      return (response as List).map((json) {
+        final story = StoryRow.fromJson(json);
+        final tags =
+            (json[StoryTagTable().tableName] as List?)
+                ?.whereType<Map<String, dynamic>>()
+                .map(StoryTagRow.fromJson)
+                .toList() ??
+            [];
+        return StoryWithTags(story: story, tags: tags);
+      }).toList();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching previous stories: $e');
+      return [];
+    }
   }
 }

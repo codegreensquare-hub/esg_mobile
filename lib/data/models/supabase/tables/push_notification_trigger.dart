@@ -26,19 +26,21 @@ class PushNotificationTriggerTable
 class PushNotificationTriggerRow extends SupabaseDataRow {
   /// Push Notification Trigger Row
   PushNotificationTriggerRow({
-    required String createdBy,
     String? id,
-    String? token,
+    List<String>? token,
     String? title,
     String? body,
     DateTime? createdAt,
+    String? createdBy,
+    String? imageUrl,
   }) : super({
-         'created_by': supaSerialize(createdBy),
          if (id != null) 'id': supaSerialize(id),
          if (token != null) 'token': supaSerialize(token),
          if (title != null) 'title': supaSerialize(title),
          if (body != null) 'body': supaSerialize(body),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
+         if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (imageUrl != null) 'image_url': supaSerialize(imageUrl),
        });
 
   /// Push Notification Trigger Row
@@ -66,8 +68,8 @@ class PushNotificationTriggerRow extends SupabaseDataRow {
   static const String tokenField = 'token';
 
   /// Token
-  String? get token => getField<String>(tokenField);
-  set token(String? value) => setField<String>(tokenField, value);
+  List<String> get token => getListField<String>(tokenField);
+  set token(List<String>? value) => setListField<String>(tokenField, value);
 
   /// Title field name
   static const String titleField = 'title';
@@ -95,27 +97,36 @@ class PushNotificationTriggerRow extends SupabaseDataRow {
   static const String createdByField = 'created_by';
 
   /// Created By
-  String get createdBy => getField<String>(createdByField)!;
-  set createdBy(String value) => setField<String>(createdByField, value);
+  String? get createdBy => getField<String>(createdByField);
+  set createdBy(String? value) => setField<String>(createdByField, value);
+
+  /// Image Url field name
+  static const String imageUrlField = 'image_url';
+
+  /// Image Url
+  String? get imageUrl => getField<String>(imageUrlField);
+  set imageUrl(String? value) => setField<String>(imageUrlField, value);
 
   /// Make a copy of the current [PushNotificationTriggerRow]
   /// overriding the provided fields
   PushNotificationTriggerRow copyWith({
-    String? createdBy,
     String? id,
-    String? token,
+    List<String>? token,
     String? title,
     String? body,
     DateTime? createdAt,
+    String? createdBy,
+    String? imageUrl,
   }) => PushNotificationTriggerRow.fromJson({
-    'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'id': supaSerialize(id) ?? data['id'],
     'token': supaSerialize(token) ?? data['token'],
     'title': supaSerialize(title) ?? data['title'],
     'body': supaSerialize(body) ?? data['body'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
+    'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'image_url': supaSerialize(imageUrl) ?? data['image_url'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.032204
+/// Date: 2025-12-23 14:25:57.817735

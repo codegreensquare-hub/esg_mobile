@@ -30,6 +30,7 @@ class InquiryRow extends SupabaseDataRow {
     String? content,
     String? title,
     bool? hasResponse,
+    dynamic images,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -37,6 +38,7 @@ class InquiryRow extends SupabaseDataRow {
          if (content != null) 'content': supaSerialize(content),
          if (title != null) 'title': supaSerialize(title),
          if (hasResponse != null) 'has_response': supaSerialize(hasResponse),
+         if (images != null) 'images': supaSerialize(images),
        });
 
   /// Inquiry Row
@@ -98,6 +100,13 @@ class InquiryRow extends SupabaseDataRow {
       getField<bool>(hasResponseField, defaultValue: false)!;
   set hasResponse(bool value) => setField<bool>(hasResponseField, value);
 
+  /// Images field name
+  static const String imagesField = 'images';
+
+  /// Images
+  dynamic get images => getField<dynamic>(imagesField);
+  set images(dynamic value) => setField<dynamic>(imagesField, value);
+
   /// Make a copy of the current [InquiryRow]
   /// overriding the provided fields
   InquiryRow copyWith({
@@ -107,6 +116,7 @@ class InquiryRow extends SupabaseDataRow {
     String? content,
     String? title,
     bool? hasResponse,
+    dynamic images,
   }) => InquiryRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -114,8 +124,9 @@ class InquiryRow extends SupabaseDataRow {
     'content': supaSerialize(content) ?? data['content'],
     'title': supaSerialize(title) ?? data['title'],
     'has_response': supaSerialize(hasResponse) ?? data['has_response'],
+    'images': supaSerialize(images) ?? data['images'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.008568
+/// Date: 2025-12-23 14:25:57.787661

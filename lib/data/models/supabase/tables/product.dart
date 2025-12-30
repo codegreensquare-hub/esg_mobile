@@ -69,8 +69,7 @@ class ProductRow extends SupabaseDataRow {
          if (company != null) 'company': supaSerialize(company),
          if (id != null) 'id': supaSerialize(id),
          if (code != null) 'code': supaSerialize(code),
-         if (stockQuantity != null)
-           'stock_quantity': supaSerialize(stockQuantity),
+         if (stockQuantity != null) 'stock_quantity': supaSerialize(stockQuantity),
          if (saleStatus != null) 'sale_status': supaSerialize(saleStatus),
        });
 
@@ -243,9 +242,9 @@ class ProductRow extends SupabaseDataRow {
 
   /// Sale Status
   ProductSaleStatus? get saleStatus => getField<ProductSaleStatus>(
-    saleStatusField,
-    enumValues: ProductSaleStatus.values,
-  );
+        saleStatusField,
+        enumValues: ProductSaleStatus.values,
+      );
   set saleStatus(ProductSaleStatus? value) =>
       setField<ProductSaleStatus>(saleStatusField, value);
 
@@ -302,4 +301,4 @@ class ProductRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.026547
+/// Date: 2025-12-23 14:25:57.805265

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/screens/green_square/order_item_inquiry.screen.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -374,90 +375,115 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: SizedBox(
-                                        width: 56,
-                                        height: 56,
-                                        child: imageUrl != null
-                                            ? Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => Container(
-                                                      color: cs
-                                                          .surfaceContainerHighest,
-                                                      child: Icon(
-                                                        Icons
-                                                            .image_not_supported_outlined,
-                                                        color:
-                                                            cs.onSurfaceVariant,
-                                                      ),
-                                                    ),
-                                              )
-                                            : Container(
-                                                color:
-                                                    cs.surfaceContainerHighest,
-                                                child: Icon(
-                                                  Icons.image_outlined,
-                                                  color: cs.onSurfaceVariant,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            titleText,
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '수량: $quantityText',
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color: cs.onSurfaceVariant,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: cs.surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        '배송 준비중',
-                                        style: theme.textTheme.labelSmall
-                                            ?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                              fontWeight: FontWeight.w700,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            OrderItemInquiryScreen(
+                                              orderItem: e.item,
+                                              product: e.product,
                                             ),
                                       ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Ink(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          child: SizedBox(
+                                            width: 56,
+                                            height: 56,
+                                            child: imageUrl != null
+                                                ? Image.network(
+                                                    imageUrl,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) => Container(
+                                                          color: cs
+                                                              .surfaceContainerHighest,
+                                                          child: Icon(
+                                                            Icons
+                                                                .image_not_supported_outlined,
+                                                            color: cs
+                                                                .onSurfaceVariant,
+                                                          ),
+                                                        ),
+                                                  )
+                                                : Container(
+                                                    color: cs
+                                                        .surfaceContainerHighest,
+                                                    child: Icon(
+                                                      Icons.image_outlined,
+                                                      color:
+                                                          cs.onSurfaceVariant,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                titleText,
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '수량: $quantityText',
+                                                style: theme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      color:
+                                                          cs.onSurfaceVariant,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: cs.surfaceContainerHighest,
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '배송 준비중',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color: cs.onSurfaceVariant,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               );
                             }),

@@ -18,7 +18,7 @@ class ShoppingMallTab extends StatefulWidget {
 
 class _ShoppingMallTabState extends State<ShoppingMallTab>
     with TickerProviderStateMixin {
-  int awardPoints = 0;
+  double awardPoints = 0.0;
   final TextEditingController _searchController = TextEditingController();
   String selectedCategoryId = 'All';
   List<ProductCategoryRow> categories = [];
@@ -168,7 +168,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
       // Update the local state
       setState(() {
         final index = products.indexWhere(
-          (p) => p.product.code == productWithDetails.product.code,
+          (p) => p.product.id == productWithDetails.product.id,
         );
         if (index != -1) {
           products[index] = ProductWithOtherDetails(
@@ -226,6 +226,9 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final mileageText = awardPoints == awardPoints.roundToDouble()
+        ? awardPoints.toInt().toString()
+        : awardPoints.toStringAsFixed(1);
 
     return SingleChildScrollView(
       // padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
@@ -251,7 +254,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
                   style: theme.textTheme.titleMedium,
                 ),
                 Text(
-                  '$awardPoints P',
+                  '$mileageText P',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: cs.primary,

@@ -39,6 +39,7 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
     DateTime? updatedAt,
     bool? isEnabled,
     String? createdBy,
+    String? companyId,
   }) : super({
          'category_id': supaSerialize(categoryId),
          if (id != null) 'id': supaSerialize(id),
@@ -53,6 +54,7 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
          if (updatedAt != null) 'updated_at': supaSerialize(updatedAt),
          if (isEnabled != null) 'is_enabled': supaSerialize(isEnabled),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (companyId != null) 'company_id': supaSerialize(companyId),
        });
 
   /// Automatic Push Notification Row
@@ -165,6 +167,13 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
       getField<String>(createdByField, defaultValue: 'auth.')!;
   set createdBy(String value) => setField<String>(createdByField, value);
 
+  /// Company Id field name
+  static const String companyIdField = 'company_id';
+
+  /// Company Id
+  String? get companyId => getField<String>(companyIdField);
+  set companyId(String? value) => setField<String>(companyIdField, value);
+
   /// Make a copy of the current [AutomaticPushNotificationRow]
   /// overriding the provided fields
   AutomaticPushNotificationRow copyWith({
@@ -181,6 +190,7 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
     DateTime? updatedAt,
     bool? isEnabled,
     String? createdBy,
+    String? companyId,
   }) => AutomaticPushNotificationRow.fromJson({
     'category_id': supaSerialize(categoryId) ?? data['category_id'],
     'id': supaSerialize(id) ?? data['id'],
@@ -195,8 +205,9 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
     'updated_at': supaSerialize(updatedAt) ?? data['updated_at'],
     'is_enabled': supaSerialize(isEnabled) ?? data['is_enabled'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'company_id': supaSerialize(companyId) ?? data['company_id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.003138
+/// Date: 2025-12-23 14:25:57.777038

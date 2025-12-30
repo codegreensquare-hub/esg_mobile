@@ -22,7 +22,7 @@
       "deviceId": "RT7TITAN5G008792"
     },
     {
-      "name": "iPhone 17 Pro Max",
+      "name": "iPhone 17 Pro Max (mobile)",
       "request": "launch",
       "type": "dart",
       "deviceId": "7D82478D-B82A-4F09-A1F8-31D2DC0B0150"

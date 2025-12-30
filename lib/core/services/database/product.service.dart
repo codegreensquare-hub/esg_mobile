@@ -101,6 +101,80 @@ class ProductService {
     }
   }
 
+  Future<List<ProductWithOtherDetails>> fetchProductsByIds({
+    required List<String> productIds,
+    String? userId,
+    int? limit,
+  }) async {
+    if (productIds.isEmpty) {
+      return [];
+    }
+
+    try {
+      final uniqueIds = productIds.toSet().toList();
+      final response = await _client
+          .from(ProductTable().tableName)
+          .select(
+            '*, product_category(name), product_image(*), user:product_by(*)',
+          )
+          .inFilter(ProductRow.idField, uniqueIds);
+
+      final wishlistProductIds = <String>{};
+      if (userId != null) {
+        final wishlistResponse = await _client
+            .from(ProductWishlistTable().tableName)
+            .select(ProductWishlistRow.productField)
+            .eq(ProductWishlistRow.wishlistByField, userId)
+            .inFilter(ProductWishlistRow.productField, uniqueIds);
+
+        wishlistProductIds.addAll(
+          (wishlistResponse as List).map(
+            (row) => row[ProductWishlistRow.productField] as String,
+          ),
+        );
+      }
+
+      final products = (response as List).map((data) {
+        final product = ProductRow.fromJson(data);
+        final categoryData = data['product_category'] as Map<String, dynamic>?;
+        final categoryName = categoryData?['name'] as String?;
+        final imagesData = data['product_image'] as List<dynamic>? ?? [];
+        final images = imagesData
+            .whereType<Map<String, dynamic>>()
+            .map(ProductImageRow.fromJson)
+            .toList();
+        final sellerData = data['user'] as Map<String, dynamic>?;
+        if (sellerData == null) {
+          throw Exception('Seller data missing for product ${product.id}');
+        }
+        final seller = UserRow.fromJson(sellerData);
+
+        return ProductWithOtherDetails(
+          product: product,
+          seller: seller,
+          categoryName: categoryName,
+          images: images,
+          isInWishlist: wishlistProductIds.contains(product.id),
+        );
+      }).toList();
+
+      final indexById = productIds.asMap().map(
+        (index, id) => MapEntry(id, index),
+      );
+
+      products.sort(
+        (a, b) => (indexById[a.product.id] ?? 1 << 30).compareTo(
+          indexById[b.product.id] ?? 1 << 30,
+        ),
+      );
+
+      return limit == null ? products : products.take(limit).toList();
+    } catch (e) {
+      debugPrint('Error fetching products by ids: $e');
+      return [];
+    }
+  }
+
   Future<List<ProductCategoryRow>> fetchCategories() async {
     try {
       final response = await _client
@@ -206,21 +280,18 @@ class ProductService {
     }
   }
 
-  Future<int> getUserAwardPoints(String userId) async {
+  Future<double> getUserAwardPoints(String userId) async {
     try {
-      // Assuming there's a user_award_points table or similar
-      // For now, return a default value or implement based on your schema
-      // You may need to adjust this based on your actual database structure
       final response = await _client
-          .from('user_award_points') // Replace with actual table name
+          .from('award_points')
           .select('points')
-          .eq('user_id', userId)
+          .eq('user', userId)
           .maybeSingle();
 
-      return response?['points'] as int? ?? 0;
+      return response?['points'] as double? ?? 0.0;
     } catch (e) {
       debugPrint('Error fetching user award points: $e');
-      return 0;
+      return 0.0;
     }
   }
 }

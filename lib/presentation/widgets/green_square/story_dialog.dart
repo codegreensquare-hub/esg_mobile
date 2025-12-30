@@ -2,9 +2,14 @@ import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/text.story.dart';
+import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
+import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,6 +31,11 @@ class _StoryDialogState extends State<StoryDialog> {
   late List<StoryCommentWithUser> comments = [];
   late int likeCount = 0;
   late bool hasLiked = false;
+  late List<ProductWithOtherDetails> recommendedProducts = [];
+  late List<MissionRow> recommendedMissions = [];
+  late List<StoryWithTags> previousStories = [];
+  bool isLoadingRecommendations = true;
+  bool isLoadingPreviousStories = true;
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -72,15 +82,46 @@ class _StoryDialogState extends State<StoryDialog> {
     final storyId = widget.story.id;
     final fetchedComments = await StoryService.instance.fetchComments(storyId);
     final count = await StoryService.instance.getLikeCount(storyId);
-    bool liked = false;
-    if (userId != null) {
-      liked = await StoryService.instance.hasUserLiked(storyId, userId!);
-    }
+    final liked = userId == null
+        ? false
+        : await StoryService.instance.hasUserLiked(storyId, userId!);
+
+    setState(() {
+      isLoadingRecommendations = true;
+      isLoadingPreviousStories = true;
+    });
+
+    final fetchedProducts = await StoryService.instance.fetchRelatedProducts(
+      storyId,
+      userId: userId,
+    );
+    final fetchedMissions = await StoryService.instance.fetchRelatedMissions(
+      storyId,
+    );
+
+    final fetchedPreviousStories = await StoryService.instance
+        .fetchPreviousStories(widget.story);
+
     setState(() {
       comments = fetchedComments;
       likeCount = count;
       hasLiked = liked;
+      recommendedProducts = fetchedProducts;
+      recommendedMissions = fetchedMissions;
+      isLoadingRecommendations = false;
+      previousStories = fetchedPreviousStories;
+      isLoadingPreviousStories = false;
     });
+  }
+
+  void _navigateToProductDetail(ProductWithOtherDetails productWithDetails) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(
+          productWithDetails: productWithDetails,
+        ),
+      ),
+    );
   }
 
   void _updateHeaderCardHeight() {
@@ -148,6 +189,8 @@ class _StoryDialogState extends State<StoryDialog> {
     _photoHeightThreshold = photoHeight;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateHeaderCardHeight();
@@ -592,21 +635,154 @@ class _StoryDialogState extends State<StoryDialog> {
                               ),
                           ],
                         ),
+                        SizedBox(
+                          height: 32,
+                        ),
                       ],
                     ),
                   ),
                 ),
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: 12),
+                  child: SizedBox(height: 16),
                 ),
+                if (!isLoadingRecommendations &&
+                    recommendedProducts.isNotEmpty) ...[
+                  // Recommended Products
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: cs.surface,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                            child: Text(
+                              '추천 상품',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ...recommendedProducts.map(
+                            (productWithDetails) => _RecommendedProductListTile(
+                              productWithDetails: productWithDetails,
+                              onTap: () => _navigateToProductDetail(
+                                productWithDetails,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 16),
+                  ),
+                ],
+                if (!isLoadingRecommendations &&
+                    recommendedMissions.isNotEmpty) ...[
+                  // Recommended Missions
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: cs.surface,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                            child: Text(
+                              '추천 미션',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ...recommendedMissions.map(
+                            (mission) => MissionAvailableListTile(
+                              mission: mission,
+                              onTap: (mission) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => MissionDetailDialog(
+                                      mission: mission,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 16),
+                  ),
+                ],
+                // Other Interesting Stories
                 SliverToBoxAdapter(
                   child: Container(
                     color: cs.surface,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [Text("Second container")],
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                          child: Text(
+                            '흥미로운 다른 이야기들',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (isLoadingPreviousStories)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        else if (previousStories.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Text(
+                              '다른 이야기가 없습니다.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 12,
+                                    crossAxisSpacing: 12,
+                                    childAspectRatio: 0.78,
+                                  ),
+                              itemCount: previousStories.take(4).length,
+                              itemBuilder: (context, index) {
+                                final storyWithTags = previousStories[index];
+                                return _RecommendedStoryGridTile(
+                                  storyWithTags: storyWithTags,
+                                );
+                              },
+                            ),
+                          ),
+                      ],
                     ),
                   ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: bottomPadding + 16),
                 ),
               ],
             ),
@@ -653,6 +829,168 @@ class _StoryDialogState extends State<StoryDialog> {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RecommendedStoryGridTile extends StatelessWidget {
+  const _RecommendedStoryGridTile({
+    required this.storyWithTags,
+  });
+
+  final StoryWithTags storyWithTags;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final story = storyWithTags.story;
+
+    final imageUrl =
+        story.thumbnailBucket != null && story.thumbnailFileName != null
+        ? getImageLink(
+            story.thumbnailBucket!,
+            story.thumbnailFileName!,
+            folderPath: story.thumbnailFolderPath!,
+          )
+        : null;
+
+    return InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => StoryDialog(
+            story: storyWithTags.story,
+            tags: storyWithTags.tags,
+          ),
+        ),
+      ),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        elevation: 0.1,
+        color: cs.surfaceContainerLowest,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: imageUrl == null
+                  ? Container(
+                      color: cs.surfaceContainerHighest,
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    )
+                  : Hero(
+                      tag: 'green-square-story-image-${story.id}',
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: cs.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                story.title ?? '',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecommendedProductListTile extends StatelessWidget {
+  const _RecommendedProductListTile({
+    required this.productWithDetails,
+    required this.onTap,
+  });
+
+  final ProductWithOtherDetails productWithDetails;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final product = productWithDetails.product;
+
+    final imageUrl =
+        product.mainImageBucket != null && product.mainImageFileName != null
+        ? getImageLink(
+            product.mainImageBucket!,
+            product.mainImageFileName!,
+            folderPath: product.mainImageFolderPath,
+          )
+        : null;
+
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 56,
+          height: 56,
+          child: imageUrl == null
+              ? Container(
+                  color: cs.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.image_outlined,
+                    color: cs.onSurfaceVariant,
+                  ),
+                )
+              : Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: cs.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+        ),
+      ),
+      title: Text(
+        product.title ?? '제품명 없음',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Text(
+        product.name ?? '',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: cs.onSurfaceVariant,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: cs.onSurfaceVariant,
       ),
     );
   }

@@ -30,6 +30,7 @@ export 'mission_photo_task.dart';
 export 'mission_request.dart';
 export 'order.dart';
 export 'order_item.dart';
+export 'order_item_inquiry_message.dart';
 export 'order_item_option.dart';
 export 'organization.dart';
 export 'payment.dart';
@@ -57,4 +58,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.038989
+/// Date: 2025-12-23 14:25:57.824104

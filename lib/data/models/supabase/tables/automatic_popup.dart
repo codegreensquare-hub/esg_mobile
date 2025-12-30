@@ -40,6 +40,7 @@ class AutomaticPopupRow extends SupabaseDataRow {
     bool? isEnabled,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? companyId,
   }) : super({
          'category_id': supaSerialize(categoryId),
          if (id != null) 'id': supaSerialize(id),
@@ -61,6 +62,7 @@ class AutomaticPopupRow extends SupabaseDataRow {
          if (isEnabled != null) 'is_enabled': supaSerialize(isEnabled),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (updatedAt != null) 'updated_at': supaSerialize(updatedAt),
+         if (companyId != null) 'company_id': supaSerialize(companyId),
        });
 
   /// Automatic Popup Row
@@ -189,6 +191,13 @@ class AutomaticPopupRow extends SupabaseDataRow {
       getField<DateTime>(updatedAtField, defaultValue: DateTime.now())!;
   set updatedAt(DateTime value) => setField<DateTime>(updatedAtField, value);
 
+  /// Company Id field name
+  static const String companyIdField = 'company_id';
+
+  /// Company Id
+  String? get companyId => getField<String>(companyIdField);
+  set companyId(String? value) => setField<String>(companyIdField, value);
+
   /// Make a copy of the current [AutomaticPopupRow]
   /// overriding the provided fields
   AutomaticPopupRow copyWith({
@@ -207,6 +216,7 @@ class AutomaticPopupRow extends SupabaseDataRow {
     bool? isEnabled,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? companyId,
   }) => AutomaticPopupRow.fromJson({
     'category_id': supaSerialize(categoryId) ?? data['category_id'],
     'id': supaSerialize(id) ?? data['id'],
@@ -225,8 +235,9 @@ class AutomaticPopupRow extends SupabaseDataRow {
     'is_enabled': supaSerialize(isEnabled) ?? data['is_enabled'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'updated_at': supaSerialize(updatedAt) ?? data['updated_at'],
+    'company_id': supaSerialize(companyId) ?? data['company_id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.000744
+/// Date: 2025-12-23 14:25:57.774345

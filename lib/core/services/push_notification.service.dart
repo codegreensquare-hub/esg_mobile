@@ -1,4 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/data/models/supabase/tables/push_notification_token.dart';
 
@@ -23,13 +25,25 @@ class PushNotificationService {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      // Get token
-      final token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        await _saveToken(token);
+      final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+      if (isIOS) {
+        final apnsToken = await _firebaseMessaging.getAPNSToken();
+        if (apnsToken == null) {
+          _firebaseMessaging.onTokenRefresh.listen(_saveToken);
+          return;
+        }
       }
 
-      // Listen for token updates
+      try {
+        final token = await _firebaseMessaging.getToken();
+        if (token != null) {
+          await _saveToken(token);
+        }
+      } catch (_) {
+        // Ignore early iOS APNS-token-not-set failures.
+      }
+
       _firebaseMessaging.onTokenRefresh.listen(_saveToken);
     }
   }
@@ -58,9 +72,20 @@ class PushNotificationService {
   }
 
   Future<void> saveTokenOnLogin() async {
-    final token = await _firebaseMessaging.getToken();
-    if (token != null) {
-      await _saveToken(token);
+    final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+    if (isIOS) {
+      final apnsToken = await _firebaseMessaging.getAPNSToken();
+      if (apnsToken == null) return;
+    }
+
+    try {
+      final token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        await _saveToken(token);
+      }
+    } catch (_) {
+      // Ignore early iOS APNS-token-not-set failures.
     }
   }
 }

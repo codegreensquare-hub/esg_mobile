@@ -96,4 +96,4 @@ class MissionRequestRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.023652
+/// Date: 2025-12-23 14:25:57.801728

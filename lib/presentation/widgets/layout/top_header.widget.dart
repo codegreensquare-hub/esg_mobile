@@ -45,9 +45,13 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
       pinned: false,
       floating: false,
       snap: false,
-      leading: SizedBox.shrink(),
+      automaticallyImplyLeading: false,
+      automaticallyImplyActions: false,
       backgroundColor: theme.colorScheme.primary,
       actions: widget.actions,
+      leading: widget.actions == null || widget.actions!.isEmpty
+          ? null
+          : const SizedBox.shrink(),
       title: Center(
         child: SizedBox(
           width: 200,
@@ -67,7 +71,7 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
             },
             textBuilder: (value) {
               return Text(
-                value ? 'C  O  D  E' : 'S  Q  U  A  R  E',
+                value ? '  C  O  D  E ' : 'S  Q  U  A  R  E',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   color: theme.colorScheme.primary,
                   fontSize: 12,

@@ -52,6 +52,7 @@ class MissionRow extends SupabaseDataRow {
     String? rejectedBy,
     bool? isDeleted,
     String? rejectedReason,
+    String? companyId,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -94,6 +95,7 @@ class MissionRow extends SupabaseDataRow {
          if (isDeleted != null) 'is_deleted': supaSerialize(isDeleted),
          if (rejectedReason != null)
            'rejected_reason': supaSerialize(rejectedReason),
+         if (companyId != null) 'company_id': supaSerialize(companyId),
        });
 
   /// Mission Row
@@ -336,6 +338,13 @@ class MissionRow extends SupabaseDataRow {
   set rejectedReason(String? value) =>
       setField<String>(rejectedReasonField, value);
 
+  /// Company Id field name
+  static const String companyIdField = 'company_id';
+
+  /// Company Id
+  String? get companyId => getField<String>(companyIdField);
+  set companyId(String? value) => setField<String>(companyIdField, value);
+
   /// Make a copy of the current [MissionRow]
   /// overriding the provided fields
   MissionRow copyWith({
@@ -367,6 +376,7 @@ class MissionRow extends SupabaseDataRow {
     String? rejectedBy,
     bool? isDeleted,
     String? rejectedReason,
+    String? companyId,
   }) => MissionRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -408,8 +418,9 @@ class MissionRow extends SupabaseDataRow {
     'rejected_by': supaSerialize(rejectedBy) ?? data['rejected_by'],
     'is_deleted': supaSerialize(isDeleted) ?? data['is_deleted'],
     'rejected_reason': supaSerialize(rejectedReason) ?? data['rejected_reason'],
+    'company_id': supaSerialize(companyId) ?? data['company_id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-19 15:29:31.020359
+/// Date: 2025-12-23 14:25:57.797914
