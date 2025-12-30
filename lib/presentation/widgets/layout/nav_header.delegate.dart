@@ -23,6 +23,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.selectedIndex = 0,
     this.onTabSelected,
     this.onTapMenu,
+    this.onTapLogin,
     this.onTapCart,
     this.homeTab,
     this.onSelectSubTab,
@@ -37,6 +38,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
   final void Function(int index, String tab)? onTabSelected;
   final void Function(String parentTab, String subTab)? onSelectSubTab;
   final void Function()? onTapMenu;
+  final VoidCallback? onTapLogin;
   final VoidCallback? onTapCart;
   final String? homeTab;
   // Current layout width supplied by parent (e.g. LayoutBuilder). We only
@@ -96,6 +98,14 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
                 Spacer(),
                 IconButton(
+                  tooltip: 'User',
+                  icon: Icon(
+                    Icons.person_outline,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  onPressed: onTapLogin,
+                ),
+                IconButton(
                   tooltip: 'Shopping',
                   icon: Icon(
                     Icons.shopping_bag_outlined,
@@ -122,7 +132,11 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ...tabs
                     .asMap()
                     .entries
-                    .where((e) => !(homeTab != null && e.value == homeTab))
+                    .where(
+                      (e) =>
+                          !(homeTab != null && e.value == homeTab) &&
+                          e.value != codeGreenLoginTabId,
+                    )
                     .map(
                       (e) => _NavTabButton(
                         id: e.value,
@@ -152,11 +166,8 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                 // My
                 NavHeaderButton(
                   icon: Icons.person_outline,
-                  title: 'My',
-                  onTap: () {
-                    // TODO
-                    throw UnimplementedError();
-                  },
+                  title: 'Login',
+                  onTap: onTapLogin,
                 ),
                 // Cart
                 NavHeaderButton(
@@ -186,6 +197,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.selectedIndex != selectedIndex ||
         oldDelegate.homeTab != homeTab ||
         oldDelegate.onTapCart != onTapCart ||
+        oldDelegate.onTapLogin != onTapLogin ||
         oldDelegate.onSelectSubTab != onSelectSubTab ||
         prevWide != nextWide;
   }

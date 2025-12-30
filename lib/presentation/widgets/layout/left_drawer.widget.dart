@@ -1,10 +1,8 @@
 import 'package:esg_mobile/core/constants/navigation.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
-import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
 import 'package:esg_mobile/presentation/widgets/logo/code_green.logo.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class CodeGreenLeftDrawer extends StatelessWidget {
   final List<String> tabs;
@@ -13,6 +11,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
   final ValueChanged<int>? onSelect;
   final String? homeTab;
   final VoidCallback? onTapGreenSquare;
+  final VoidCallback? onTapLogin;
   final void Function(String tab, String subTab)? onSelectSubTab;
 
   const CodeGreenLeftDrawer({
@@ -23,6 +22,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
     this.onSelect,
     this.homeTab,
     this.onTapGreenSquare,
+    this.onTapLogin,
     this.onSelectSubTab,
   });
 
@@ -99,7 +99,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                     return ListTile(
                       onTap: () {
                         Navigator.of(context).pop();
-                        context.push(LoginScreen.route);
+                        onTapLogin?.call();
                       },
                       title: Text(
                         '로그인',
@@ -115,7 +115,11 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                 ...tabs
                     .asMap()
                     .entries
-                    .where((e) => !(homeTab != null && e.value == homeTab))
+                    .where(
+                      (e) =>
+                          !(homeTab != null && e.value == homeTab) &&
+                          e.value != codeGreenLoginTabId,
+                    )
                     .map<Widget>((e) {
                       final index = e.key;
                       final id = e.value;

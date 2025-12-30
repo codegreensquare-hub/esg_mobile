@@ -6,6 +6,7 @@ import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
+import 'package:esg_mobile/presentation/screens/code_green/login/code_green_login.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.tab.dart';
@@ -131,6 +132,7 @@ class _MainScreenState extends State<MainScreen> {
         onTapGreenSquare: () {
           setState(() => _selectedMainTab = MainTab.greenSquare);
         },
+        onTapLogin: _openCodeGreenLogin,
         onSelectSubTab: _handleCodeGreenSubTab,
       ),
       endDrawer: isGreenSquare
@@ -237,6 +239,7 @@ class _MainScreenState extends State<MainScreen> {
                   }
                 },
                 onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                onTapLogin: _openCodeGreenLogin,
                 onTapCart: _showCartBottomSheet,
                 onSelectSubTab: _handleCodeGreenSubTab,
               ),
@@ -319,6 +322,10 @@ class _MainScreenState extends State<MainScreen> {
         return const LookBookTab(key: PageStorageKey(LookBookTab.tab));
       case EventTab.tab:
         return const EventTab(key: PageStorageKey(EventTab.tab));
+      case codeGreenLoginTabId:
+        return const CodeGreenLoginTab(
+          key: PageStorageKey(codeGreenLoginTabId),
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -359,6 +366,15 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
       );
+    });
+  }
+
+  void _openCodeGreenLogin() {
+    final idx = codeGreenTabs.indexOf(codeGreenLoginTabId);
+    if (idx < 0) return;
+    setState(() {
+      _selectedMainTab = MainTab.codeGreen;
+      _selectedIndex = idx;
     });
   }
 
