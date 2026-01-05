@@ -95,7 +95,7 @@ class _OrderItemInquiryScreenState extends State<OrderItemInquiryScreen>
 
   void _startPolling() {
     _stopPolling(); // Ensure no duplicate timers
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) {
         _pollNewMessages();
       }
@@ -181,6 +181,7 @@ class _OrderItemInquiryScreenState extends State<OrderItemInquiryScreen>
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           0.0, // For reverse ListView, 0.0 is the bottom (newest messages)
@@ -484,8 +485,9 @@ class _OrderItemInquiryScreenState extends State<OrderItemInquiryScreen>
                       filled: true,
                       fillColor: cs.surfaceContainerHighest,
                     ),
-                    maxLines: null,
-                    textInputAction: TextInputAction.newline,
+                    maxLines: 1,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
                 const SizedBox(width: 8),

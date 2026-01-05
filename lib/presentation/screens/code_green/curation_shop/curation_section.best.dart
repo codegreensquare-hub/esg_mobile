@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'curation_shop.product_fetch.dart';
 
 class CurationSectionBest extends StatelessWidget {
-  const CurationSectionBest({super.key});
+  const CurationSectionBest({super.key, this.onTapProduct});
+
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           'Best Sellers',
@@ -22,7 +25,7 @@ class CurationSectionBest extends StatelessWidget {
           style: theme.textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
-        const CurationShopProductFetch(tab: 'best'),
+        CurationShopProductFetch(tab: 'best', onTapProduct: onTapProduct),
       ],
     );
   }

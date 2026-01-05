@@ -393,7 +393,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     children: [
                                       Text(
                                         item.product.title ??
-                                            item.product.code ??
+                                            item.product.name ??
                                             '제품명 없음',
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(

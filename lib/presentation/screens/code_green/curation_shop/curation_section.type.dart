@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/enums/product_material.dart';
 import 'curation_shop.product_fetch.dart';
 
@@ -7,10 +8,12 @@ class CurationSectionType extends StatelessWidget {
     super.key,
     required this.selectedSlug,
     required this.onSubTabChanged,
+    this.onTapProduct,
   });
 
   final String selectedSlug;
   final ValueChanged<String> onSubTabChanged;
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,7 @@ class CurationSectionType extends StatelessWidget {
       length: ProductMaterial.values.length,
       initialIndex: initialIndex,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             'Shop by Type',
@@ -61,6 +64,7 @@ class CurationSectionType extends StatelessWidget {
           CurationShopProductFetch(
             tab: 'type',
             subTab: selectedSlug,
+            onTapProduct: onTapProduct,
           ),
         ],
       ),

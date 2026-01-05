@@ -69,11 +69,13 @@ class UserAuthService extends ChangeNotifier {
     String? username,
     String? phone,
     String? birthdate,
+    String? company,
   }) async {
     final metadata = <String, dynamic>{
       if (username != null && username.isNotEmpty) 'username': username,
       if (phone != null && phone.isNotEmpty) 'phone': phone,
       if (birthdate != null && birthdate.isNotEmpty) 'birthdate': birthdate,
+      if (company != null && company.isNotEmpty) 'company': company,
     };
     final response = await _client.auth.signUp(
       email: email,
@@ -88,6 +90,20 @@ class UserAuthService extends ChangeNotifier {
   Future<void> signOut() async {
     await _client.auth.signOut();
     _updateUser(null);
+  }
+
+  /// Sign in using Kakao OAuth.
+  ///
+  /// Requires Supabase Dashboard provider config + mobile deep-link setup.
+  Future<void> signInWithKakao() async {
+    await _client.auth.signInWithOAuth(
+      OAuthProvider.kakao,
+      redirectTo: kIsWeb ? null : 'io.supabase.flutter://login-callback/',
+    );
+  }
+
+  Future<void> refresh() async {
+    await _syncUserRowFor(_currentUser);
   }
 
   void _updateUser(User? user) {

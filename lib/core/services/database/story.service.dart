@@ -66,6 +66,51 @@ class StoryService {
     }).toList();
   }
 
+  Future<List<StoryCommentRow>> fetchCommentsByUser(String userId) async {
+    final trimmed = userId.trim();
+    if (trimmed.isEmpty) {
+      return const <StoryCommentRow>[];
+    }
+
+    final response = await _client
+        .from(StoryCommentTable().tableName)
+        .select()
+        .eq(StoryCommentRow.commentByField, trimmed)
+        .order(StoryCommentRow.createdAtField, ascending: false);
+
+    return (response as List)
+        .whereType<Map<String, dynamic>>()
+        .map(StoryCommentRow.fromJson)
+        .toList(growable: false);
+  }
+
+  Future<StoryWithTags?> fetchStoryWithTagsById(String storyId) async {
+    final trimmed = storyId.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    final json = await _client
+        .from(StoryTable().tableName)
+        .select('*, story_tag(*)')
+        .eq(StoryRow.idField, trimmed)
+        .maybeSingle();
+
+    if (json is! Map<String, dynamic>) {
+      return null;
+    }
+
+    final story = StoryRow.fromJson(json);
+    final tags =
+        (json[StoryTagTable().tableName] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(StoryTagRow.fromJson)
+            .toList(growable: false) ??
+        const <StoryTagRow>[];
+
+    return StoryWithTags(story: story, tags: tags);
+  }
+
   Future<int> getLikeCount(String storyId) async {
     final response = await _client
         .from(StoryLikeTable().tableName)

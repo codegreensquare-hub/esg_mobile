@@ -1,7 +1,7 @@
 import 'package:esg_mobile/core/constants/frame_width.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CodeGreenLoginTab extends StatefulWidget {
   const CodeGreenLoginTab({super.key});
@@ -18,9 +18,7 @@ class _CodeGreenLoginTabState extends State<CodeGreenLoginTab> {
 
     setState(() => _isSubmitting = true);
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.kakao,
-      );
+      await UserAuthService.instance.signInWithKakao();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

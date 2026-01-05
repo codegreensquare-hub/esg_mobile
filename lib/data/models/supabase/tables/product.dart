@@ -41,9 +41,6 @@ class ProductRow extends SupabaseDataRow {
     String? title,
     String? company,
     String? id,
-    String? code,
-    int? stockQuantity,
-    ProductSaleStatus? saleStatus,
   }) : super({
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
@@ -68,9 +65,6 @@ class ProductRow extends SupabaseDataRow {
          if (title != null) 'title': supaSerialize(title),
          if (company != null) 'company': supaSerialize(company),
          if (id != null) 'id': supaSerialize(id),
-         if (code != null) 'code': supaSerialize(code),
-         if (stockQuantity != null) 'stock_quantity': supaSerialize(stockQuantity),
-         if (saleStatus != null) 'sale_status': supaSerialize(saleStatus),
        });
 
   /// Product Row
@@ -223,31 +217,6 @@ class ProductRow extends SupabaseDataRow {
   String get id => getField<String>(idField, defaultValue: '')!;
   set id(String value) => setField<String>(idField, value);
 
-  /// Code field name
-  static const String codeField = 'code';
-
-  /// Code
-  String? get code => getField<String>(codeField);
-  set code(String? value) => setField<String>(codeField, value);
-
-  /// Stock Quantity field name
-  static const String stockQuantityField = 'stock_quantity';
-
-  /// Stock Quantity
-  int? get stockQuantity => getField<int>(stockQuantityField);
-  set stockQuantity(int? value) => setField<int>(stockQuantityField, value);
-
-  /// Sale Status field name
-  static const String saleStatusField = 'sale_status';
-
-  /// Sale Status
-  ProductSaleStatus? get saleStatus => getField<ProductSaleStatus>(
-        saleStatusField,
-        enumValues: ProductSaleStatus.values,
-      );
-  set saleStatus(ProductSaleStatus? value) =>
-      setField<ProductSaleStatus>(saleStatusField, value);
-
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
   ProductRow copyWith({
@@ -268,9 +237,6 @@ class ProductRow extends SupabaseDataRow {
     String? title,
     String? company,
     String? id,
-    String? code,
-    int? stockQuantity,
-    ProductSaleStatus? saleStatus,
   }) => ProductRow.fromJson({
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
@@ -294,11 +260,8 @@ class ProductRow extends SupabaseDataRow {
     'title': supaSerialize(title) ?? data['title'],
     'company': supaSerialize(company) ?? data['company'],
     'id': supaSerialize(id) ?? data['id'],
-    'code': supaSerialize(code) ?? data['code'],
-    'stock_quantity': supaSerialize(stockQuantity) ?? data['stock_quantity'],
-    'sale_status': supaSerialize(saleStatus) ?? data['sale_status'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-23 14:25:57.805265
+/// Date: 2025-12-30 17:23:48.774463

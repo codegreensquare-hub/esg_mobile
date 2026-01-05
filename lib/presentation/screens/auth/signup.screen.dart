@@ -1,4 +1,5 @@
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +24,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneController = TextEditingController();
   final _birthdateController = TextEditingController();
   DateTime? _selectedBirthdate;
+  bool _isLoadingCompanies = true;
+  List<CompanyRow> _companies = const [];
+  String? _selectedCompanyId;
   bool _isSubmitting = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanies();
+  }
+
+  Future<void> _loadCompanies() async {
+    setState(() {
+      _isLoadingCompanies = true;
+      _companies = const [];
+      _selectedCompanyId = null;
+    });
+
+    try {
+      final client = Supabase.instance.client;
+      final rows = await client
+          .from(CompanyTable().tableName)
+          .select('${CompanyRow.idField}, ${CompanyRow.nameField}')
+          .order(CompanyRow.nameField, ascending: true);
+
+      final companies = (rows as List)
+          .whereType<Map<String, dynamic>>()
+          .map(CompanyRow.fromJson)
+          .where((e) => (e.name ?? '').trim().isNotEmpty)
+          .toList(growable: false);
+
+      if (!mounted) return;
+      setState(() {
+        _companies = companies;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = '회사 목록을 불러오지 못했습니다. 다시 시도해주세요.';
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() => _isLoadingCompanies = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -55,6 +100,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ? null
             : _phoneController.text.trim(),
         birthdate: normalizedBirthdate,
+        company: _selectedCompanyId,
       );
       if (!mounted) return;
       final nextRoute = isVerified
@@ -95,6 +141,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  DropdownButtonFormField<String>(
+                    value: _selectedCompanyId,
+                    items: _companies
+                        .map(
+                          (c) => DropdownMenuItem<String>(
+                            value: c.id,
+                            child: Text(c.name ?? ''),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: _isLoadingCompanies
+                        ? null
+                        : (value) => setState(() => _selectedCompanyId = value),
+                    decoration: InputDecoration(
+                      labelText: '회사',
+                      hintText: _isLoadingCompanies
+                          ? '회사 목록 불러오는 중...'
+                          : '회사를 선택해주세요',
+                      suffixIcon: _isLoadingCompanies
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              tooltip: '회사 목록 새로고침',
+                              onPressed: _isSubmitting ? null : _loadCompanies,
+                              icon: const Icon(Icons.refresh),
+                            ),
+                    ),
+                    validator: (value) {
+                      if (_isLoadingCompanies) {
+                        return '회사 목록을 불러오는 중입니다.';
+                      }
+                      if ((value ?? '').isEmpty) {
+                        return '회사를 선택해주세요.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _usernameController,
                     decoration: const InputDecoration(labelText: '사용자 이름'),

@@ -5,11 +5,14 @@ import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/my_comments.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/liked_stories_dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AccountTab extends StatefulWidget {
@@ -185,9 +188,7 @@ class _AccountTabState extends State<AccountTab> {
   }
 
   void _handleSignupTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('회원가입 화면으로 이동해 주세요.')),
-    );
+    context.push(SignUpScreen.route);
   }
 
   void _handleOrderLookup() {
@@ -217,8 +218,17 @@ class _AccountTabState extends State<AccountTab> {
   }
 
   void _handleMyComments() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('내가 쓴 댓글 기능은 준비 중입니다.')),
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MyCommentsScreen(userId: userId!),
+      ),
     );
   }
 

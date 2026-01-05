@@ -21,7 +21,8 @@ class ProductDetailScreen extends StatefulWidget {
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
+class _ProductDetailScreenState extends State<ProductDetailScreen>
+    with SingleTickerProviderStateMixin {
   late ProductWithOtherDetails productWithDetails;
   bool isInWishlist = false;
   String? userId;
@@ -31,6 +32,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   List<ProductOptionDefinition> productOptions = [];
   final Map<String, String> selectedOptionValues = {};
   double currentAwardPoints = 0.0;
+  late final TabController _tabController;
 
   @override
   void initState() {
@@ -38,8 +40,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     productWithDetails = widget.productWithDetails;
     userId = Supabase.instance.client.auth.currentUser?.id;
     isInWishlist = productWithDetails.isInWishlist;
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_handleTabChange);
     _loadProductOptions();
     _loadAwardPoints();
+  }
+
+  void _handleTabChange() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _toggleWishlist() async {
@@ -105,9 +121,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _increaseQuantity() {
-    final stockLimit = productWithDetails.product.stockQuantity?.toInt() ?? 999;
+    // Inventory/stock is not tracked right now.
     setState(() {
-      quantity = (quantity + 1).clamp(1, stockLimit).toInt();
+      quantity = (quantity + 1).clamp(1, 999).toInt();
     });
   }
 
@@ -147,7 +163,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       final result = await CartService.instance.addItem(
         userId: userId!,
-        productCode: productWithDetails.product.id,
+        productId: productWithDetails.product.id,
         quantity: quantity.toDouble(),
         selectedOptions: optionPayload,
       );
@@ -210,7 +226,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.title ?? product.code ?? '제품명 없음'),
+        title: Text(product.title ?? '제품명 없음'),
         actions: [
           if (userId != null)
             IconButton(
@@ -357,7 +373,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               .map(
                                 (valueRow) => DropdownMenuItem<String>(
                                   value: valueRow.value ?? valueRow.id,
-                                  child: Text(valueRow.value ?? valueRow.id),
+                                  child: Text(
+                                    valueRow.value ?? valueRow.id,
+                                  ),
                                 ),
                               )
                               .toList(),
@@ -423,7 +441,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             isAddingToCart ? '담는 중...' : '장바구니 담기',
                           ),
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -433,13 +453,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           onPressed: () {
                             // TODO: Implement purchase functionality
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('구매 기능은 곧 추가됩니다.')),
+                              const SnackBar(
+                                content: Text('구매 기능은 곧 추가됩니다.'),
+                              ),
                             );
                           },
                           icon: const Icon(Icons.shopping_cart),
                           label: const Text('구매하기'),
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -447,31 +471,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
 
                   const SizedBox(height: 24),
-
-                  DefaultTabController(
-                    length: 2,
-                    child: Column(
-                      children: [
-                        const TabBar(
-                          tabs: [
-                            Tab(text: '제품 설명'),
-                            Tab(text: '리뷰 (0)'),
-                          ],
-                        ),
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxHeight: MediaQuery.of(context).size.height * 0.6,
-                            minHeight: 100,
-                          ),
-                          child: TabBarView(
-                            children: [
-                              ProductDescriptionTab(product: product),
-                              ReviewsTab(product: product),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  TabBar(
+                    controller: _tabController,
+                    tabs: const [
+                      Tab(text: '제품 설명'),
+                      Tab(text: '리뷰 (0)'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    child: _tabController.index == 0
+                        ? ProductDescriptionTab(product: product)
+                        : ReviewsTab(product: product),
                   ),
                 ],
               ),

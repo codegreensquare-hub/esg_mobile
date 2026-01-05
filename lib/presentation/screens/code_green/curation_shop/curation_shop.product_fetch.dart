@@ -4,6 +4,7 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/product.dart';
+import 'package:esg_mobile/presentation/screens/code_green/product_detail_tab.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -18,10 +19,12 @@ class CurationShopProductFetch extends StatefulWidget {
     super.key,
     required this.tab,
     this.subTab,
+    this.onTapProduct,
   });
 
   final String tab;
   final String? subTab;
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
 
   @override
   State<CurationShopProductFetch> createState() =>
@@ -116,8 +119,10 @@ class _CurationShopProductFetchState extends State<CurationShopProductFetch> {
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
       itemCount: _products.length,
-      itemBuilder: (context, index) =>
-          _CurationProductCard(product: _products[index]),
+      itemBuilder: (context, index) => _CurationProductCard(
+        product: _products[index],
+        onTap: widget.onTapProduct,
+      ),
     );
   }
 
@@ -188,9 +193,10 @@ ProductMaterial? _materialFromSlug(String? slug) {
 }
 
 class _CurationProductCard extends StatelessWidget {
-  const _CurationProductCard({required this.product});
+  const _CurationProductCard({required this.product, this.onTap});
 
   final ProductWithOtherDetails product;
+  final ValueChanged<ProductWithOtherDetails>? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -207,88 +213,105 @@ class _CurationProductCard extends StatelessWidget {
           )
         : null;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 0,
-      color: cs.surface,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
+    return InkWell(
+      onTap: () {
+        final handler = onTap;
+        if (handler != null) {
+          handler(product);
+          return;
+        }
+
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CodeGreenProductDetailTabScreen(
+              productWithDetails: product,
+            ),
+          ),
+        );
+      },
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        color: cs.surface,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Container(
+                          color: cs.surfaceContainerHighest,
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator.adaptive(),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => Container(
                         color: cs.surfaceContainerHighest,
                         alignment: Alignment.center,
-                        child: const CircularProgressIndicator.adaptive(),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) => Container(
+                        child: const Icon(Icons.image_not_supported),
+                      ),
+                    )
+                  : Container(
                       color: cs.surfaceContainerHighest,
                       alignment: Alignment.center,
-                      child: const Icon(Icons.image_not_supported),
+                      child: const Icon(Icons.image),
                     ),
-                  )
-                : Container(
-                    color: cs.surfaceContainerHighest,
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.image),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    (data.title ?? '').isNotEmpty ? data.title! : 'Product',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  data.title ?? data.id,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (product.categoryName != null &&
-                    product.categoryName!.isNotEmpty) ...[
+                  if (product.categoryName != null &&
+                      product.categoryName!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      product.categoryName!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
-                    product.categoryName!,
+                    '[${product.seller.username ?? 'Unknown Seller'}]',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    price != null ? formatKRW(price) : 'Price on request',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
-                const SizedBox(height: 4),
-                Text(
-                  '[${product.seller.username ?? 'Unknown Seller'}]',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  price != null ? formatKRW(price) : 'Price on request',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

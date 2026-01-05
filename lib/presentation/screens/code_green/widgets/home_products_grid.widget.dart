@@ -1,4 +1,5 @@
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/presentation/screens/code_green/product_detail_tab.screen.dart';
 import 'package:esg_mobile/presentation/widgets/home/product_card.widget.dart';
 import 'package:flutter/material.dart';
 
@@ -7,12 +8,14 @@ class HomeProductsGrid extends StatelessWidget {
     required this.products,
     required this.resolveImagePath,
     required this.resolveTitle,
+    this.onTapProduct,
     super.key,
   });
 
   final List<ProductWithOtherDetails> products;
   final String Function(ProductWithOtherDetails item) resolveImagePath;
   final String Function(ProductWithOtherDetails item) resolveTitle;
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +45,21 @@ class HomeProductsGrid extends StatelessWidget {
             return ProductCard(
               imagePath: resolveImagePath(product),
               productName: resolveTitle(product),
+              onTap: () {
+                final handler = onTapProduct;
+                if (handler != null) {
+                  handler(product);
+                  return;
+                }
+
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => CodeGreenProductDetailTabScreen(
+                      productWithDetails: product,
+                    ),
+                  ),
+                );
+              },
             );
           },
         );

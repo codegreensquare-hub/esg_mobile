@@ -35,7 +35,8 @@ class ProductService {
       }
 
       if (searchQuery != null && searchQuery.isNotEmpty) {
-        query = query.ilike(ProductRow.codeField, '%$searchQuery%');
+        // Products no longer have a separate "code" field; search by title.
+        query = query.ilike(ProductRow.titleField, '%$searchQuery%');
       }
 
       if (vendor != null) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/data/models/supabase/enums/product_material.dart';
 import 'package:esg_mobile/data/models/supabase/enums/product_style.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.all.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.best.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_section.style.dart';
@@ -34,9 +35,14 @@ class CurationShopTabController extends ChangeNotifier {
 
 class CurationShopTab extends StatefulWidget {
   static const tab = 'curation_shop';
-  const CurationShopTab({super.key, this.controller});
+  const CurationShopTab({
+    super.key,
+    this.controller,
+    this.onTapProduct,
+  });
 
   final CurationShopTabController? controller;
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
 
   @override
   State<CurationShopTab> createState() => _CurationShopTabState();
@@ -139,9 +145,9 @@ class _CurationShopTabState extends State<CurationShopTab>
   Widget _buildSection(int index) {
     switch (index) {
       case 0:
-        return const CurationSectionAll();
+        return CurationSectionAll(onTapProduct: widget.onTapProduct);
       case 1:
-        return const CurationSectionBest();
+        return CurationSectionBest(onTapProduct: widget.onTapProduct);
       case 2:
         return CurationSectionStyle(
           selectedSlug: _styleSubTab,
@@ -152,6 +158,7 @@ class _CurationShopTabState extends State<CurationShopTab>
               });
             }
           },
+          onTapProduct: widget.onTapProduct,
         );
       case 3:
       default:
@@ -164,6 +171,7 @@ class _CurationShopTabState extends State<CurationShopTab>
               });
             }
           },
+          onTapProduct: widget.onTapProduct,
         );
     }
   }

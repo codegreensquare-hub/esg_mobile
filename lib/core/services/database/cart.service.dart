@@ -67,7 +67,7 @@ class CartService {
 
   Future<CartItemRow?> addItem({
     required String userId,
-    required String productCode,
+    required String productId,
     required double quantity,
     Map<String, String> selectedOptions = const {},
   }) async {
@@ -78,7 +78,7 @@ class CartService {
           .from(CartItemTable().tableName)
           .select('*, cart_item_option(*)')
           .eq(CartItemRow.customerField, userId)
-          .eq(CartItemRow.productField, productCode);
+          .eq(CartItemRow.productField, productId);
 
       final existingItems = existingResponse
           .whereType<Map<String, dynamic>>()
@@ -115,7 +115,7 @@ class CartService {
           .from(CartItemTable().tableName)
           .insert({
             CartItemRow.customerField: userId,
-            CartItemRow.productField: productCode,
+            CartItemRow.productField: productId,
             CartItemRow.quantityField: quantity,
           })
           .select()

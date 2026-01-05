@@ -39,6 +39,10 @@ class UserRow extends SupabaseDataRow {
     String? company,
     DateTime? adminRejectedAt,
     String? adminRejectedBy,
+    String? kakaoUrl,
+    String? photoBucket,
+    String? photoFolderPath,
+    String? photoFileName,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -62,6 +66,12 @@ class UserRow extends SupabaseDataRow {
            'admin_rejected_at': supaSerialize(adminRejectedAt),
          if (adminRejectedBy != null)
            'admin_rejected_by': supaSerialize(adminRejectedBy),
+         if (kakaoUrl != null) 'kakao_url': supaSerialize(kakaoUrl),
+         if (photoBucket != null) 'photo_bucket': supaSerialize(photoBucket),
+         if (photoFolderPath != null)
+           'photo_folder_path': supaSerialize(photoFolderPath),
+         if (photoFileName != null)
+           'photo_file_name': supaSerialize(photoFileName),
        });
 
   /// User Row
@@ -199,6 +209,36 @@ class UserRow extends SupabaseDataRow {
   set adminRejectedBy(String? value) =>
       setField<String>(adminRejectedByField, value);
 
+  /// Kakao Url field name
+  static const String kakaoUrlField = 'kakao_url';
+
+  /// Kakao Url
+  String? get kakaoUrl => getField<String>(kakaoUrlField);
+  set kakaoUrl(String? value) => setField<String>(kakaoUrlField, value);
+
+  /// Photo Bucket field name
+  static const String photoBucketField = 'photo_bucket';
+
+  /// Photo Bucket
+  String? get photoBucket => getField<String>(photoBucketField);
+  set photoBucket(String? value) => setField<String>(photoBucketField, value);
+
+  /// Photo Folder Path field name
+  static const String photoFolderPathField = 'photo_folder_path';
+
+  /// Photo Folder Path
+  String? get photoFolderPath => getField<String>(photoFolderPathField);
+  set photoFolderPath(String? value) =>
+      setField<String>(photoFolderPathField, value);
+
+  /// Photo File Name field name
+  static const String photoFileNameField = 'photo_file_name';
+
+  /// Photo File Name
+  String? get photoFileName => getField<String>(photoFileNameField);
+  set photoFileName(String? value) =>
+      setField<String>(photoFileNameField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -217,6 +257,10 @@ class UserRow extends SupabaseDataRow {
     String? company,
     DateTime? adminRejectedAt,
     String? adminRejectedBy,
+    String? kakaoUrl,
+    String? photoBucket,
+    String? photoFolderPath,
+    String? photoFileName,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -240,8 +284,13 @@ class UserRow extends SupabaseDataRow {
         supaSerialize(adminRejectedAt) ?? data['admin_rejected_at'],
     'admin_rejected_by':
         supaSerialize(adminRejectedBy) ?? data['admin_rejected_by'],
+    'kakao_url': supaSerialize(kakaoUrl) ?? data['kakao_url'],
+    'photo_bucket': supaSerialize(photoBucket) ?? data['photo_bucket'],
+    'photo_folder_path':
+        supaSerialize(photoFolderPath) ?? data['photo_folder_path'],
+    'photo_file_name': supaSerialize(photoFileName) ?? data['photo_file_name'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-23 14:25:57.821958
+/// Date: 2025-12-30 17:23:48.785435

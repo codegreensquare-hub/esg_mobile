@@ -2,6 +2,7 @@ import 'package:esg_mobile/core/enums/navigations.dart';
 import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
@@ -9,6 +10,7 @@ import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/login/code_green_login.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
+import 'package:esg_mobile/presentation/screens/code_green/product_detail.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
@@ -59,6 +61,8 @@ class _MainScreenState extends State<MainScreen> {
   MainTab _selectedMainTab = MainTab.greenSquare;
   int _greenIndex = 0; // 0: Story, 1: Shopping, 2: Participate, 3: Account
   late final CurationShopTabController _curationShopController;
+  late final CodeGreenProductDetailTabController _productDetailController;
+  int _codeGreenLastNonProductTabIndex = 0;
 
   static const Set<String> _codeGreenHeroTabs = {
     HomeTab.tab,
@@ -74,6 +78,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _curationShopController = CurationShopTabController();
+    _productDetailController = CodeGreenProductDetailTabController();
     _scrollController = widget.controller ?? ScrollController();
     _scrollController.addListener(() {
       final offset = _scrollController.hasClients
@@ -89,6 +94,7 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     _scrollController.dispose();
     _curationShopController.dispose();
+    _productDetailController.dispose();
     super.dispose();
   }
 
@@ -307,6 +313,7 @@ class _MainScreenState extends State<MainScreen> {
           onTapVeganMaterial: _openOriginalShop,
           onTapBiodegradableMaterial: _openOriginalShop,
           onTapGreenSquare: _openGreenSquare,
+          onTapProduct: _openCodeGreenProduct,
           onTapStory: _openGreenSquareStory,
         );
       case OriginalShopTab.tab:
@@ -315,6 +322,13 @@ class _MainScreenState extends State<MainScreen> {
         return CurationShopTab(
           key: const PageStorageKey(CurationShopTab.tab),
           controller: _curationShopController,
+          onTapProduct: _openCodeGreenProduct,
+        );
+      case CodeGreenProductDetailTab.tab:
+        return CodeGreenProductDetailTab(
+          key: const PageStorageKey(CodeGreenProductDetailTab.tab),
+          controller: _productDetailController,
+          onBack: _closeCodeGreenProduct,
         );
       case AboutTab.tab:
         return const AboutTab(key: PageStorageKey(AboutTab.tab));
@@ -329,6 +343,52 @@ class _MainScreenState extends State<MainScreen> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  void _openCodeGreenProduct(ProductWithOtherDetails product) {
+    final idx = codeGreenTabs.indexOf(CodeGreenProductDetailTab.tab);
+    if (idx < 0) return;
+
+    final homeIdx = codeGreenTabs.indexOf(HomeTab.tab);
+    final fallbackIdx = homeIdx >= 0 ? homeIdx : 0;
+    _codeGreenLastNonProductTabIndex =
+        (_selectedMainTab == MainTab.codeGreen && _selectedIndex != idx)
+        ? _selectedIndex
+        : fallbackIdx;
+
+    _productDetailController.select(product);
+    setState(() {
+      _selectedMainTab = MainTab.codeGreen;
+      _selectedIndex = idx;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  void _closeCodeGreenProduct() {
+    _productDetailController.clear();
+    setState(() {
+      _selectedMainTab = MainTab.codeGreen;
+      _selectedIndex = _codeGreenLastNonProductTabIndex;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   void _openOriginalShop() {

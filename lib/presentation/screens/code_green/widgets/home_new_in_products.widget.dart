@@ -9,6 +9,7 @@ class HomeNewInProducts extends StatelessWidget {
     required this.products,
     required this.resolveImagePath,
     required this.resolveTitle,
+    this.onTapProduct,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class HomeNewInProducts extends StatelessWidget {
   final List<ProductWithOtherDetails> products;
   final String Function(ProductWithOtherDetails item) resolveImagePath;
   final String Function(ProductWithOtherDetails item) resolveTitle;
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class HomeNewInProducts extends StatelessWidget {
         products: products,
         resolveImagePath: resolveImagePath,
         resolveTitle: resolveTitle,
+        onTapProduct: onTapProduct,
       ),
     };
 

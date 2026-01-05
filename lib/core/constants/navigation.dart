@@ -4,6 +4,7 @@ import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
+import 'package:esg_mobile/presentation/screens/code_green/product_detail.tab.dart';
 
 const String codeGreenLoginTabId = 'login';
 
@@ -14,6 +15,7 @@ const codeGreenTabs = [
   LookBookTab.tab,
   AboutTab.tab,
   EventTab.tab,
+  CodeGreenProductDetailTab.tab,
   codeGreenLoginTabId,
 ];
 
@@ -24,6 +26,7 @@ const codeGreenLabels = {
   LookBookTab.tab: 'Look Book',
   AboutTab.tab: 'About',
   EventTab.tab: 'Event',
+  CodeGreenProductDetailTab.tab: 'Product',
   codeGreenLoginTabId: 'Login',
 };
 

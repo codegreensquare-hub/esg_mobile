@@ -96,4 +96,4 @@ class AutomaticPopupCategoryRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2025-12-23 14:25:57.775353
+/// Date: 2025-12-30 17:23:48.742260

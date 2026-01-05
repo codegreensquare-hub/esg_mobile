@@ -19,6 +19,7 @@ class HomeTab extends StatefulWidget {
     this.onTapVeganMaterial,
     this.onTapBiodegradableMaterial,
     this.onTapGreenSquare,
+    this.onTapProduct,
     this.onTapStory, // Updated to use StoryWithTags
     super.key,
   });
@@ -27,6 +28,7 @@ class HomeTab extends StatefulWidget {
   final VoidCallback? onTapVeganMaterial;
   final VoidCallback? onTapBiodegradableMaterial;
   final VoidCallback? onTapGreenSquare;
+  final ValueChanged<ProductWithOtherDetails>? onTapProduct;
   final void Function(StoryWithTags story)?
   onTapStory; // Changed type to StoryWithTags
 
@@ -147,6 +149,7 @@ class _HomeTabState extends State<HomeTab> {
                     products: _products,
                     resolveImagePath: _resolveProductImagePath,
                     resolveTitle: _resolveProductTitle,
+                    onTapProduct: widget.onTapProduct,
                   ),
                 ],
               ),
