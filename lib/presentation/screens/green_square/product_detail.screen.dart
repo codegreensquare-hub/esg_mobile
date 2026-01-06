@@ -4,6 +4,7 @@ import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
@@ -30,7 +31,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   bool isAddingToCart = false;
   bool isLoadingOptions = true;
   List<ProductOptionDefinition> productOptions = [];
+  List<ProductOptionColorRow> productColors = [];
   final Map<String, String> selectedOptionValues = {};
+  String? selectedVariantImageUrl;
   double currentAwardPoints = 0.0;
   late final TabController _tabController;
 
@@ -96,11 +99,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     final options = await CartService.instance.fetchProductOptions(
       productWithDetails.product.id,
     );
+    final colorValues = await CartService.instance.fetchColorOptionValues(
+      productId: productWithDetails.product.id,
+    );
     if (!mounted) {
       return;
     }
     setState(() {
       productOptions = options;
+      productColors = colorValues;
       isLoadingOptions = false;
     });
   }
@@ -146,7 +153,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       (option) => (selectedOptionValues[option.id] ?? '').isEmpty,
     );
 
-    if (hasMissingOption) {
+    final hasMissingColor =
+        productColors.isNotEmpty &&
+        (selectedOptionValues['__color__'] ?? '').trim().isEmpty;
+
+    if (hasMissingOption || hasMissingColor) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('모든 옵션을 선택해주세요.')),
       );
@@ -159,6 +170,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         for (final option in productOptions)
           if ((selectedOptionValues[option.id] ?? '').isNotEmpty)
             option.label: selectedOptionValues[option.id]!,
+        if ((selectedOptionValues['__color__'] ?? '').trim().isNotEmpty)
+          'Color': selectedOptionValues['__color__']!.trim(),
       };
 
       final result = await CartService.instance.addItem(
@@ -210,6 +223,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             folderPath: product.mainImageFolderPath,
           )
         : null;
+    final resolvedImageUrl = selectedVariantImageUrl ?? imageUrl;
     final double? regularPrice = product.regularPrice;
     final double? discountedPrice = product.minimumPriceMinusAwardPoints;
     final hasDiscount =
@@ -247,9 +261,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               aspectRatio: 1,
               child: Hero(
                 tag: 'green-square-product-image-${product.id}',
-                child: imageUrl != null
+                child: resolvedImageUrl != null
                     ? Image.network(
-                        imageUrl,
+                        resolvedImageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: cs.surfaceContainerHighest,
@@ -352,7 +366,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
                   if (isLoadingOptions)
                     const Center(child: CircularProgressIndicator())
-                  else if (productOptions.isNotEmpty) ...[
+                  else if (productColors.isNotEmpty ||
+                      productOptions.isNotEmpty) ...[
                     Text(
                       '옵션 선택',
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -360,6 +375,89 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       ),
                     ),
                     const SizedBox(height: 12),
+                    if (productColors.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Color',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: productColors
+                                  .where(
+                                    (row) =>
+                                        (row.value ?? '').trim().length == 6,
+                                  )
+                                  .map((row) {
+                                    final hex = (row.value ?? '').trim();
+                                    final selectedHex =
+                                        (selectedOptionValues['__color__'] ??
+                                                '')
+                                            .trim();
+                                    final isSelected =
+                                        selectedHex.toLowerCase() ==
+                                        hex.toLowerCase();
+                                    final color = Color(
+                                      int.parse('FF$hex', radix: 16),
+                                    );
+
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        customBorder: const CircleBorder(),
+                                        onTap: () {
+                                          final bucket =
+                                              row.coloredProductBucket;
+                                          final fileName =
+                                              row.coloredProductFileName;
+                                          final folderPath =
+                                              row.coloredProductFolderPath;
+
+                                          final nextUrl =
+                                              bucket != null && fileName != null
+                                              ? getImageLink(
+                                                  bucket,
+                                                  fileName,
+                                                  folderPath: folderPath,
+                                                )
+                                              : null;
+
+                                          setState(() {
+                                            selectedOptionValues['__color__'] =
+                                                hex;
+                                            selectedVariantImageUrl = nextUrl;
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 28,
+                                          height: 28,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: color,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? cs.primary
+                                                  : cs.outlineVariant,
+                                              width: isSelected ? 3 : 1,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  })
+                                  .toList(growable: false),
+                            ),
+                          ],
+                        ),
+                      ),
                     ...productOptions.map(
                       (option) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -373,12 +471,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               .map(
                                 (valueRow) => DropdownMenuItem<String>(
                                   value: valueRow.value ?? valueRow.id,
-                                  child: Text(
-                                    valueRow.value ?? valueRow.id,
-                                  ),
+                                  child: Text(valueRow.value ?? valueRow.id),
                                 ),
                               )
-                              .toList(),
+                              .toList(growable: false),
                           onChanged: (value) {
                             setState(() {
                               if (value == null || value.isEmpty) {

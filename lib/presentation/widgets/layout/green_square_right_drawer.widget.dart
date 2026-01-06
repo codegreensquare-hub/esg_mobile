@@ -40,7 +40,7 @@ class GreenSquareRightDrawer extends StatelessWidget {
             Expanded(
               child: ListView.separated(
                 itemCount: destinations.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final destination = destinations[index];
                   final isExternal =

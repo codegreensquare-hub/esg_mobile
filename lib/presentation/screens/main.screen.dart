@@ -530,14 +530,15 @@ class _MainScreenState extends State<MainScreen> {
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               itemCount: missions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (_, index) => MissionAvailableListTile(
                 mission: missions[index],
                 onTap: (mission) {
                   Navigator.of(ctx).pop();
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => MissionDetailDialog(mission: mission),
+                      builder: (context) =>
+                          MissionDetailDialog(mission: mission),
                     ),
                   );
                 },

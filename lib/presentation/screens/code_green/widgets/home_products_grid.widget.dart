@@ -45,6 +45,8 @@ class HomeProductsGrid extends StatelessWidget {
             return ProductCard(
               imagePath: resolveImagePath(product),
               productName: resolveTitle(product),
+              productId: product.product.id,
+              mainImageFolderPath: product.product.mainImageFolderPath,
               onTap: () {
                 final handler = onTapProduct;
                 if (handler != null) {

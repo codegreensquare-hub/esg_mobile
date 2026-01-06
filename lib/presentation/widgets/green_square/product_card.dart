@@ -1,9 +1,11 @@
+import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   const ProductCard({
     super.key,
     required this.productWithDetails,
@@ -16,9 +18,46 @@ class ProductCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  List<ProductOptionColorRow> _colorValues = const [];
+  String? _selectedImageUrl;
+  String? _selectedColorHex;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadColors();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.productWithDetails.product.id !=
+        widget.productWithDetails.product.id) {
+      _colorValues = const [];
+      _selectedImageUrl = null;
+      _selectedColorHex = null;
+      _loadColors();
+    }
+  }
+
+  Future<void> _loadColors() async {
+    final pid = widget.productWithDetails.product.id;
+    final colors = await CartService.instance.fetchColorOptionValues(
+      productId: pid,
+    );
+    if (!mounted) return;
+    setState(() => _colorValues = colors);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final productWithDetails = widget.productWithDetails;
     final product = productWithDetails.product;
     final double? regularPrice = product.regularPrice;
     final double? discountedPrice = product.minimumPriceMinusAwardPoints;
@@ -39,8 +78,10 @@ class ProductCard extends StatelessWidget {
           )
         : null;
 
+    final resolvedImageUrl = _selectedImageUrl ?? imageUrl;
+
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Card(
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
@@ -60,9 +101,9 @@ class ProductCard extends StatelessWidget {
                   Positioned.fill(
                     child: Hero(
                       tag: 'green-square-product-image-${product.id}',
-                      child: imageUrl != null
+                      child: resolvedImageUrl != null
                           ? Image.network(
-                              imageUrl,
+                              resolvedImageUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
                                   Container(
@@ -79,7 +120,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   // Heart Button
-                  if (onWishlistToggle != null)
+                  if (widget.onWishlistToggle != null)
                     Positioned(
                       top: 8,
                       right: 8,
@@ -101,9 +142,90 @@ class ProductCard extends StatelessWidget {
                                 ? Colors.red
                                 : cs.surface,
                           ),
-                          onPressed: onWishlistToggle,
+                          onPressed: widget.onWishlistToggle,
                           iconSize: 20,
                           padding: EdgeInsets.all(0),
+                        ),
+                      ),
+                    ),
+
+                  if (_colorValues.isNotEmpty)
+                    Positioned(
+                      left: 8,
+                      right: 8,
+                      bottom: 8,
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: _colorValues
+                                .map((valueRow) {
+                                  final hex = (valueRow.value ?? '').trim();
+                                  final isSelected =
+                                      _selectedColorHex?.toLowerCase() ==
+                                      hex.toLowerCase();
+
+                                  final color = Color(
+                                    int.parse('FF$hex', radix: 16),
+                                  );
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: Material(
+                                      color: cs.surface.withValues(alpha: 0.75),
+                                      shape: const StadiumBorder(),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: InkWell(
+                                        onTap: () {
+                                          final bucket =
+                                              valueRow.coloredProductBucket;
+                                          final fileName =
+                                              valueRow.coloredProductFileName;
+                                          final folderPath =
+                                              valueRow.coloredProductFolderPath;
+
+                                          final nextUrl =
+                                              bucket != null && fileName != null
+                                              ? getImageLink(
+                                                  bucket,
+                                                  fileName,
+                                                  folderPath: folderPath,
+                                                )
+                                              : null;
+
+                                          setState(() {
+                                            _selectedColorHex = hex;
+                                            _selectedImageUrl = nextUrl;
+                                          });
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 4,
+                                          ),
+                                          child: Container(
+                                            width: 12,
+                                            height: 12,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: color,
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? cs.primary
+                                                    : cs.outlineVariant,
+                                                width: isSelected ? 2 : 1,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                })
+                                .toList(growable: false),
+                          ),
                         ),
                       ),
                     ),

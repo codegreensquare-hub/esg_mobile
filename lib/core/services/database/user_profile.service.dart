@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:esg_mobile/data/models/supabase/tables/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

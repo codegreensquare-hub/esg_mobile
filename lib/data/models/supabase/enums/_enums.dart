@@ -5,6 +5,7 @@
 // ignore_for_file: require_trailing_commas, constant_identifier_names
 
 export 'automatic_push_type.dart';
+export 'client_admin_notification_type.dart';
 export 'interval_unit.dart';
 export 'mission_publicity.dart';
 export 'mission_type.dart';
@@ -15,4 +16,4 @@ export 'user_type.dart';
 export 'vendor_admin_type.dart';
 
 /// Tag: v2
-/// Date: 2025-12-30 17:23:48.726133
+/// Date: 2026-01-05 16:52:08.856949

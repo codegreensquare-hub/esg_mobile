@@ -1,7 +1,12 @@
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CodeGreenProductDetailTabScreen extends StatefulWidget {
   const CodeGreenProductDetailTabScreen({
@@ -31,16 +36,118 @@ class _CodeGreenProductDetailTabScreenState
   late final PageController _pageController;
   int _selectedImageIndex = 0;
 
+  List<ProductOptionColorRow> _colorOptions = const [];
+  String? _selectedColorHex;
+  String? _selectedColorImageUrl;
+
+  String? _userId;
+  int _quantity = 1;
+  bool _isAddingToCart = false;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _userId = Supabase.instance.client.auth.currentUser?.id;
+    _loadColors();
+  }
+
+  @override
+  void didUpdateWidget(covariant CodeGreenProductDetailTabScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.productWithDetails.product.id !=
+        widget.productWithDetails.product.id) {
+      _colorOptions = const [];
+      _selectedColorHex = null;
+      _selectedColorImageUrl = null;
+      _loadColors();
+    }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _increaseQuantity() {
+    setState(() {
+      _quantity = (_quantity + 1).clamp(1, 999).toInt();
+    });
+  }
+
+  void _decreaseQuantity() {
+    if (_quantity <= 1) {
+      return;
+    }
+    setState(() => _quantity -= 1);
+  }
+
+  Future<void> _addToCart() async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    final userId = _userId;
+    if (userId == null || userId.trim().isEmpty) {
+      context.push(LoginScreen.route);
+      return;
+    }
+
+    if (_colorOptions.isNotEmpty && (_selectedColorHex ?? '').trim().isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('색상을 선택해주세요.')),
+      );
+      return;
+    }
+
+    setState(() => _isAddingToCart = true);
+    try {
+      final productId = widget.productWithDetails.product.id;
+
+      final selectedColor = (_selectedColorHex ?? '').trim();
+      final selectedOptions = <String, String>{
+        if (selectedColor.isNotEmpty) 'Color': selectedColor,
+      };
+
+      final result = await CartService.instance.addItem(
+        userId: userId,
+        productId: productId,
+        quantity: _quantity.toDouble(),
+        selectedOptions: selectedOptions,
+      );
+
+      if (!mounted) return;
+
+      if (result == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('장바구니 담기에 실패했습니다. 다시 시도해주세요.')),
+        );
+        return;
+      }
+
+      messenger.showSnackBar(
+        const SnackBar(content: Text('장바구니에 담았습니다.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('장바구니 담기 중 오류가 발생했습니다.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isAddingToCart = false);
+      }
+    }
+  }
+
+  Future<void> _loadColors() async {
+    final pid = widget.productWithDetails.product.id.trim();
+    if (pid.isEmpty) return;
+
+    final colors = await CartService.instance.fetchColorOptionValues(
+      productId: pid,
+    );
+    if (!mounted) return;
+    setState(() => _colorOptions = colors);
   }
 
   @override
@@ -56,7 +163,7 @@ class _CodeGreenProductDetailTabScreenState
     final sellerName = productWithDetails.seller.username ?? 'Unknown Seller';
     final description = product.description;
 
-    final mainImageUrl =
+    final baseMainImageUrl =
         product.mainImageBucket != null && product.mainImageFileName != null
         ? getImageLink(
             product.mainImageBucket!,
@@ -65,18 +172,24 @@ class _CodeGreenProductDetailTabScreenState
           )
         : null;
 
-    final galleryUrls = <String>{
-      ...productWithDetails.images
-          .where((row) => row.bucket != null && row.fileName != null)
-          .map(
-            (row) => getImageLink(
-              row.bucket!,
-              row.fileName!,
-              folderPath: row.folderPath,
-            ),
+    final mainImageUrl = _selectedColorImageUrl ?? baseMainImageUrl;
+
+    final otherImageUrls = productWithDetails.images
+        .where((row) => row.bucket != null && row.fileName != null)
+        .map(
+          (row) => getImageLink(
+            row.bucket!,
+            row.fileName!,
+            folderPath: row.folderPath,
           ),
+        )
+        .where((url) => url != mainImageUrl)
+        .toList(growable: false);
+
+    final galleryUrls = <String>[
       if (mainImageUrl != null) mainImageUrl,
-    }.toList(growable: false);
+      ...otherImageUrls,
+    ];
 
     final price = product.regularPrice;
 
@@ -262,6 +375,127 @@ class _CodeGreenProductDetailTabScreenState
                 fontWeight: FontWeight.w800,
               ),
             ),
+            if (_colorOptions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Color',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _colorOptions
+                    .where((row) => (row.value ?? '').trim().length == 6)
+                    .map((row) {
+                      final hex = (row.value ?? '').trim();
+                      final isSelected =
+                          (_selectedColorHex ?? '').toLowerCase() ==
+                          hex.toLowerCase();
+
+                      final color = Color(int.parse('FF$hex', radix: 16));
+
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () {
+                            final bucket = row.coloredProductBucket;
+                            final fileName = row.coloredProductFileName;
+                            final folderPath = row.coloredProductFolderPath;
+
+                            final nextUrl = bucket != null && fileName != null
+                                ? getImageLink(
+                                    bucket,
+                                    fileName,
+                                    folderPath: folderPath,
+                                  )
+                                : null;
+
+                            setState(() {
+                              _selectedColorHex = hex;
+                              _selectedColorImageUrl = nextUrl;
+                              _selectedImageIndex = 0;
+                            });
+
+                            _pageController.animateToPage(
+                              0,
+                              duration: const Duration(milliseconds: 220),
+                              curve: Curves.easeOut,
+                            );
+                          },
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: color,
+                              border: Border.all(
+                                color: isSelected
+                                    ? cs.primary
+                                    : cs.outlineVariant,
+                                width: isSelected ? 3 : 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    })
+                    .toList(growable: false),
+              ),
+            ],
+
+            const SizedBox(height: 16),
+            Text(
+              '수량',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: _decreaseQuantity,
+                  icon: const Icon(Icons.remove_circle_outline),
+                ),
+                Text(
+                  '$_quantity',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                IconButton(
+                  onPressed: _increaseQuantity,
+                  icon: const Icon(Icons.add_circle_outline),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isAddingToCart ? null : _addToCart,
+                child: _isAddingToCart
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shopping_cart_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text('Add to cart'),
+                        ],
+                      ),
+              ),
+            ),
+
             if (description != null && description.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -376,7 +610,7 @@ class _CodeGreenProductDetailTabScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: header,
             ),
             tabBar,
@@ -403,8 +637,12 @@ class _CodeGreenProductDetailTabScreenState
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        extendBodyBehindAppBar: widget.showAppBar,
         appBar: widget.showAppBar
             ? AppBar(
+                backgroundColor: cs.surface.withValues(alpha: 0.85),
+                elevation: 0,
+                scrolledUnderElevation: 0,
                 title: Text(
                   title,
                   maxLines: 1,
@@ -412,39 +650,43 @@ class _CodeGreenProductDetailTabScreenState
                 ),
               )
             : null,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: header,
+        body: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: header,
+                  ),
                 ),
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _TabBarHeaderDelegate(
-                  tabBar: tabBar,
-                  backgroundColor: cs.surface,
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _TabBarHeaderDelegate(
+                    tabBar: tabBar,
+                    backgroundColor: cs.surface,
+                  ),
                 ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: detailContent,
-              ),
-              SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: reviewContent,
-              ),
-              SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: qnaContent,
-              ),
-            ],
+              ];
+            },
+            body: TabBarView(
+              children: [
+                SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: detailContent,
+                ),
+                SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: reviewContent,
+                ),
+                SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: qnaContent,
+                ),
+              ],
+            ),
           ),
         ),
       ),

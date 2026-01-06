@@ -13,6 +13,7 @@ export 'award_points.dart';
 export 'award_points_transaction.dart';
 export 'cart_item.dart';
 export 'cart_item_option.dart';
+export 'client_admin_notification.dart';
 export 'company.dart';
 export 'faq.dart';
 export 'faq_category.dart';
@@ -38,6 +39,7 @@ export 'popup.dart';
 export 'product.dart';
 export 'product_category.dart';
 export 'product_image.dart';
+export 'product_option_color.dart';
 export 'product_option_parameter.dart';
 export 'product_option_value.dart';
 export 'product_wishlist.dart';
@@ -58,4 +60,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2025-12-30 17:23:48.786605
+/// Date: 2026-01-05 16:52:08.920984

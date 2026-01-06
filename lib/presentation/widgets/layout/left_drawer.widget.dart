@@ -210,9 +210,11 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                     }
                     return InkWell(
                       onTap: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final navigator = Navigator.of(context);
                         await authService.signOut();
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        navigator.pop();
+                        messenger.showSnackBar(
                           const SnackBar(content: Text('로그아웃되었습니다.')),
                         );
                       },

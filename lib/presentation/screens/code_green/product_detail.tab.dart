@@ -74,7 +74,7 @@ class _CodeGreenProductDetailTabState extends State<CodeGreenProductDetailTab> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      padding: const EdgeInsets.only(bottom: 32, top: 8),
       child: CodeGreenProductDetailTabScreen(
         productWithDetails: product,
         showAppBar: false,

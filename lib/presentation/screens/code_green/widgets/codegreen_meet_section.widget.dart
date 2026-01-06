@@ -38,7 +38,7 @@ class CodegreenMeetSection extends StatelessWidget {
           bodyFontSize = 16;
         }
 
-        return Container(
+        return SizedBox(
           width: double.infinity,
           child: Column(
             children: [

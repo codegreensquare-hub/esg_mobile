@@ -8,4 +8,4 @@ export 'enums/_enums.dart';
 export 'tables/_tables.dart';
 
 /// Tag: v2
-/// Date: 2025-12-30 17:23:48.786712
+/// Date: 2026-01-05 16:52:08.921409

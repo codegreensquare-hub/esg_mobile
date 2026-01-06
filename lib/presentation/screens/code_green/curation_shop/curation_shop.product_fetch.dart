@@ -1,9 +1,10 @@
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
-import 'package:esg_mobile/data/models/supabase/tables/product.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/code_green/product_detail_tab.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -192,16 +193,56 @@ ProductMaterial? _materialFromSlug(String? slug) {
   return matches.isEmpty ? null : matches.first;
 }
 
-class _CurationProductCard extends StatelessWidget {
+class _CurationProductCard extends StatefulWidget {
   const _CurationProductCard({required this.product, this.onTap});
 
   final ProductWithOtherDetails product;
   final ValueChanged<ProductWithOtherDetails>? onTap;
 
   @override
+  State<_CurationProductCard> createState() => _CurationProductCardState();
+}
+
+class _CurationProductCardState extends State<_CurationProductCard> {
+  List<ProductOptionColorRow> _colorValues = const [];
+  String? _selectedImageUrl;
+  String? _selectedColorHex;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadColors();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CurationProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.product.id != widget.product.product.id) {
+      _colorValues = const [];
+      _selectedImageUrl = null;
+      _selectedColorHex = null;
+      _loadColors();
+    }
+  }
+
+  Future<void> _loadColors() async {
+    final pid = widget.product.product.id.trim();
+    if (pid.isEmpty) {
+      return;
+    }
+
+    final colors = await CartService.instance.fetchColorOptionValues(
+      productId: pid,
+    );
+    if (!mounted) return;
+    setState(() => _colorValues = colors);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final product = widget.product;
     final data = product.product;
     final price = data.regularPrice;
     final imageUrl =
@@ -213,9 +254,11 @@ class _CurationProductCard extends StatelessWidget {
           )
         : null;
 
+    final resolvedImageUrl = _selectedImageUrl ?? imageUrl;
+
     return InkWell(
       onTap: () {
-        final handler = onTap;
+        final handler = widget.onTap;
         if (handler != null) {
           handler(product);
           return;
@@ -241,29 +284,105 @@ class _CurationProductCard extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 1,
-              child: imageUrl != null
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  resolvedImageUrl != null
+                      ? Image.network(
+                          resolvedImageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              color: cs.surfaceContainerHighest,
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator.adaptive(),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: cs.surfaceContainerHighest,
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.image_not_supported),
+                              ),
+                        )
+                      : Container(
                           color: cs.surfaceContainerHighest,
                           alignment: Alignment.center,
-                          child: const CircularProgressIndicator.adaptive(),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: cs.surfaceContainerHighest,
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.image_not_supported),
+                          child: const Icon(Icons.image),
+                        ),
+                  if (_colorValues.isNotEmpty)
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: _colorValues
+                              .where(
+                                (row) => (row.value ?? '').trim().length == 6,
+                              )
+                              .map((row) {
+                                final hex = (row.value ?? '').trim();
+                                final isSelected =
+                                    _selectedColorHex?.toLowerCase() ==
+                                    hex.toLowerCase();
+
+                                final color = Color(
+                                  int.parse('FF$hex', radix: 16),
+                                );
+
+                                return InkWell(
+                                  onTap: () {
+                                    final bucket = row.coloredProductBucket;
+                                    final fileName = row.coloredProductFileName;
+                                    final folderPath =
+                                        row.coloredProductFolderPath;
+
+                                    final nextUrl =
+                                        bucket != null && fileName != null
+                                        ? getImageLink(
+                                            bucket,
+                                            fileName,
+                                            folderPath: folderPath,
+                                          )
+                                        : null;
+
+                                    setState(() {
+                                      _selectedColorHex = hex;
+                                      _selectedImageUrl = nextUrl;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    child: Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: color,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? cs.primary
+                                              : cs.outlineVariant,
+                                          width: isSelected ? 2 : 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              })
+                              .toList(growable: false),
+                        ),
                       ),
-                    )
-                  : Container(
-                      color: cs.surfaceContainerHighest,
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.image),
                     ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(12),

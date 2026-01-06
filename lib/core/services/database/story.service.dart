@@ -3,6 +3,7 @@ import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/data/models/supabase/database.dart';
@@ -40,7 +41,7 @@ class StoryService {
         .order(StoryRow.createdAtField, ascending: false)
         .range(offset, offset + limit - 1);
 
-    print('Fetched stories response: $response');
+    debugPrint('Fetched stories response: $response');
 
     return (response as List).map((json) {
       final story = StoryRow.fromJson(json);

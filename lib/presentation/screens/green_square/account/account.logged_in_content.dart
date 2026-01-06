@@ -230,7 +230,7 @@ class AccountLoggedInContent extends StatelessWidget {
                             : Container(
                                 width: 72,
                                 height: 72,
-                                color: cs.surfaceTint.withOpacity(0.1),
+                                color: cs.surfaceTint.withValues(alpha: 0.1),
                                 child: const Icon(Icons.photo_outlined),
                               ),
                       ),

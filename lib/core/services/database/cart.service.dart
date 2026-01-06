@@ -12,6 +12,40 @@ class CartService {
 
   final SupabaseClient _client = Supabase.instance.client;
 
+  final Map<String, Future<List<ProductOptionDefinition>>> _optionsMemo = {};
+
+  final Map<String, Future<List<ProductOptionColorRow>>> _colorOptionsMemo = {};
+
+  Future<List<ProductOptionColorRow>> fetchColorOptionValues({
+    required String productId,
+  }) {
+    final pid = productId.trim();
+    if (pid.isEmpty) {
+      return Future.value(const []);
+    }
+
+    final cached = _colorOptionsMemo[pid];
+    if (cached != null) {
+      return cached;
+    }
+
+    final future = _client
+        .from(ProductOptionColorTable().tableName)
+        .select('*')
+        .eq(ProductOptionColorRow.productField, pid)
+        .then(
+          (rows) => rows
+              .whereType<Map<String, dynamic>>()
+              .map(ProductOptionColorRow.fromJson)
+              .where((row) => (row.value ?? '').trim().length == 6)
+              .toList(growable: false),
+        )
+        .catchError((_) => <ProductOptionColorRow>[]);
+
+    _colorOptionsMemo[pid] = future;
+    return future;
+  }
+
   String _optionsSignature(Map<String, String> selectedOptions) {
     final normalized =
         selectedOptions.entries
@@ -166,6 +200,19 @@ class CartService {
   Future<List<ProductOptionDefinition>> fetchProductOptions(
     String productId,
   ) async {
+    final cached = _optionsMemo[productId];
+    if (cached != null) {
+      return cached;
+    }
+
+    final future = _fetchProductOptionsUncached(productId);
+    _optionsMemo[productId] = future;
+    return future;
+  }
+
+  Future<List<ProductOptionDefinition>> _fetchProductOptionsUncached(
+    String productId,
+  ) async {
     try {
       final response = await _client
           .from(ProductOptionParameterTable().tableName)
@@ -187,25 +234,24 @@ class CartService {
           .toList();
 
       final valuesByParameter = <String, List<ProductOptionValueRow>>{};
-      if (optionParameterIds.isNotEmpty) {
-        final valuesResponse = await _client
-            .from(ProductOptionValueTable().tableName)
-            .select('*')
-            .filter(
-              ProductOptionValueRow.optionParameterField,
-              'in',
-              '(${optionParameterIds.map((id) => '"$id"').join(',')})',
-            );
+      final valueResponse = optionParameterIds.isNotEmpty
+          ? await _client
+                .from(ProductOptionValueTable().tableName)
+                .select('*')
+                .filter(
+                  ProductOptionValueRow.optionParameterField,
+                  'in',
+                  '(${optionParameterIds.map((id) => '"$id"').join(',')})',
+                )
+          : const [];
 
-        for (final data in valuesResponse.whereType<Map<String, dynamic>>()) {
-          final row = ProductOptionValueRow.fromJson(data);
-          final key = row.optionParameter;
-          if (key == null) {
-            continue;
-          }
-          valuesByParameter.putIfAbsent(key, () => []).add(row);
-        }
-      }
+      valueResponse
+          .whereType<Map<String, dynamic>>()
+          .map(ProductOptionValueRow.fromJson)
+          .forEach((row) {
+            final key = row.optionParameter ?? '__null__';
+            valuesByParameter.putIfAbsent(key, () => []).add(row);
+          });
 
       return parameterRows
           .map((row) {
@@ -213,7 +259,10 @@ class CartService {
             final values =
                 valuesByParameter[row.optionParameter] ??
                 valuesByParameter[row.id] ??
-                <ProductOptionValueRow>[];
+                (row.optionParameter == null
+                    ? (valuesByParameter['__null__'] ??
+                          <ProductOptionValueRow>[])
+                    : <ProductOptionValueRow>[]);
 
             return ProductOptionDefinition(
               id: parameterId,

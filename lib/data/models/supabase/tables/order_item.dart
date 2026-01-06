@@ -30,12 +30,18 @@ class OrderItemRow extends SupabaseDataRow {
     String? product,
     double? quantity,
     String? order,
+    DateTime? sentForDeliveryAt,
+    DateTime? receivedDeliveryAt,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (product != null) 'product': supaSerialize(product),
          if (quantity != null) 'quantity': supaSerialize(quantity),
          if (order != null) 'order': supaSerialize(order),
+         if (sentForDeliveryAt != null)
+           'sent_for_delivery_at': supaSerialize(sentForDeliveryAt),
+         if (receivedDeliveryAt != null)
+           'received_delivery_at': supaSerialize(receivedDeliveryAt),
        });
 
   /// Order Item Row
@@ -88,6 +94,23 @@ class OrderItemRow extends SupabaseDataRow {
   String? get order => getField<String>(orderField);
   set order(String? value) => setField<String>(orderField, value);
 
+  /// Sent For Delivery At field name
+  static const String sentForDeliveryAtField = 'sent_for_delivery_at';
+
+  /// Sent For Delivery At
+  DateTime? get sentForDeliveryAt => getField<DateTime>(sentForDeliveryAtField);
+  set sentForDeliveryAt(DateTime? value) =>
+      setField<DateTime>(sentForDeliveryAtField, value);
+
+  /// Received Delivery At field name
+  static const String receivedDeliveryAtField = 'received_delivery_at';
+
+  /// Received Delivery At
+  DateTime? get receivedDeliveryAt =>
+      getField<DateTime>(receivedDeliveryAtField);
+  set receivedDeliveryAt(DateTime? value) =>
+      setField<DateTime>(receivedDeliveryAtField, value);
+
   /// Make a copy of the current [OrderItemRow]
   /// overriding the provided fields
   OrderItemRow copyWith({
@@ -96,14 +119,20 @@ class OrderItemRow extends SupabaseDataRow {
     String? product,
     double? quantity,
     String? order,
+    DateTime? sentForDeliveryAt,
+    DateTime? receivedDeliveryAt,
   }) => OrderItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'product': supaSerialize(product) ?? data['product'],
     'quantity': supaSerialize(quantity) ?? data['quantity'],
     'order': supaSerialize(order) ?? data['order'],
+    'sent_for_delivery_at':
+        supaSerialize(sentForDeliveryAt) ?? data['sent_for_delivery_at'],
+    'received_delivery_at':
+        supaSerialize(receivedDeliveryAt) ?? data['received_delivery_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2025-12-30 17:23:48.771971
+/// Date: 2026-01-05 16:52:08.904515

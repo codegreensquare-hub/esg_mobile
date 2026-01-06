@@ -67,7 +67,7 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final comment = items[index];
               final commentText = (comment.comment ?? '').trim();
@@ -85,6 +85,7 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
                   onTap: storyId.isEmpty
                       ? null
                       : () async {
+                          final messenger = ScaffoldMessenger.of(context);
                           final navigator = Navigator.of(context);
 
                           try {
@@ -93,7 +94,7 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
                             if (!mounted) return;
 
                             if (storyWithTags == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 const SnackBar(
                                   content: Text('스토리를 찾을 수 없습니다.'),
                                 ),
@@ -114,7 +115,7 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
                             );
                           } catch (e) {
                             if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(
                                 content: Text('오류가 발생했습니다: $e'),
                               ),

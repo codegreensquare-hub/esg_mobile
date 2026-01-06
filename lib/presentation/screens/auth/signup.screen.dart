@@ -66,8 +66,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _error = '회사 목록을 불러오지 못했습니다. 다시 시도해주세요.';
       });
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoadingCompanies = false);
+      if (mounted) {
+        setState(() => _isLoadingCompanies = false);
+      }
     }
   }
 
@@ -142,7 +143,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: _selectedCompanyId,
+                    initialValue: _selectedCompanyId,
                     items: _companies
                         .map(
                           (c) => DropdownMenuItem<String>(

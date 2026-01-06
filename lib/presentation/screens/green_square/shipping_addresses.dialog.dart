@@ -66,6 +66,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
   }
 
   Future<void> _createAddress(ShippingAddressFormResult result) async {
+    final messenger = ScaffoldMessenger.of(context);
     final created = await UserShippingAddressService.instance.createAddress(
       userId: widget.userId,
       name: result.name,
@@ -82,7 +83,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
     }
 
     if (created == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('배송지 등록에 실패했습니다.')),
       );
       return;
@@ -92,13 +93,14 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
       await _setDefaultAddress(created.id);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       const SnackBar(content: Text('배송지가 등록되었습니다.')),
     );
     _loadAddresses();
   }
 
   Future<void> _updateAddress(ShippingAddressFormResult result) async {
+    final messenger = ScaffoldMessenger.of(context);
     final addressId = result.addressId;
     if (addressId == null) {
       return;
@@ -120,7 +122,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
     }
 
     if (updated == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('배송지 수정에 실패했습니다.')),
       );
       return;
@@ -130,7 +132,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
       await _setDefaultAddress(addressId);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       const SnackBar(content: Text('배송지가 수정되었습니다.')),
     );
     _loadAddresses();

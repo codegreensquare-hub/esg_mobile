@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/core/enums/mission_status.dart';
@@ -77,7 +78,7 @@ class MissionService {
       if (status == MissionStatus.past)
         (builder) => builder.lt(MissionRow.lastActiveDateField, now),
     ];
-    print('Filters applied: $filters');
+    debugPrint('Filters applied: $filters');
 
     final filtered = filters.fold<PostgrestFilterBuilder>(
       _baseQuery.select(),
@@ -93,7 +94,7 @@ class MissionService {
     };
 
     final rows = await result;
-    print(rows);
+    debugPrint('$rows');
 
     return (rows as List)
         .map(
