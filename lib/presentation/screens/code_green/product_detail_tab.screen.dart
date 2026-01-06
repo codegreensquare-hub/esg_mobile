@@ -1,10 +1,13 @@
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
+import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -37,12 +40,17 @@ class _CodeGreenProductDetailTabScreenState
   int _selectedImageIndex = 0;
 
   List<ProductOptionColorRow> _colorOptions = const [];
+  String? _selectedColorId;
   String? _selectedColorHex;
   String? _selectedColorImageUrl;
+
+  Map<String, String> _selectedOptions = const {};
 
   String? _userId;
   int _quantity = 1;
   bool _isAddingToCart = false;
+  CartItemWithProduct? _matchingCartItem;
+  bool _isCheckingCartState = false;
 
   @override
   void initState() {
@@ -58,8 +66,11 @@ class _CodeGreenProductDetailTabScreenState
     if (oldWidget.productWithDetails.product.id !=
         widget.productWithDetails.product.id) {
       _colorOptions = const [];
+      _selectedColorId = null;
       _selectedColorHex = null;
       _selectedColorImageUrl = null;
+      _selectedOptions = const {};
+      _matchingCartItem = null;
       _loadColors();
     }
   }
@@ -103,8 +114,9 @@ class _CodeGreenProductDetailTabScreenState
     try {
       final productId = widget.productWithDetails.product.id;
 
-      final selectedColor = (_selectedColorHex ?? '').trim();
+      final selectedColor = (_selectedColorId ?? '').trim();
       final selectedOptions = <String, String>{
+        ..._selectedOptions,
         if (selectedColor.isNotEmpty) 'Color': selectedColor,
       };
 
@@ -127,10 +139,16 @@ class _CodeGreenProductDetailTabScreenState
       messenger.showSnackBar(
         const SnackBar(content: Text('장바구니에 담았습니다.')),
       );
+
+      await _refreshCartMatch();
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('장바구니 담기 중 오류가 발생했습니다.')),
+        SnackBar(
+          content: Text(
+            kDebugMode ? '장바구니 담기 중 오류가 발생했습니다.\n$e' : '장바구니 담기 중 오류가 발생했습니다.',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -148,12 +166,137 @@ class _CodeGreenProductDetailTabScreenState
     );
     if (!mounted) return;
     setState(() => _colorOptions = colors);
+    await _refreshCartMatch();
+  }
+
+  String _optionsSignatureFromMap(Map<String, String> selectedOptions) {
+    final normalized =
+        selectedOptions.entries
+            .where(
+              (e) =>
+                  e.key.isNotEmpty &&
+                  e.value.isNotEmpty &&
+                  e.key.toLowerCase() != 'color',
+            )
+            .map((e) => '${e.key}=${e.value}')
+            .toList(growable: false)
+          ..sort();
+    return normalized.join('|');
+  }
+
+  String _cartItemOptionsSignature(List<CartItemOptionRow> options) {
+    final normalized =
+        options
+            .where(
+              (o) => (o.option ?? '').isNotEmpty && (o.value ?? '').isNotEmpty,
+            )
+            .where((o) => (o.option ?? '').toLowerCase() != 'color')
+            .map((o) => '${o.option}=${o.value}')
+            .toList(growable: false)
+          ..sort();
+    return normalized.join('|');
+  }
+
+  String _cartItemSelectedColor(CartItemWithProduct item) {
+    final fromField = (item.cartItem.optionColor ?? '').trim();
+    if (fromField.isNotEmpty) return fromField;
+
+    final fromOptions = item.options
+        .where((o) => (o.option ?? '').toLowerCase() == 'color')
+        .map((o) => (o.value ?? '').trim())
+        .where((v) => v.isNotEmpty)
+        .toList(growable: false);
+
+    return fromOptions.isEmpty ? '' : fromOptions.first;
+  }
+
+  Future<void> _refreshCartMatch() async {
+    final userId = _userId;
+    if (userId == null || userId.trim().isEmpty) {
+      if (!mounted) return;
+      setState(() => _matchingCartItem = null);
+      return;
+    }
+
+    final requiresColorSelection = _colorOptions.isNotEmpty;
+    final selectedColorId = (_selectedColorId ?? '').trim();
+    if (requiresColorSelection && selectedColorId.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _matchingCartItem = null;
+        _isCheckingCartState = false;
+      });
+      return;
+    }
+
+    final selectedColorHex = (_selectedColorHex ?? '').trim();
+
+    final selectedOptions = <String, String>{
+      ..._selectedOptions,
+      if (selectedColorId.isNotEmpty) 'Color': selectedColorId,
+    };
+    final requestedSignature = _optionsSignatureFromMap(selectedOptions);
+    final productId = widget.productWithDetails.product.id;
+
+    if (!mounted) return;
+    setState(() => _isCheckingCartState = true);
+
+    final items = await CartService.instance.fetchCartItems(userId);
+    if (!mounted) return;
+
+    final match = items
+        .where((e) => e.product.id == productId)
+        .map(
+          (e) => (
+            item: e,
+            signature: _cartItemOptionsSignature(e.options),
+            color: _cartItemSelectedColor(e).toLowerCase(),
+          ),
+        )
+        .where(
+          (e) =>
+              e.signature == requestedSignature &&
+              (e.color == selectedColorId.toLowerCase() ||
+                  (selectedColorHex.isNotEmpty &&
+                      e.color == selectedColorHex.toLowerCase())),
+        )
+        .map((e) => e.item)
+        .toList(growable: false);
+
+    setState(() {
+      _matchingCartItem = match.isEmpty ? null : match.first;
+      _isCheckingCartState = false;
+    });
+  }
+
+  Future<void> _openCart() async {
+    final userId = _userId;
+    if (userId == null || userId.trim().isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    final items = await CartService.instance.fetchCartItems(userId);
+    if (!mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => CartBottomSheet(items: items),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
+    final requiresColorSelection = _colorOptions.isNotEmpty;
+    final hasSelectedColor = (_selectedColorId ?? '').trim().isNotEmpty;
+    final canAddToCart = !requiresColorSelection || hasSelectedColor;
 
     final productWithDetails = widget.productWithDetails;
     final product = productWithDetails.product;
@@ -392,8 +535,8 @@ class _CodeGreenProductDetailTabScreenState
                     .map((row) {
                       final hex = (row.value ?? '').trim();
                       final isSelected =
-                          (_selectedColorHex ?? '').toLowerCase() ==
-                          hex.toLowerCase();
+                          (_selectedColorId ?? '').toLowerCase() ==
+                          row.id.toLowerCase();
 
                       final color = Color(int.parse('FF$hex', radix: 16));
 
@@ -415,10 +558,13 @@ class _CodeGreenProductDetailTabScreenState
                                 : null;
 
                             setState(() {
+                              _selectedColorId = row.id;
                               _selectedColorHex = hex;
                               _selectedColorImageUrl = nextUrl;
                               _selectedImageIndex = 0;
                             });
+
+                            _refreshCartMatch();
 
                             _pageController.animateToPage(
                               0,
@@ -477,23 +623,66 @@ class _CodeGreenProductDetailTabScreenState
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isAddingToCart ? null : _addToCart,
-                child: _isAddingToCart
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.shopping_cart_outlined, size: 18),
-                          SizedBox(width: 8),
-                          Text('Add to cart'),
-                        ],
-                      ),
-              ),
+              child: _matchingCartItem == null
+                  ? ElevatedButton(
+                      onPressed: (!canAddToCart || _isAddingToCart)
+                          ? null
+                          : _addToCart,
+                      child: _isAddingToCart
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.shopping_cart_outlined, size: 18),
+                                SizedBox(width: 8),
+                                Text('Add to cart'),
+                              ],
+                            ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          _isCheckingCartState
+                              ? 'Checking cart...'
+                              : 'Already added to cart.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _isAddingToCart ? null : _addToCart,
+                                child: _isAddingToCart
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text('Add another'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: _openCart,
+                                child: const Text('Check cart'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
             ),
 
             if (description != null && description.isNotEmpty) ...[

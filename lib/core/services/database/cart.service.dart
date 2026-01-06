@@ -16,6 +16,40 @@ class CartService {
 
   final Map<String, Future<List<ProductOptionColorRow>>> _colorOptionsMemo = {};
 
+  Future<Map<String, String>> fetchColorHexByIds(
+    Iterable<String> colorIds,
+  ) async {
+    final ids = colorIds
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+    if (ids.isEmpty) return const {};
+
+    try {
+      final response = await _client
+          .from(ProductOptionColorTable().tableName)
+          .select(
+            '${ProductOptionColorRow.idField}, ${ProductOptionColorRow.valueField}',
+          )
+          .inFilter(ProductOptionColorRow.idField, ids);
+
+      final rows = response
+          .whereType<Map<String, dynamic>>()
+          .map(ProductOptionColorRow.fromJson)
+          .toList(growable: false);
+
+      return {
+        for (final row in rows)
+          if ((row.value ?? '').trim().isNotEmpty)
+            row.id: (row.value ?? '').trim(),
+      };
+    } catch (e) {
+      debugPrint('Error fetching color hex by ids: $e');
+      return const {};
+    }
+  }
+
   Future<List<ProductOptionColorRow>> fetchColorOptionValues({
     required String productId,
   }) {
@@ -49,7 +83,12 @@ class CartService {
   String _optionsSignature(Map<String, String> selectedOptions) {
     final normalized =
         selectedOptions.entries
-            .where((e) => e.key.isNotEmpty && e.value.isNotEmpty)
+            .where(
+              (e) =>
+                  e.key.isNotEmpty &&
+                  e.value.isNotEmpty &&
+                  e.key.toLowerCase() != 'color',
+            )
             .map((e) => '${e.key}=${e.value}')
             .toList(growable: false)
           ..sort();
@@ -62,10 +101,36 @@ class CartService {
             .where(
               (o) => (o.option ?? '').isNotEmpty && (o.value ?? '').isNotEmpty,
             )
+            .where((o) => (o.option ?? '').toLowerCase() != 'color')
             .map((o) => '${o.option}=${o.value}')
             .toList(growable: false)
           ..sort();
     return normalized.join('|');
+  }
+
+  String _extractRequestedColor(Map<String, String> selectedOptions) {
+    final entry = selectedOptions.entries
+        .where((e) => e.key.toLowerCase() == 'color')
+        .map((e) => e.value)
+        .where((v) => v.trim().isNotEmpty)
+        .map((v) => v.trim())
+        .toList(growable: false);
+    return entry.isEmpty ? '' : entry.first;
+  }
+
+  String _extractExistingColor(
+    CartItemRow item,
+    List<CartItemOptionRow> options,
+  ) {
+    final fromField = (item.optionColor ?? '').trim();
+    if (fromField.isNotEmpty) return fromField;
+
+    final fromOptions = options
+        .where((o) => (o.option ?? '').toLowerCase() == 'color')
+        .map((o) => (o.value ?? '').trim())
+        .where((v) => v.isNotEmpty)
+        .toList(growable: false);
+    return fromOptions.isEmpty ? '' : fromOptions.first;
   }
 
   Future<List<CartItemWithProduct>> fetchCartItems(String userId) async {
@@ -107,6 +172,7 @@ class CartService {
   }) async {
     try {
       final requestedSignature = _optionsSignature(selectedOptions);
+      final requestedColor = _extractRequestedColor(selectedOptions);
 
       final existingResponse = await _client
           .from(CartItemTable().tableName)
@@ -123,12 +189,18 @@ class CartService {
                 .whereType<Map<String, dynamic>>()
                 .map(CartItemOptionRow.fromJson)
                 .toList(growable: false);
-            return (item: item, signature: _cartItemOptionsSignature(options));
+            return (
+              item: item,
+              signature: _cartItemOptionsSignature(options),
+              color: _extractExistingColor(item, options),
+            );
           })
           .toList(growable: false);
 
       final matching = existingItems.where(
-        (e) => e.signature == requestedSignature,
+        (e) =>
+            e.signature == requestedSignature &&
+            e.color.trim().toLowerCase() == requestedColor.trim().toLowerCase(),
       );
       final existingMatch = matching.isEmpty ? null : matching.first.item;
 
@@ -145,15 +217,41 @@ class CartService {
         return CartItemRow.fromJson(updated);
       }
 
-      final inserted = await _client
-          .from(CartItemTable().tableName)
-          .insert({
-            CartItemRow.customerField: userId,
-            CartItemRow.productField: productId,
-            CartItemRow.quantityField: quantity,
-          })
-          .select()
-          .single();
+      final baseInsertPayload = {
+        CartItemRow.customerField: userId,
+        CartItemRow.productField: productId,
+        CartItemRow.quantityField: quantity,
+      };
+
+      final insertPayload = {
+        ...baseInsertPayload,
+        if (requestedColor.isNotEmpty)
+          CartItemRow.optionColorField: requestedColor,
+      };
+
+      Map<String, dynamic> inserted;
+      try {
+        inserted = await _client
+            .from(CartItemTable().tableName)
+            .insert(insertPayload)
+            .select()
+            .single();
+      } on PostgrestException catch (e) {
+        if (requestedColor.trim().isEmpty) {
+          rethrow;
+        }
+
+        debugPrint(
+          'cart_item insert with option_color failed; retrying without option_color. '
+          'code=${e.code} message=${e.message} details=${e.details}',
+        );
+
+        inserted = await _client
+            .from(CartItemTable().tableName)
+            .insert(baseInsertPayload)
+            .select()
+            .single();
+      }
 
       final cartItem = CartItemRow.fromJson(inserted);
 
@@ -170,13 +268,20 @@ class CartService {
             .toList();
 
         if (payload.isNotEmpty) {
-          await _client.from(CartItemOptionTable().tableName).insert(payload);
+          try {
+            await _client.from(CartItemOptionTable().tableName).insert(payload);
+          } catch (e) {
+            debugPrint(
+              'cart_item_option insert failed; keeping cart_item without options. error=$e',
+            );
+          }
         }
       }
 
       return cartItem;
     } catch (e) {
       debugPrint('Error adding item to cart: $e');
+      debugPrintStack(stackTrace: StackTrace.current);
       return null;
     }
   }

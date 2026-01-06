@@ -133,4 +133,4 @@ class CompanyRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-05 16:52:08.887271
+/// Date: 2026-01-06 15:13:43.601652

@@ -207,6 +207,7 @@ class _CurationProductCardState extends State<_CurationProductCard> {
   List<ProductOptionColorRow> _colorValues = const [];
   String? _selectedImageUrl;
   String? _selectedColorHex;
+  final Set<String> _preloadedImageUrls = <String>{};
 
   @override
   void initState() {
@@ -235,7 +236,51 @@ class _CurationProductCardState extends State<_CurationProductCard> {
       productId: pid,
     );
     if (!mounted) return;
+
     setState(() => _colorValues = colors);
+
+    final data = widget.product.product;
+    final baseImageUrl =
+        data.mainImageBucket != null && data.mainImageFileName != null
+        ? getImageLink(
+            data.mainImageBucket!,
+            data.mainImageFileName!,
+            folderPath: data.mainImageFolderPath,
+          )
+        : null;
+
+    final variantUrls = colors
+        .map(
+          (row) =>
+              row.coloredProductBucket != null &&
+                  row.coloredProductFileName != null
+              ? getImageLink(
+                  row.coloredProductBucket!,
+                  row.coloredProductFileName!,
+                  folderPath: row.coloredProductFolderPath,
+                )
+              : null,
+        )
+        .whereType<String>()
+        .toList(growable: false);
+
+    final urlsToPreload = <String?>[baseImageUrl, ...variantUrls]
+        .whereType<String>()
+        .where((url) => url.isNotEmpty)
+        .toSet()
+        .difference(_preloadedImageUrls);
+
+    if (urlsToPreload.isEmpty) return;
+    _preloadedImageUrls.addAll(urlsToPreload);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Future.wait(
+        urlsToPreload
+            .map((url) => precacheImage(NetworkImage(url), context))
+            .toList(growable: false),
+      );
+    });
   }
 
   @override
@@ -291,6 +336,7 @@ class _CurationProductCardState extends State<_CurationProductCard> {
                       ? Image.network(
                           resolvedImageUrl,
                           fit: BoxFit.cover,
+                          gaplessPlayback: true,
                           loadingBuilder: (context, child, progress) {
                             if (progress == null) return child;
                             return Container(
