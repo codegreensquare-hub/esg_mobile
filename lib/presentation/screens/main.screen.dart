@@ -61,6 +61,7 @@ class _MainScreenState extends State<MainScreen> {
   MainTab _selectedMainTab = MainTab.greenSquare;
   int _greenIndex = 0; // 0: Story, 1: Shopping, 2: Participate, 3: Account
   late final CurationShopTabController _curationShopController;
+  late final OriginalShopTabController _originalShopController;
   late final CodeGreenProductDetailTabController _productDetailController;
   int _codeGreenLastNonProductTabIndex = 0;
 
@@ -78,6 +79,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _curationShopController = CurationShopTabController();
+    _originalShopController = OriginalShopTabController();
     _productDetailController = CodeGreenProductDetailTabController();
     _scrollController = widget.controller ?? ScrollController();
     _scrollController.addListener(() {
@@ -94,6 +96,7 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     _scrollController.dispose();
     _curationShopController.dispose();
+    _originalShopController.dispose();
     _productDetailController.dispose();
     super.dispose();
   }
@@ -317,7 +320,11 @@ class _MainScreenState extends State<MainScreen> {
           onTapStory: _openGreenSquareStory,
         );
       case OriginalShopTab.tab:
-        return const OriginalShopTab(key: PageStorageKey(OriginalShopTab.tab));
+        return OriginalShopTab(
+          key: const PageStorageKey(OriginalShopTab.tab),
+          controller: _originalShopController,
+          onTapProduct: _openCodeGreenProduct,
+        );
       case CurationShopTab.tab:
         return CurationShopTab(
           key: const PageStorageKey(CurationShopTab.tab),
@@ -331,7 +338,11 @@ class _MainScreenState extends State<MainScreen> {
           onBack: _closeCodeGreenProduct,
         );
       case AboutTab.tab:
-        return const AboutTab(key: PageStorageKey(AboutTab.tab));
+        return AboutTab(
+          key: const PageStorageKey(AboutTab.tab),
+          onTapCodeGreenProducts: _openCurationShop,
+          onTapGreenSquare: _openGreenSquare,
+        );
       case LookBookTab.tab:
         return const LookBookTab(key: PageStorageKey(LookBookTab.tab));
       case EventTab.tab:
@@ -401,6 +412,16 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _openCurationShop() {
+    final idx = codeGreenTabs.indexOf(CurationShopTab.tab);
+    if (idx < 0) return;
+    if (idx == _selectedIndex) return;
+    setState(() {
+      _selectedMainTab = MainTab.codeGreen;
+      _selectedIndex = idx;
+    });
+  }
+
   void _openGreenSquare() {
     setState(() {
       _selectedMainTab = MainTab.greenSquare;
@@ -441,6 +462,12 @@ class _MainScreenState extends State<MainScreen> {
   void _handleCodeGreenSubTab(String parentTab, String subTab) {
     if (parentTab == CurationShopTab.tab) {
       _curationShopController.selectById(subTab);
+      final idx = codeGreenTabs.indexOf(parentTab);
+      if (idx >= 0 && idx != _selectedIndex) {
+        setState(() => _selectedIndex = idx);
+      }
+    } else if (parentTab == OriginalShopTab.tab) {
+      _originalShopController.selectById(subTab);
       final idx = codeGreenTabs.indexOf(parentTab);
       if (idx >= 0 && idx != _selectedIndex) {
         setState(() => _selectedIndex = idx);

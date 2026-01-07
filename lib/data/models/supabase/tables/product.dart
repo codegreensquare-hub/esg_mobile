@@ -41,6 +41,7 @@ class ProductRow extends SupabaseDataRow {
     String? title,
     String? company,
     String? id,
+    bool? isCuration,
   }) : super({
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
@@ -65,6 +66,7 @@ class ProductRow extends SupabaseDataRow {
          if (title != null) 'title': supaSerialize(title),
          if (company != null) 'company': supaSerialize(company),
          if (id != null) 'id': supaSerialize(id),
+         if (isCuration != null) 'is_curation': supaSerialize(isCuration),
        });
 
   /// Product Row
@@ -217,6 +219,13 @@ class ProductRow extends SupabaseDataRow {
   String get id => getField<String>(idField, defaultValue: '')!;
   set id(String value) => setField<String>(idField, value);
 
+  /// Is Curation field name
+  static const String isCurationField = 'is_curation';
+
+  /// Is Curation
+  bool get isCuration => getField<bool>(isCurationField, defaultValue: false)!;
+  set isCuration(bool value) => setField<bool>(isCurationField, value);
+
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
   ProductRow copyWith({
@@ -237,6 +246,7 @@ class ProductRow extends SupabaseDataRow {
     String? title,
     String? company,
     String? id,
+    bool? isCuration,
   }) => ProductRow.fromJson({
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
@@ -260,8 +270,9 @@ class ProductRow extends SupabaseDataRow {
     'title': supaSerialize(title) ?? data['title'],
     'company': supaSerialize(company) ?? data['company'],
     'id': supaSerialize(id) ?? data['id'],
+    'is_curation': supaSerialize(isCuration) ?? data['is_curation'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-06 15:13:43.621938
+/// Date: 2026-01-07 17:49:51.884925

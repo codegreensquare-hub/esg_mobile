@@ -19,6 +19,8 @@ class ProductService {
     VendorAdminType? vendor,
     ProductStyle? style,
     ProductMaterial? material,
+    bool? isCuration,
+    String? company,
     String orderByField = ProductRow.createdAtField,
     bool orderAscending = false,
     int? limit,
@@ -49,6 +51,14 @@ class ProductService {
 
       if (material != null) {
         query = query.eq(ProductRow.typeField, material.name);
+      }
+
+      if (isCuration != null) {
+        query = query.eq(ProductRow.isCurationField, isCuration);
+      }
+
+      if (company != null) {
+        query = query.eq(ProductRow.companyField, company);
       }
 
       var finalQuery = query.order(orderByField, ascending: orderAscending);

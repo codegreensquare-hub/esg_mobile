@@ -65,6 +65,7 @@ class CurationSectionStyle extends StatelessWidget {
             tab: 'style',
             subTab: selectedSlug,
             onTapProduct: onTapProduct,
+            isCuration: true,
           ),
         ],
       ),

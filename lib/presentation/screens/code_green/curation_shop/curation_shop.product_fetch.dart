@@ -11,21 +11,24 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 const int _defaultGridLimit = 12;
 
-/// Fetches and renders Code Green curation products inside a responsive grid.
+/// Fetches and renders Code Green products inside a responsive grid.
 ///
 /// [tab] controls the high-level category (all/best/style/type) while the
 /// optional [subTab] lets parent widgets drill deeper (e.g. tote, natural).
+/// [isCuration] filters products by curation status (true for curation shop, false for original shop).
 class CurationShopProductFetch extends StatefulWidget {
   const CurationShopProductFetch({
     super.key,
     required this.tab,
     this.subTab,
     this.onTapProduct,
+    this.isCuration = true,
   });
 
   final String tab;
   final String? subTab;
   final ValueChanged<ProductWithOtherDetails>? onTapProduct;
+  final bool isCuration;
 
   @override
   State<CurationShopProductFetch> createState() =>
@@ -63,6 +66,8 @@ class _CurationShopProductFetchState extends State<CurationShopProductFetch> {
         vendor: VendorAdminType.lgs,
         style: filter.style,
         material: filter.material,
+        isCuration: widget.isCuration,
+        company: '00000000-0000-0000-0000-000000000000',
         orderByField: filter.orderByField,
         orderAscending: filter.orderAscending,
         limit: filter.limit,

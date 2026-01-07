@@ -29,7 +29,11 @@ class CurationSectionAll extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        CurationShopProductFetch(tab: 'all', onTapProduct: onTapProduct),
+        CurationShopProductFetch(
+          tab: 'all',
+          onTapProduct: onTapProduct,
+          isCuration: true,
+        ),
       ],
     );
   }

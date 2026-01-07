@@ -58,6 +58,7 @@ class _HomeTabState extends State<HomeTab> {
     try {
       final results = await ProductService.instance.fetchProducts(
         vendor: VendorAdminType.lgs,
+        company: '00000000-0000-0000-0000-000000000000',
         limit: _homeGridLimit,
       );
 

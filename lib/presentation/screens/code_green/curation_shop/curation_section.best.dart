@@ -25,7 +25,11 @@ class CurationSectionBest extends StatelessWidget {
           style: theme.textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
-        CurationShopProductFetch(tab: 'best', onTapProduct: onTapProduct),
+        CurationShopProductFetch(
+          tab: 'best',
+          onTapProduct: onTapProduct,
+          isCuration: true,
+        ),
       ],
     );
   }

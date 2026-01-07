@@ -56,6 +56,7 @@ class _StoriesSectionState extends State<StoriesSection> {
 
   Future<void> _loadStories() async {
     if (_isLoadingMore) return;
+    if (!mounted) return;
     setState(() => _isLoadingMore = true);
     try {
       final newStories = await StoryService.instance.fetchStories(
@@ -64,6 +65,7 @@ class _StoriesSectionState extends State<StoriesSection> {
         offset: _offset,
       );
 
+      if (!mounted) return;
       _stories.addAll(newStories);
       _offset += newStories.length;
       if (newStories.length < _limit) {
