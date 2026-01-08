@@ -9,50 +9,53 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Product Option Parameter Table
-class ProductOptionParameterTable
-    extends SupabaseTable<ProductOptionParameterRow> {
+/// Lookbook Product Table
+class LookbookProductTable extends SupabaseTable<LookbookProductRow> {
   /// Table Name
   @override
-  String get tableName => 'product_option_parameter';
+  String get tableName => 'lookbook_product';
 
-  /// Create a [ProductOptionParameterRow] from the [data] provided
+  /// Create a [LookbookProductRow] from the [data] provided
   @override
-  ProductOptionParameterRow createRow(Map<String, dynamic> data) =>
-      ProductOptionParameterRow.fromJson(data);
+  LookbookProductRow createRow(Map<String, dynamic> data) =>
+      LookbookProductRow.fromJson(data);
 }
 
-/// Product Option Parameter Row
-class ProductOptionParameterRow extends SupabaseDataRow {
-  /// Product Option Parameter Row
-  ProductOptionParameterRow({
+/// Lookbook Product Row
+class LookbookProductRow extends SupabaseDataRow {
+  /// Lookbook Product Row
+  LookbookProductRow({
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? optionParameter,
     String? product,
+    double? x,
+    double? y,
+    String? lookbookEntry,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
-         if (optionParameter != null)
-           'option_parameter': supaSerialize(optionParameter),
          if (product != null) 'product': supaSerialize(product),
+         if (x != null) 'x': supaSerialize(x),
+         if (y != null) 'y': supaSerialize(y),
+         if (lookbookEntry != null)
+           'lookbook_entry': supaSerialize(lookbookEntry),
        });
 
-  /// Product Option Parameter Row
-  const ProductOptionParameterRow._(super.data);
+  /// Lookbook Product Row
+  const LookbookProductRow._(super.data);
 
-  /// Create Product Option Parameter Row from a [data] map
-  factory ProductOptionParameterRow.fromJson(Map<String, dynamic> data) =>
-      ProductOptionParameterRow._(data.cleaned);
+  /// Create Lookbook Product Row from a [data] map
+  factory LookbookProductRow.fromJson(Map<String, dynamic> data) =>
+      LookbookProductRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => ProductOptionParameterTable();
+  SupabaseTable get table => LookbookProductTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -76,14 +79,6 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   String? get createdBy => getField<String>(createdByField);
   set createdBy(String? value) => setField<String>(createdByField, value);
 
-  /// Option Parameter field name
-  static const String optionParameterField = 'option_parameter';
-
-  /// Option Parameter
-  String? get optionParameter => getField<String>(optionParameterField);
-  set optionParameter(String? value) =>
-      setField<String>(optionParameterField, value);
-
   /// Product field name
   static const String productField = 'product';
 
@@ -91,23 +86,48 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   String? get product => getField<String>(productField);
   set product(String? value) => setField<String>(productField, value);
 
-  /// Make a copy of the current [ProductOptionParameterRow]
+  /// X field name
+  static const String xField = 'x';
+
+  /// X
+  double? get x => getField<double>(xField);
+  set x(double? value) => setField<double>(xField, value);
+
+  /// Y field name
+  static const String yField = 'y';
+
+  /// Y
+  double? get y => getField<double>(yField);
+  set y(double? value) => setField<double>(yField, value);
+
+  /// Lookbook Entry field name
+  static const String lookbookEntryField = 'lookbook_entry';
+
+  /// Lookbook Entry
+  String? get lookbookEntry => getField<String>(lookbookEntryField);
+  set lookbookEntry(String? value) =>
+      setField<String>(lookbookEntryField, value);
+
+  /// Make a copy of the current [LookbookProductRow]
   /// overriding the provided fields
-  ProductOptionParameterRow copyWith({
+  LookbookProductRow copyWith({
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? optionParameter,
     String? product,
-  }) => ProductOptionParameterRow.fromJson({
+    double? x,
+    double? y,
+    String? lookbookEntry,
+  }) => LookbookProductRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
-    'option_parameter':
-        supaSerialize(optionParameter) ?? data['option_parameter'],
     'product': supaSerialize(product) ?? data['product'],
+    'x': supaSerialize(x) ?? data['x'],
+    'y': supaSerialize(y) ?? data['y'],
+    'lookbook_entry': supaSerialize(lookbookEntry) ?? data['lookbook_entry'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.024143
+/// Date: 2026-01-08 15:40:00.014363

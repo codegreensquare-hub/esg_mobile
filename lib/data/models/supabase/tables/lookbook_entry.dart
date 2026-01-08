@@ -25,21 +25,23 @@ class LookbookEntryTable extends SupabaseTable<LookbookEntryRow> {
 class LookbookEntryRow extends SupabaseDataRow {
   /// Lookbook Entry Row
   LookbookEntryRow({
-    required int id,
+    required String lookbook,
     DateTime? createdAt,
     String? bucket,
     String? folderPath,
     String? fileName,
     String? createdBy,
     int? order,
+    String? id,
   }) : super({
-         'id': supaSerialize(id),
+         'lookbook': supaSerialize(lookbook),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (bucket != null) 'bucket': supaSerialize(bucket),
          if (folderPath != null) 'folder_path': supaSerialize(folderPath),
          if (fileName != null) 'file_name': supaSerialize(fileName),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (order != null) 'order': supaSerialize(order),
+         if (id != null) 'id': supaSerialize(id),
        });
 
   /// Lookbook Entry Row
@@ -55,13 +57,6 @@ class LookbookEntryRow extends SupabaseDataRow {
   /// Get the [SupabaseTable] for this row
   @override
   SupabaseTable get table => LookbookEntryTable();
-
-  /// Id field name
-  static const String idField = 'id';
-
-  /// Id
-  int get id => getField<int>(idField)!;
-  set id(int value) => setField<int>(idField, value);
 
   /// Created At field name
   static const String createdAtField = 'created_at';
@@ -106,26 +101,42 @@ class LookbookEntryRow extends SupabaseDataRow {
   int get order => getField<int>(orderField, defaultValue: 0)!;
   set order(int value) => setField<int>(orderField, value);
 
+  /// Lookbook field name
+  static const String lookbookField = 'lookbook';
+
+  /// Lookbook
+  String get lookbook => getField<String>(lookbookField)!;
+  set lookbook(String value) => setField<String>(lookbookField, value);
+
+  /// Id field name
+  static const String idField = 'id';
+
+  /// Id
+  String get id => getField<String>(idField, defaultValue: '')!;
+  set id(String value) => setField<String>(idField, value);
+
   /// Make a copy of the current [LookbookEntryRow]
   /// overriding the provided fields
   LookbookEntryRow copyWith({
-    int? id,
+    String? lookbook,
     DateTime? createdAt,
     String? bucket,
     String? folderPath,
     String? fileName,
     String? createdBy,
     int? order,
+    String? id,
   }) => LookbookEntryRow.fromJson({
-    'id': supaSerialize(id) ?? data['id'],
+    'lookbook': supaSerialize(lookbook) ?? data['lookbook'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'bucket': supaSerialize(bucket) ?? data['bucket'],
     'folder_path': supaSerialize(folderPath) ?? data['folder_path'],
     'file_name': supaSerialize(fileName) ?? data['file_name'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'order': supaSerialize(order) ?? data['order'],
+    'id': supaSerialize(id) ?? data['id'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-07 17:49:51.876662
+/// Date: 2026-01-08 15:40:00.014001

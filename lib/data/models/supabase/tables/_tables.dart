@@ -24,6 +24,7 @@ export 'inquiry_response.dart';
 export 'integrated_admin_preferences.dart';
 export 'lookbook.dart';
 export 'lookbook_entry.dart';
+export 'lookbook_product.dart';
 export 'mission.dart';
 export 'mission_participation.dart';
 export 'mission_photo_animation_completion.dart';
@@ -63,4 +64,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-07 17:49:51.896619
+/// Date: 2026-01-08 15:40:00.033310

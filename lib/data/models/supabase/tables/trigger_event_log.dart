@@ -15,7 +15,7 @@ class TriggerEventLogTable extends SupabaseTable<TriggerEventLogRow> {
   @override
   String get tableName => 'trigger_event_log';
 
-    /// Create a [TriggerEventLogRow] from the [data] provided
+  /// Create a [TriggerEventLogRow] from the [data] provided
   @override
   TriggerEventLogRow createRow(Map<String, dynamic> data) =>
       TriggerEventLogRow.fromJson(data);
@@ -34,23 +34,25 @@ class TriggerEventLogRow extends SupabaseDataRow {
     String? errorHint,
     dynamic newRow,
     dynamic oldRow,
-  }): super({
-    'function_name': supaSerialize(functionName),
-    'operation': supaSerialize(operation),
-    if (id != null) 'id': supaSerialize(id),
-    if (occurredAt != null) 'occurred_at': supaSerialize(occurredAt),
-    if (errorMessage != null) 'error_message': supaSerialize(errorMessage),
-    if (errorDetail != null) 'error_detail': supaSerialize(errorDetail),
-    if (errorHint != null) 'error_hint': supaSerialize(errorHint),
-    if (newRow != null) 'new_row': supaSerialize(newRow),
-    if (oldRow != null) 'old_row': supaSerialize(oldRow),
-  });
+  }) : super({
+         'function_name': supaSerialize(functionName),
+         'operation': supaSerialize(operation),
+         if (id != null) 'id': supaSerialize(id),
+         if (occurredAt != null) 'occurred_at': supaSerialize(occurredAt),
+         if (errorMessage != null) 'error_message': supaSerialize(errorMessage),
+         if (errorDetail != null) 'error_detail': supaSerialize(errorDetail),
+         if (errorHint != null) 'error_hint': supaSerialize(errorHint),
+         if (newRow != null) 'new_row': supaSerialize(newRow),
+         if (oldRow != null) 'old_row': supaSerialize(oldRow),
+       });
 
   /// Trigger Event Log Row
   const TriggerEventLogRow._(super.data);
 
   /// Create Trigger Event Log Row from a [data] map
-  factory TriggerEventLogRow.fromJson(Map<String, dynamic> data) => TriggerEventLogRow._(data.cleaned);
+  factory TriggerEventLogRow.fromJson(Map<String, dynamic> data) =>
+      TriggerEventLogRow._(data.cleaned);
+
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
@@ -69,7 +71,8 @@ class TriggerEventLogRow extends SupabaseDataRow {
   static const String occurredAtField = 'occurred_at';
 
   /// Occurred At
-  DateTime get occurredAt => getField<DateTime>(occurredAtField, defaultValue: DateTime.now())!;
+  DateTime get occurredAt =>
+      getField<DateTime>(occurredAtField, defaultValue: DateTime.now())!;
   set occurredAt(DateTime value) => setField<DateTime>(occurredAtField, value);
 
   /// Function Name field name
@@ -121,7 +124,7 @@ class TriggerEventLogRow extends SupabaseDataRow {
   dynamic get oldRow => getField<dynamic>(oldRowField);
   set oldRow(dynamic value) => setField<dynamic>(oldRowField, value);
 
-  /// Make a copy of the current [TriggerEventLogRow] 
+  /// Make a copy of the current [TriggerEventLogRow]
   /// overriding the provided fields
   TriggerEventLogRow copyWith({
     String? functionName,
@@ -133,19 +136,18 @@ class TriggerEventLogRow extends SupabaseDataRow {
     String? errorHint,
     dynamic newRow,
     dynamic oldRow,
-  }) =>
-    TriggerEventLogRow.fromJson({
-      'function_name': supaSerialize(functionName) ?? data['function_name'],
-      'operation': supaSerialize(operation) ?? data['operation'],
-      'id': supaSerialize(id) ?? data['id'],
-      'occurred_at': supaSerialize(occurredAt) ?? data['occurred_at'],
-      'error_message': supaSerialize(errorMessage) ?? data['error_message'],
-      'error_detail': supaSerialize(errorDetail) ?? data['error_detail'],
-      'error_hint': supaSerialize(errorHint) ?? data['error_hint'],
-      'new_row': supaSerialize(newRow) ?? data['new_row'],
-      'old_row': supaSerialize(oldRow) ?? data['old_row'],
-    });
+  }) => TriggerEventLogRow.fromJson({
+    'function_name': supaSerialize(functionName) ?? data['function_name'],
+    'operation': supaSerialize(operation) ?? data['operation'],
+    'id': supaSerialize(id) ?? data['id'],
+    'occurred_at': supaSerialize(occurredAt) ?? data['occurred_at'],
+    'error_message': supaSerialize(errorMessage) ?? data['error_message'],
+    'error_detail': supaSerialize(errorDetail) ?? data['error_detail'],
+    'error_hint': supaSerialize(errorHint) ?? data['error_hint'],
+    'new_row': supaSerialize(newRow) ?? data['new_row'],
+    'old_row': supaSerialize(oldRow) ?? data['old_row'],
+  });
 }
 
 /// Tag: v2
-/// Date: 2026-01-07 17:49:51.894002
+/// Date: 2026-01-08 15:40:00.031258

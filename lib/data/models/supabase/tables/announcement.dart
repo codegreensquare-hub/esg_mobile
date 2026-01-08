@@ -33,6 +33,7 @@ class AnnouncementRow extends SupabaseDataRow {
     String? createdBy,
     DateTime? createdAt,
     int? views,
+    List<String>? readBy,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (title != null) 'title': supaSerialize(title),
@@ -42,6 +43,7 @@ class AnnouncementRow extends SupabaseDataRow {
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (views != null) 'views': supaSerialize(views),
+         if (readBy != null) 'read_by': supaSerialize(readBy),
        });
 
   /// Announcement Row
@@ -115,6 +117,13 @@ class AnnouncementRow extends SupabaseDataRow {
   int get views => getField<int>(viewsField, defaultValue: 0)!;
   set views(int value) => setField<int>(viewsField, value);
 
+  /// Read By field name
+  static const String readByField = 'read_by';
+
+  /// Read By
+  List<String> get readBy => getListField<String>(readByField);
+  set readBy(List<String>? value) => setListField<String>(readByField, value);
+
   /// Make a copy of the current [AnnouncementRow]
   /// overriding the provided fields
   AnnouncementRow copyWith({
@@ -126,6 +135,7 @@ class AnnouncementRow extends SupabaseDataRow {
     String? createdBy,
     DateTime? createdAt,
     int? views,
+    List<String>? readBy,
   }) => AnnouncementRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'title': supaSerialize(title) ?? data['title'],
@@ -135,8 +145,9 @@ class AnnouncementRow extends SupabaseDataRow {
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'views': supaSerialize(views) ?? data['views'],
+    'read_by': supaSerialize(readBy) ?? data['read_by'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-07 17:49:51.854505
+/// Date: 2026-01-08 15:39:59.989791
