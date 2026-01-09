@@ -118,6 +118,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                     .where(
                       (e) =>
                           !(homeTab != null && e.value == homeTab) &&
+                          e.value != lookbookEntryViewerTabId &&
                           e.value != codeGreenProductTabId &&
                           e.value != codeGreenLoginTabId,
                     )

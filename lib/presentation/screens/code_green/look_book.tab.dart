@@ -6,7 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LookBookTab extends StatefulWidget {
   static const tab = 'look_book';
-  const LookBookTab({super.key});
+  const LookBookTab({super.key, this.onOpenLookbook});
+
+  final void Function(String lookbookId, String lookbookTitle)? onOpenLookbook;
 
   @override
   State<LookBookTab> createState() => _LookBookTabState();
@@ -122,6 +124,9 @@ class _LookBookTabState extends State<LookBookTab> {
                           id: item.row.id,
                           title: title,
                           coverUrl: coverUrl,
+                          onTap: () {
+                            widget.onOpenLookbook?.call(item.row.id, title);
+                          },
                         );
                       },
                     ),

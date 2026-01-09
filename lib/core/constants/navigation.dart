@@ -8,6 +8,7 @@ import 'package:esg_mobile/presentation/screens/code_green/product_detail.tab.da
 
 const String codeGreenLoginTabId = 'login';
 const String codeGreenProductTabId = CodeGreenProductDetailTab.tab;
+const String lookbookEntryViewerTabId = 'lookbook_entry_viewer';
 
 const codeGreenTabs = [
   HomeTab.tab,
@@ -15,6 +16,7 @@ const codeGreenTabs = [
   CurationShopTab.tab,
   AboutTab.tab,
   LookBookTab.tab,
+  lookbookEntryViewerTabId,
   EventTab.tab,
   codeGreenProductTabId,
   codeGreenLoginTabId,
@@ -25,6 +27,7 @@ const codeGreenLabels = {
   CurationShopTab.tab: 'Curation Shop',
   OriginalShopTab.tab: 'Original Shop',
   LookBookTab.tab: 'Look Book',
+  lookbookEntryViewerTabId: 'Look Book Viewer',
   AboutTab.tab: 'About',
   EventTab.tab: 'Event',
   codeGreenProductTabId: 'Product',

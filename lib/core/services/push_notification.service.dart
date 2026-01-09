@@ -1,6 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform, kIsWeb;
+    show debugPrint, kDebugMode;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/data/models/supabase/tables/push_notification_token.dart';
 
@@ -14,6 +14,7 @@ class PushNotificationService {
   PushNotificationService._();
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  String? _lastKnownToken;
 
   Future<void> initialize() async {
     // Request permission
@@ -25,67 +26,70 @@ class PushNotificationService {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+      _firebaseMessaging.onTokenRefresh.listen((token) async {
+        _lastKnownToken = token;
+        await _saveTokenIfPossible(token);
+      });
 
-      if (isIOS) {
-        final apnsToken = await _firebaseMessaging.getAPNSToken();
-        if (apnsToken == null) {
-          _firebaseMessaging.onTokenRefresh.listen(_saveToken);
-          return;
-        }
-      }
-
-      try {
-        final token = await _firebaseMessaging.getToken();
-        if (token != null) {
-          await _saveToken(token);
-        }
-      } catch (_) {
-        // Ignore early iOS APNS-token-not-set failures.
-      }
-
-      _firebaseMessaging.onTokenRefresh.listen(_saveToken);
+      await _fetchAndPersistTokenIfPossible();
     }
   }
 
-  Future<void> _saveToken(String token) async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
+  Future<void> _fetchAndPersistTokenIfPossible() async {
+    try {
+      final token = await _firebaseMessaging.getToken();
+      if (token == null) {
+        if (kDebugMode) {
+          debugPrint('PushNotificationService: FCM token is null.');
+        }
+        return;
+      }
+      _lastKnownToken = token;
+      await _saveTokenIfPossible(token);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('PushNotificationService: getToken failed: $e');
+      }
+    }
+  }
 
-    // Check if token already exists
-    final existing = await Supabase.instance.client
-        .from(PushNotificationTokenTable().tableName)
-        .select()
-        .eq(PushNotificationTokenRow.tokenField, token)
-        .eq(PushNotificationTokenRow.userField, user.id)
-        .maybeSingle();
+  Future<void> _saveTokenIfPossible(String token) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
 
-    if (existing == null) {
-      // Insert new token
+    try {
       await Supabase.instance.client
           .from(PushNotificationTokenTable().tableName)
-          .insert({
+          .upsert({
             PushNotificationTokenRow.tokenField: token,
-            PushNotificationTokenRow.userField: user.id,
-          });
+            if (userId != null) PushNotificationTokenRow.userField: userId,
+          }, onConflict: PushNotificationTokenRow.tokenField);
+
+      if (kDebugMode) {
+        debugPrint(
+          'PushNotificationService: upserted token (userId=${userId ?? 'null'}).',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('PushNotificationService: upsert failed: $e');
+      }
     }
   }
 
   Future<void> saveTokenOnLogin() async {
-    final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+    await syncTokenForCurrentUser();
+  }
 
-    if (isIOS) {
-      final apnsToken = await _firebaseMessaging.getAPNSToken();
-      if (apnsToken == null) return;
+  Future<void> syncTokenForCurrentUser() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    final token = _lastKnownToken;
+    if (token != null) {
+      await _saveTokenIfPossible(token);
+      return;
     }
 
-    try {
-      final token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        await _saveToken(token);
-      }
-    } catch (_) {
-      // Ignore early iOS APNS-token-not-set failures.
-    }
+    await _fetchAndPersistTokenIfPossible();
   }
 }

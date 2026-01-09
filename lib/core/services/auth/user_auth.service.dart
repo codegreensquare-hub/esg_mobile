@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:esg_mobile/data/models/supabase/tables/user.dart';
+import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,9 +10,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class UserAuthService extends ChangeNotifier {
   UserAuthService._internal() : _client = Supabase.instance.client {
     _currentUser = _client.auth.currentUser;
+    unawaited(PushNotificationService.instance.syncTokenForCurrentUser());
     unawaited(_syncUserRowFor(_currentUser));
     _authSub = _client.auth.onAuthStateChange.listen((data) {
+      final wasLoggedOut = _currentUser == null;
       _updateUser(data.session?.user);
+      if (wasLoggedOut && data.session?.user != null) {
+        unawaited(PushNotificationService.instance.syncTokenForCurrentUser());
+      }
       unawaited(_syncUserRowFor(data.session?.user));
     });
   }

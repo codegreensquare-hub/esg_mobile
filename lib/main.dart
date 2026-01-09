@@ -4,6 +4,7 @@ import 'package:supabase_codegen/supabase_codegen.dart' as supa_codegen;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:esg_mobile/app/app.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/firebase_options.dart';
 
@@ -29,6 +30,9 @@ Future<void> main() async {
 
   // Ensure supabase_codegen generated tables reuse the initialized client
   supa_codegen.setClient(Supabase.instance.client);
+
+  // Ensure auth state listener is live (also syncs push token if logged in)
+  UserAuthService.instance;
 
   // Initialize push notifications
   await PushNotificationService.instance.initialize();

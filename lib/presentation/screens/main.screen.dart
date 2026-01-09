@@ -9,6 +9,7 @@ import 'package:esg_mobile/presentation/screens/code_green/event.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/home.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/login/code_green_login.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
+import 'package:esg_mobile/presentation/screens/code_green/lookbook_entry_viewer.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/original_shop.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/product_detail.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.tab.dart';
@@ -64,6 +65,9 @@ class _MainScreenState extends State<MainScreen> {
   late final OriginalShopTabController _originalShopController;
   late final CodeGreenProductDetailTabController _productDetailController;
   int _codeGreenLastNonProductTabIndex = 0;
+
+  String? _selectedLookbookId;
+  String? _selectedLookbookTitle;
 
   static const Set<String> _codeGreenHeroTabs = {
     HomeTab.tab,
@@ -344,7 +348,37 @@ class _MainScreenState extends State<MainScreen> {
           onTapGreenSquare: _openGreenSquare,
         );
       case LookBookTab.tab:
-        return const LookBookTab(key: PageStorageKey(LookBookTab.tab));
+        return LookBookTab(
+          key: const PageStorageKey(LookBookTab.tab),
+          onOpenLookbook: (lookbookId, lookbookTitle) {
+            final idx = codeGreenTabs.indexOf(lookbookEntryViewerTabId);
+            if (idx < 0) return;
+
+            setState(() {
+              _selectedLookbookId = lookbookId;
+              _selectedLookbookTitle = lookbookTitle;
+              _selectedMainTab = MainTab.codeGreen;
+              _selectedIndex = idx;
+            });
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              if (!_scrollController.hasClients) return;
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOut,
+              );
+            });
+          },
+        );
+      case lookbookEntryViewerTabId:
+        return LookbookEntryViewerTab(
+          key: const PageStorageKey(LookbookEntryViewerTab.tab),
+          lookbookId: _selectedLookbookId,
+          lookbookTitle: _selectedLookbookTitle,
+          onOpenProduct: _openCodeGreenProduct,
+        );
       case EventTab.tab:
         return const EventTab(key: PageStorageKey(EventTab.tab));
       case codeGreenLoginTabId:

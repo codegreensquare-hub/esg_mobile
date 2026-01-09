@@ -135,6 +135,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                     .where(
                       (e) =>
                           !(homeTab != null && e.value == homeTab) &&
+                          e.value != lookbookEntryViewerTabId &&
                           e.value != codeGreenProductTabId &&
                           e.value != codeGreenLoginTabId,
                     )
