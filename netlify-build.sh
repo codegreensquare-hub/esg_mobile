@@ -23,6 +23,12 @@ if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
   exit 1
 fi
 
+if [ -n "${SUPABASE_KEY:-}" ]; then
+  echo "ERROR: SUPABASE_KEY is set, but service-role keys must never be used in client builds." 1>&2
+  echo "Remove SUPABASE_KEY from Netlify environment variables for this site." 1>&2
+  exit 1
+fi
+
 flutter build web --release \
   --dart-define=SUPABASE_URL="$SUPABASE_URL" \
   --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
