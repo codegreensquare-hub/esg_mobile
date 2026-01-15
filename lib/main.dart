@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_codegen/supabase_codegen.dart' as supa_codegen;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,13 +18,20 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Load environment variables
-  await dotenv.load(fileName: '.env');
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  if (supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) {
+    throw StateError(
+      'Missing SUPABASE_URL / SUPABASE_ANON_KEY. '
+      'Provide them via --dart-define (recommended for web deploys like Netlify).',
+    );
+  }
 
   // Initialize Supabase
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
   // Ensure supabase_codegen generated tables reuse the initialized client

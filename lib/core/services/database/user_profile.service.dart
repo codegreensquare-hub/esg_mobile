@@ -1,6 +1,5 @@
 import 'package:esg_mobile/data/models/supabase/tables/user.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,10 +10,11 @@ class UserProfileService {
 
   final SupabaseClient _client = Supabase.instance.client;
 
-  String get _photoBucket =>
-      (dotenv.env['SUPABASE_USER_PHOTO_BUCKET'] ?? '').trim().isNotEmpty
-      ? dotenv.env['SUPABASE_USER_PHOTO_BUCKET']!.trim()
-      : 'user';
+  String get _photoBucket {
+    const bucket = String.fromEnvironment('SUPABASE_USER_PHOTO_BUCKET');
+    final trimmed = bucket.trim();
+    return trimmed.isNotEmpty ? trimmed : 'user';
+  }
 
   Future<void> updateUsername({
     required String userId,
