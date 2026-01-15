@@ -117,4 +117,4 @@ class CartItemRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.000347
+/// Date: 2026-01-15 14:21:42.903405

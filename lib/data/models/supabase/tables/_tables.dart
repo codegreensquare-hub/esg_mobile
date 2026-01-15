@@ -26,6 +26,8 @@ export 'lookbook.dart';
 export 'lookbook_entry.dart';
 export 'lookbook_product.dart';
 export 'mission.dart';
+export 'mission_click.dart';
+export 'mission_impression.dart';
 export 'mission_participation.dart';
 export 'mission_photo_animation_completion.dart';
 export 'mission_photo_not_allowed.dart';
@@ -42,6 +44,7 @@ export 'popup.dart';
 export 'product.dart';
 export 'product_category.dart';
 export 'product_image.dart';
+export 'product_image_description.dart';
 export 'product_option_color.dart';
 export 'product_option_parameter.dart';
 export 'product_option_value.dart';
@@ -50,6 +53,7 @@ export 'push_notification.dart';
 export 'push_notification_token.dart';
 export 'push_notification_trigger.dart';
 export 'request_audit_log.dart';
+export 'setting.dart';
 export 'stamp.dart';
 export 'story.dart';
 export 'story_comment.dart';
@@ -64,4 +68,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.033310
+/// Date: 2026-01-15 14:21:42.935886

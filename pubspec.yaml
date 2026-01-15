@@ -39,6 +39,7 @@ flutter:
     - assets/images/carousel/
     - assets/images/product_grid/
     - assets/images/material_grid/
+    - assets/images/award_points/
     - assets/images/banner/
     - assets/images/login/
     - assets/images/meetCodegreenAndSquare/

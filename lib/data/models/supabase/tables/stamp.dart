@@ -27,10 +27,16 @@ class StampRow extends SupabaseDataRow {
     String? id,
     DateTime? createdAt,
     String? name,
+    String? bucket,
+    String? fileName,
+    String? folderPath,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (name != null) 'name': supaSerialize(name),
+         if (bucket != null) 'bucket': supaSerialize(bucket),
+         if (fileName != null) 'file_name': supaSerialize(fileName),
+         if (folderPath != null) 'folder_path': supaSerialize(folderPath),
        });
 
   /// Stamp Row
@@ -69,18 +75,45 @@ class StampRow extends SupabaseDataRow {
   String? get name => getField<String>(nameField);
   set name(String? value) => setField<String>(nameField, value);
 
+  /// Bucket field name
+  static const String bucketField = 'bucket';
+
+  /// Bucket
+  String? get bucket => getField<String>(bucketField);
+  set bucket(String? value) => setField<String>(bucketField, value);
+
+  /// File Name field name
+  static const String fileNameField = 'file_name';
+
+  /// File Name
+  String? get fileName => getField<String>(fileNameField);
+  set fileName(String? value) => setField<String>(fileNameField, value);
+
+  /// Folder Path field name
+  static const String folderPathField = 'folder_path';
+
+  /// Folder Path
+  String? get folderPath => getField<String>(folderPathField);
+  set folderPath(String? value) => setField<String>(folderPathField, value);
+
   /// Make a copy of the current [StampRow]
   /// overriding the provided fields
   StampRow copyWith({
     String? id,
     DateTime? createdAt,
     String? name,
+    String? bucket,
+    String? fileName,
+    String? folderPath,
   }) => StampRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'name': supaSerialize(name) ?? data['name'],
+    'bucket': supaSerialize(bucket) ?? data['bucket'],
+    'file_name': supaSerialize(fileName) ?? data['file_name'],
+    'folder_path': supaSerialize(folderPath) ?? data['folder_path'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.026613
+/// Date: 2026-01-15 14:21:42.927965

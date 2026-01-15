@@ -2,6 +2,8 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/services/database/settings.service.dart';
+import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/code_green/widgets/lookbook_product_marker.widget.dart';
@@ -80,11 +82,23 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
 
   List<_LookbookEntryData> _entries = const [];
   ProductsById _productsById = const {};
+  double _baseDiscountRate = 0.0;
 
   @override
   void initState() {
     super.initState();
     _loadFuture = _fetchAll();
+    _loadBaseDiscountRate();
+  }
+
+  Future<void> _loadBaseDiscountRate() async {
+    try {
+      final rate = await SettingsService.instance.getBaseDiscountRate();
+      if (!mounted) return;
+      setState(() => _baseDiscountRate = rate);
+    } catch (e) {
+      debugPrint('Error loading base discount rate: $e');
+    }
   }
 
   @override
@@ -499,12 +513,25 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
                                   final openProduct = product?.product;
 
                                   final row = openProduct?.product;
-                                  final price = row?.minimumPriceMinusAwardPoints ??
-                                      row?.regularPrice;
-                                  final priceText = price == null
+                                  final regularPrice = row?.regularPrice;
+                                  final additionalDiscountRate =
+                                      row?.additionalDiscountRate ?? 0.0;
+                                  final totalDiscountRate =
+                                      _baseDiscountRate +
+                                      additionalDiscountRate;
+                                  final price = regularPrice == null
                                       ? null
+                                      : minimumPriceAmount(
+                                          regularPrice: regularPrice,
+                                          totalDiscountRate: totalDiscountRate,
+                                        );
+                                  final priceText = price == null
+                                      ? (regularPrice == null
+                                            ? null
+                                            : formatKRW(regularPrice))
                                       : formatKRW(price);
-                                  final description = (row?.description ?? '').trim();
+                                  final description = (row?.description ?? '')
+                                      .trim();
 
                                   return Positioned(
                                     left: pos.dx - markerHaloRadius,
@@ -516,14 +543,16 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
                                           product?.name ?? 'Unknown product',
                                       thumbnailUrl: product?.thumbnailUrl,
                                       priceText: priceText,
-                                      description:
-                                          description.isEmpty ? null : description,
+                                      description: description.isEmpty
+                                          ? null
+                                          : description,
                                       markerRadius: markerRadius,
                                       markerHaloRadius: markerHaloRadius,
                                       onOpenProduct: openProduct == null
                                           ? null
-                                          : () => widget.onOpenProduct
-                                              ?.call(openProduct),
+                                          : () => widget.onOpenProduct?.call(
+                                              openProduct,
+                                            ),
                                     ),
                                   );
                                 }),

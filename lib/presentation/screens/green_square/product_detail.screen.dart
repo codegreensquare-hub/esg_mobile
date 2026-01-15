@@ -1,12 +1,15 @@
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/product_action_buttons_bar.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
 
@@ -35,7 +38,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   final Map<String, String> selectedOptionValues = {};
   String? selectedVariantImageUrl;
   double currentAwardPoints = 0.0;
+  double baseDiscountRate = 0.0;
   late final TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _actionButtonsKey = GlobalKey();
+  bool _showStickyActions = false;
 
   @override
   void initState() {
@@ -45,8 +52,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     isInWishlist = productWithDetails.isInWishlist;
     _tabController = TabController(length: 2, vsync: this)
       ..addListener(_handleTabChange);
+    _scrollController.addListener(_updateStickyActionsVisibility);
     _loadProductOptions();
     _loadAwardPoints();
+    _loadBaseDiscountRate();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _updateStickyActionsVisibility(),
+    );
   }
 
   void _handleTabChange() {
@@ -58,7 +70,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   void dispose() {
     _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
+    _scrollController.removeListener(_updateStickyActionsVisibility);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _updateStickyActionsVisibility() {
+    if (!mounted) return;
+    final renderBox =
+        _actionButtonsKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final position = renderBox.localToGlobal(Offset.zero);
+    final top = position.dy;
+    final bottom = top + renderBox.size.height;
+    final mediaQuery = MediaQuery.of(context);
+    final viewTop = mediaQuery.padding.top + kToolbarHeight;
+    final viewBottom = mediaQuery.size.height - mediaQuery.padding.bottom;
+    final isVisible = bottom > viewTop && top < viewBottom;
+    final shouldShow = !isVisible;
+    if (shouldShow == _showStickyActions) return;
+    setState(() => _showStickyActions = shouldShow);
   }
 
   Future<void> _toggleWishlist() async {
@@ -124,6 +155,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     } catch (e) {
       debugPrint('Error loading award points: $e');
       currentAwardPoints = 0.0;
+    }
+  }
+
+  Future<void> _loadBaseDiscountRate() async {
+    try {
+      final rate = await SettingsService.instance.getBaseDiscountRate();
+      if (!mounted) return;
+      setState(() => baseDiscountRate = rate);
+    } catch (e) {
+      debugPrint('Error loading base discount rate: $e');
     }
   }
 
@@ -225,7 +266,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         : null;
     final resolvedImageUrl = selectedVariantImageUrl ?? imageUrl;
     final double? regularPrice = product.regularPrice;
-    final double? discountedPrice = product.minimumPriceMinusAwardPoints;
+    final double additionalDiscountRate = product.additionalDiscountRate;
+    final double totalDiscountRate = baseDiscountRate + additionalDiscountRate;
+    final int? usableAwardPoints = regularPrice == null
+        ? null
+        : usableAwardPointsAmount(
+            regularPrice: regularPrice,
+            totalDiscountRate: totalDiscountRate,
+          );
+    final int? discountedPrice = regularPrice == null
+        ? null
+        : minimumPriceAmount(
+            regularPrice: regularPrice,
+            totalDiscountRate: totalDiscountRate,
+          );
     final hasDiscount =
         regularPrice != null &&
         discountedPrice != null &&
@@ -234,6 +288,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     final int? discountPercentage = hasDiscount
         ? (((regularPrice - discountedPrice) / regularPrice) * 100).round()
         : null;
+
+    String formatRate(double rate) {
+      if (rate.isNaN || rate.isInfinite) return '0%';
+      return rate % 1 == 0 ? '${rate.toInt()}%' : '${rate.toStringAsFixed(2)}%';
+    }
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = bottomInset > 0 ? bottomInset : 16.0;
@@ -252,342 +311,412 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero Image
-            AspectRatio(
-              aspectRatio: 1,
-              child: Hero(
-                tag: 'green-square-product-image-${product.id}',
-                child: resolvedImageUrl != null
-                    ? Image.network(
-                        resolvedImageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: cs.surfaceContainerHighest,
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            size: 64,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        color: cs.surfaceContainerHighest,
-                        child: const Icon(
-                          Icons.image,
-                          size: 64,
-                        ),
-                      ),
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: bottomPadding,
-                top: 16,
-              ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.title ?? '제품명 없음',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  // Hero Image
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: Hero(
+                      tag: 'green-square-product-image-${product.id}',
+                      child: resolvedImageUrl != null
+                          ? Image.network(
+                              resolvedImageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    color: cs.surfaceContainerHighest,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                      size: 64,
+                                    ),
+                                  ),
+                            )
+                          : Container(
+                              color: cs.surfaceContainerHighest,
+                              child: const Icon(
+                                Icons.image,
+                                size: 64,
+                              ),
+                            ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text.rich(
-                    TextSpan(
+
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: bottomPadding,
+                      top: 16,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (productWithDetails.seller.username != null &&
-                            productWithDetails.seller.username!.isNotEmpty)
-                          TextSpan(
-                            text:
-                                "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.title ?? '제품명 없음',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    if (productWithDetails.seller.username !=
+                                            null &&
+                                        productWithDetails
+                                            .seller
+                                            .username!
+                                            .isNotEmpty)
+                                      TextSpan(
+                                        text:
+                                            "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
+                                      ),
+                                    TextSpan(
+                                      text:
+                                          productWithDetails.product.name ?? '',
+                                    ),
+                                  ],
+                                ),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: cs.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              if (product.description != null &&
+                                  product.description!.isNotEmpty) ...[
+                                Text(
+                                  product.description!,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              Text(
+                                formatKRW(regularPrice ?? 0),
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (regularPrice != null &&
+                                  usableAwardPoints != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '적립금 사용 가능 금액: ${formatKRW(usableAwardPoints)}',
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '총 할인율: ${formatRate(baseDiscountRate)} + ${formatRate(additionalDiscountRate)} = ${formatRate(totalDiscountRate)}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '최소 결제 금액: ${formatKRW(regularPrice.floor())} - ${formatKRW(usableAwardPoints)} = ${formatKRW(discountedPrice ?? 0)}',
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (hasDiscount) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  '친환경 소비자라면, $discountPercentage%↓',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: cs.secondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  formatKRW(discountedPrice),
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: cs.secondary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+
+                              if (userId != null &&
+                                  currentAwardPoints.toInt() > 0) ...[
+                                Text(
+                                  '보유 마일리지 (c) ${formatKRW(currentAwardPoints.toInt())}',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              const SizedBox(height: 16),
+
+                              if (isLoadingOptions)
+                                const Center(child: CircularProgressIndicator())
+                              else if (productColors.isNotEmpty ||
+                                  productOptions.isNotEmpty) ...[
+                                Text(
+                                  '옵션 선택',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                if (productColors.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Color',
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: productColors
+                                              .where(
+                                                (row) =>
+                                                    (row.value ?? '')
+                                                        .trim()
+                                                        .length ==
+                                                    6,
+                                              )
+                                              .map((row) {
+                                                final hex = (row.value ?? '')
+                                                    .trim();
+                                                final selectedHex =
+                                                    (selectedOptionValues['__color__'] ??
+                                                            '')
+                                                        .trim();
+                                                final isSelected =
+                                                    selectedHex.toLowerCase() ==
+                                                    hex.toLowerCase();
+                                                final color = Color(
+                                                  int.parse(
+                                                    'FF$hex',
+                                                    radix: 16,
+                                                  ),
+                                                );
+
+                                                return Material(
+                                                  color: Colors.transparent,
+                                                  child: InkWell(
+                                                    customBorder:
+                                                        const CircleBorder(),
+                                                    onTap: () {
+                                                      final bucket = row
+                                                          .coloredProductBucket;
+                                                      final fileName = row
+                                                          .coloredProductFileName;
+                                                      final folderPath = row
+                                                          .coloredProductFolderPath;
+
+                                                      final nextUrl =
+                                                          bucket != null &&
+                                                              fileName != null
+                                                          ? getImageLink(
+                                                              bucket,
+                                                              fileName,
+                                                              folderPath:
+                                                                  folderPath,
+                                                            )
+                                                          : null;
+
+                                                      setState(() {
+                                                        selectedOptionValues['__color__'] =
+                                                            hex;
+                                                        selectedVariantImageUrl =
+                                                            nextUrl;
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      width: 28,
+                                                      height: 28,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: color,
+                                                        border: Border.all(
+                                                          color: isSelected
+                                                              ? cs.primary
+                                                              : cs.outlineVariant,
+                                                          width: isSelected
+                                                              ? 3
+                                                              : 1,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                              .toList(growable: false),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ...productOptions.map(
+                                  (option) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(
+                                        labelText: option.label,
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                      initialValue:
+                                          selectedOptionValues[option.id],
+                                      items: option.values
+                                          .map(
+                                            (
+                                              valueRow,
+                                            ) => DropdownMenuItem<String>(
+                                              value:
+                                                  valueRow.value ?? valueRow.id,
+                                              child: Text(
+                                                valueRow.value ?? valueRow.id,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(growable: false),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          if (value == null || value.isEmpty) {
+                                            selectedOptionValues.remove(
+                                              option.id,
+                                            );
+                                          } else {
+                                            selectedOptionValues[option.id] =
+                                                value;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                              ] else
+                                const SizedBox.shrink(),
+
+                              const SizedBox(height: 16),
+
+                              // Quantity Selector
+                              Text(
+                                '수량',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: _decreaseQuantity,
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                    ),
+                                  ),
+                                  Text(
+                                    '$quantity',
+                                    style: theme.textTheme.headlineSmall,
+                                  ),
+                                  IconButton(
+                                    onPressed: _increaseQuantity,
+                                    icon: const Icon(Icons.add_circle_outline),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // Action Buttons
+                              ProductActionButtonsBar(
+                                key: _actionButtonsKey,
+                                isAddingToCart: isAddingToCart,
+                                onAddToCart: _addToCart,
+                                onPurchase: () {
+                                  // TODO: Implement purchase functionality
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('구매 기능은 곧 추가됩니다.'),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        TextSpan(
-                          text: productWithDetails.product.name ?? '',
+                        ),
+
+                        const SizedBox(height: 24),
+                        TabBar(
+                          controller: _tabController,
+                          tabs: const [
+                            Tab(text: '제품 설명'),
+                            Tab(text: '리뷰 (0)'),
+                          ],
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                          alignment: Alignment.topCenter,
+                          child: _tabController.index == 0
+                              ? ProductDescriptionTab(product: product)
+                              : ReviewsTab(product: product),
                         ),
                       ],
                     ),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  if (product.description != null &&
-                      product.description!.isNotEmpty) ...[
-                    Text(
-                      product.description!,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  Text(
-                    formatKRW(regularPrice ?? 0),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (hasDiscount) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '친환경 소비자라면, $discountPercentage%↓',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.secondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      formatKRW(discountedPrice),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: cs.secondary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-
-                  if (userId != null) ...[
-                    Text(
-                      '보유 마일리지 (c) ${formatKRW(currentAwardPoints.toInt())}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  const SizedBox(height: 16),
-
-                  if (isLoadingOptions)
-                    const Center(child: CircularProgressIndicator())
-                  else if (productColors.isNotEmpty ||
-                      productOptions.isNotEmpty) ...[
-                    Text(
-                      '옵션 선택',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (productColors.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Color',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: productColors
-                                  .where(
-                                    (row) =>
-                                        (row.value ?? '').trim().length == 6,
-                                  )
-                                  .map((row) {
-                                    final hex = (row.value ?? '').trim();
-                                    final selectedHex =
-                                        (selectedOptionValues['__color__'] ??
-                                                '')
-                                            .trim();
-                                    final isSelected =
-                                        selectedHex.toLowerCase() ==
-                                        hex.toLowerCase();
-                                    final color = Color(
-                                      int.parse('FF$hex', radix: 16),
-                                    );
-
-                                    return Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        customBorder: const CircleBorder(),
-                                        onTap: () {
-                                          final bucket =
-                                              row.coloredProductBucket;
-                                          final fileName =
-                                              row.coloredProductFileName;
-                                          final folderPath =
-                                              row.coloredProductFolderPath;
-
-                                          final nextUrl =
-                                              bucket != null && fileName != null
-                                              ? getImageLink(
-                                                  bucket,
-                                                  fileName,
-                                                  folderPath: folderPath,
-                                                )
-                                              : null;
-
-                                          setState(() {
-                                            selectedOptionValues['__color__'] =
-                                                hex;
-                                            selectedVariantImageUrl = nextUrl;
-                                          });
-                                        },
-                                        child: Container(
-                                          width: 28,
-                                          height: 28,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: color,
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? cs.primary
-                                                  : cs.outlineVariant,
-                                              width: isSelected ? 3 : 1,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  })
-                                  .toList(growable: false),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ...productOptions.map(
-                      (option) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            labelText: option.label,
-                            border: const OutlineInputBorder(),
-                          ),
-                          initialValue: selectedOptionValues[option.id],
-                          items: option.values
-                              .map(
-                                (valueRow) => DropdownMenuItem<String>(
-                                  value: valueRow.value ?? valueRow.id,
-                                  child: Text(valueRow.value ?? valueRow.id),
-                                ),
-                              )
-                              .toList(growable: false),
-                          onChanged: (value) {
-                            setState(() {
-                              if (value == null || value.isEmpty) {
-                                selectedOptionValues.remove(option.id);
-                              } else {
-                                selectedOptionValues[option.id] = value;
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ] else
-                    const SizedBox.shrink(),
-
-                  const SizedBox(height: 16),
-
-                  // Quantity Selector
-                  Text(
-                    '수량',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: _decreaseQuantity,
-                        icon: const Icon(Icons.remove_circle_outline),
-                      ),
-                      Text(
-                        '$quantity',
-                        style: theme.textTheme.headlineSmall,
-                      ),
-                      IconButton(
-                        onPressed: _increaseQuantity,
-                        icon: const Icon(Icons.add_circle_outline),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: isAddingToCart ? null : _addToCart,
-                          icon: isAddingToCart
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.add_shopping_cart),
-                          label: Text(
-                            isAddingToCart ? '담는 중...' : '장바구니 담기',
-                          ),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Implement purchase functionality
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('구매 기능은 곧 추가됩니다.'),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.shopping_cart),
-                          label: const Text('구매하기'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-                  TabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      Tab(text: '제품 설명'),
-                      Tab(text: '리뷰 (0)'),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.topCenter,
-                    child: _tabController.index == 0
-                        ? ProductDescriptionTab(product: product)
-                        : ReviewsTab(product: product),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          if (_showStickyActions)
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              decoration: BoxDecoration(
+                color: cs.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.shadow.withAlpha(20),
+                    blurRadius: 12,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                top: false,
+                child: ProductActionButtonsBar(
+                  isAddingToCart: isAddingToCart,
+                  onAddToCart: _addToCart,
+                  onPurchase: () {
+                    // TODO: Implement purchase functionality
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('구매 기능은 곧 추가됩니다.'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

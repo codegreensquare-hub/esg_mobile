@@ -29,7 +29,6 @@ class ProductRow extends SupabaseDataRow {
     String? productBy,
     String? category,
     double? regularPrice,
-    double? minimumPriceMinusAwardPoints,
     String? mainImageBucket,
     String? mainImageFolderPath,
     String? mainImageFileName,
@@ -42,16 +41,13 @@ class ProductRow extends SupabaseDataRow {
     String? company,
     String? id,
     bool? isCuration,
+    double? additionalDiscountRate,
   }) : super({
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (productBy != null) 'product_by': supaSerialize(productBy),
          if (category != null) 'category': supaSerialize(category),
          if (regularPrice != null) 'regular_price': supaSerialize(regularPrice),
-         if (minimumPriceMinusAwardPoints != null)
-           'minimum_price_minus_award_points': supaSerialize(
-             minimumPriceMinusAwardPoints,
-           ),
          if (mainImageBucket != null)
            'main_image_bucket': supaSerialize(mainImageBucket),
          if (mainImageFolderPath != null)
@@ -67,6 +63,8 @@ class ProductRow extends SupabaseDataRow {
          if (company != null) 'company': supaSerialize(company),
          if (id != null) 'id': supaSerialize(id),
          if (isCuration != null) 'is_curation': supaSerialize(isCuration),
+         if (additionalDiscountRate != null)
+           'additional_discount_rate': supaSerialize(additionalDiscountRate),
        });
 
   /// Product Row
@@ -120,16 +118,6 @@ class ProductRow extends SupabaseDataRow {
   /// Regular Price
   double? get regularPrice => getField<double>(regularPriceField);
   set regularPrice(double? value) => setField<double>(regularPriceField, value);
-
-  /// Minimum Price Minus Award Points field name
-  static const String minimumPriceMinusAwardPointsField =
-      'minimum_price_minus_award_points';
-
-  /// Minimum Price Minus Award Points
-  double? get minimumPriceMinusAwardPoints =>
-      getField<double>(minimumPriceMinusAwardPointsField);
-  set minimumPriceMinusAwardPoints(double? value) =>
-      setField<double>(minimumPriceMinusAwardPointsField, value);
 
   /// Main Image Bucket field name
   static const String mainImageBucketField = 'main_image_bucket';
@@ -226,6 +214,15 @@ class ProductRow extends SupabaseDataRow {
   bool get isCuration => getField<bool>(isCurationField, defaultValue: false)!;
   set isCuration(bool value) => setField<bool>(isCurationField, value);
 
+  /// Additional Discount Rate field name
+  static const String additionalDiscountRateField = 'additional_discount_rate';
+
+  /// Additional Discount Rate
+  double get additionalDiscountRate =>
+      getField<double>(additionalDiscountRateField, defaultValue: 0)!;
+  set additionalDiscountRate(double value) =>
+      setField<double>(additionalDiscountRateField, value);
+
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
   ProductRow copyWith({
@@ -234,7 +231,6 @@ class ProductRow extends SupabaseDataRow {
     String? productBy,
     String? category,
     double? regularPrice,
-    double? minimumPriceMinusAwardPoints,
     String? mainImageBucket,
     String? mainImageFolderPath,
     String? mainImageFileName,
@@ -247,15 +243,13 @@ class ProductRow extends SupabaseDataRow {
     String? company,
     String? id,
     bool? isCuration,
+    double? additionalDiscountRate,
   }) => ProductRow.fromJson({
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'product_by': supaSerialize(productBy) ?? data['product_by'],
     'category': supaSerialize(category) ?? data['category'],
     'regular_price': supaSerialize(regularPrice) ?? data['regular_price'],
-    'minimum_price_minus_award_points':
-        supaSerialize(minimumPriceMinusAwardPoints) ??
-        data['minimum_price_minus_award_points'],
     'main_image_bucket':
         supaSerialize(mainImageBucket) ?? data['main_image_bucket'],
     'main_image_folder_path':
@@ -271,8 +265,11 @@ class ProductRow extends SupabaseDataRow {
     'company': supaSerialize(company) ?? data['company'],
     'id': supaSerialize(id) ?? data['id'],
     'is_curation': supaSerialize(isCuration) ?? data['is_curation'],
+    'additional_discount_rate':
+        supaSerialize(additionalDiscountRate) ??
+        data['additional_discount_rate'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.022458
+/// Date: 2026-01-15 14:21:42.922539

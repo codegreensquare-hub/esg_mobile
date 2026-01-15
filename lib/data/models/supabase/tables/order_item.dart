@@ -32,6 +32,8 @@ class OrderItemRow extends SupabaseDataRow {
     String? order,
     DateTime? sentForDeliveryAt,
     DateTime? receivedDeliveryAt,
+    DateTime? preparingForDeliveryAt,
+    DateTime? cancelledAt,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -42,6 +44,9 @@ class OrderItemRow extends SupabaseDataRow {
            'sent_for_delivery_at': supaSerialize(sentForDeliveryAt),
          if (receivedDeliveryAt != null)
            'received_delivery_at': supaSerialize(receivedDeliveryAt),
+         if (preparingForDeliveryAt != null)
+           'preparing_for_delivery_at': supaSerialize(preparingForDeliveryAt),
+         if (cancelledAt != null) 'cancelled_at': supaSerialize(cancelledAt),
        });
 
   /// Order Item Row
@@ -111,6 +116,23 @@ class OrderItemRow extends SupabaseDataRow {
   set receivedDeliveryAt(DateTime? value) =>
       setField<DateTime>(receivedDeliveryAtField, value);
 
+  /// Preparing For Delivery At field name
+  static const String preparingForDeliveryAtField = 'preparing_for_delivery_at';
+
+  /// Preparing For Delivery At
+  DateTime? get preparingForDeliveryAt =>
+      getField<DateTime>(preparingForDeliveryAtField);
+  set preparingForDeliveryAt(DateTime? value) =>
+      setField<DateTime>(preparingForDeliveryAtField, value);
+
+  /// Cancelled At field name
+  static const String cancelledAtField = 'cancelled_at';
+
+  /// Cancelled At
+  DateTime? get cancelledAt => getField<DateTime>(cancelledAtField);
+  set cancelledAt(DateTime? value) =>
+      setField<DateTime>(cancelledAtField, value);
+
   /// Make a copy of the current [OrderItemRow]
   /// overriding the provided fields
   OrderItemRow copyWith({
@@ -121,6 +143,8 @@ class OrderItemRow extends SupabaseDataRow {
     String? order,
     DateTime? sentForDeliveryAt,
     DateTime? receivedDeliveryAt,
+    DateTime? preparingForDeliveryAt,
+    DateTime? cancelledAt,
   }) => OrderItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -131,8 +155,12 @@ class OrderItemRow extends SupabaseDataRow {
         supaSerialize(sentForDeliveryAt) ?? data['sent_for_delivery_at'],
     'received_delivery_at':
         supaSerialize(receivedDeliveryAt) ?? data['received_delivery_at'],
+    'preparing_for_delivery_at':
+        supaSerialize(preparingForDeliveryAt) ??
+        data['preparing_for_delivery_at'],
+    'cancelled_at': supaSerialize(cancelledAt) ?? data['cancelled_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.019489
+/// Date: 2026-01-15 14:21:42.920210

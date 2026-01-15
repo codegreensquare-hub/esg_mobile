@@ -7,6 +7,8 @@ import 'package:esg_mobile/presentation/screens/green_square/product_detail.scre
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ShoppingMallTab extends StatefulWidget {
@@ -227,8 +229,8 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final mileageText = awardPoints == awardPoints.roundToDouble()
-        ? awardPoints.toInt().toString()
-        : awardPoints.toStringAsFixed(1);
+        ? NumberFormat.decimalPattern().format(awardPoints.toInt())
+        : NumberFormat('#,##0.0').format(awardPoints);
 
     return SingleChildScrollView(
       // padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
@@ -241,23 +243,37 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
         children: [
           // Award Points Display
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             decoration: BoxDecoration(
               color: cs.surfaceContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  '사용 가능 포인트',
-                  style: theme.textTheme.titleMedium,
+                SvgPicture.asset(
+                  'assets/images/award_points/c_milage.svg',
+                  width: 20,
+                  height: 20,
+                  semanticsLabel: '마일리지',
                 ),
+                const SizedBox(width: 8),
                 Text(
-                  '$mileageText P',
+                  mileageText,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '(현재 보유 마일리지)',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

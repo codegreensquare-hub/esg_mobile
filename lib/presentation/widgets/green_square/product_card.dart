@@ -1,6 +1,8 @@
 import 'package:esg_mobile/core/services/database/cart.service.dart';
+import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +27,13 @@ class _ProductCardState extends State<ProductCard> {
   List<ProductOptionColorRow> _colorValues = const [];
   String? _selectedImageUrl;
   String? _selectedColorHex;
+  double _baseDiscountRate = 0.0;
 
   @override
   void initState() {
     super.initState();
     _loadColors();
+    _loadBaseDiscountRate();
   }
 
   @override
@@ -53,6 +57,12 @@ class _ProductCardState extends State<ProductCard> {
     setState(() => _colorValues = colors);
   }
 
+  Future<void> _loadBaseDiscountRate() async {
+    final rate = await SettingsService.instance.getBaseDiscountRate();
+    if (!mounted) return;
+    setState(() => _baseDiscountRate = rate);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -60,7 +70,14 @@ class _ProductCardState extends State<ProductCard> {
     final productWithDetails = widget.productWithDetails;
     final product = productWithDetails.product;
     final double? regularPrice = product.regularPrice;
-    final double? discountedPrice = product.minimumPriceMinusAwardPoints;
+    final double totalDiscountRate =
+        _baseDiscountRate + product.additionalDiscountRate;
+    final int? discountedPrice = regularPrice == null
+        ? null
+        : minimumPriceAmount(
+            regularPrice: regularPrice,
+            totalDiscountRate: totalDiscountRate,
+          );
     final hasDiscount =
         regularPrice != null &&
         discountedPrice != null &&

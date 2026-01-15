@@ -31,6 +31,7 @@ class CompanyRow extends SupabaseDataRow {
     String? createdBy,
     String? ownedBy,
     VendorAdminType? vendorType,
+    DateTime? deactivatedAt,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -39,6 +40,8 @@ class CompanyRow extends SupabaseDataRow {
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (ownedBy != null) 'owned_by': supaSerialize(ownedBy),
          if (vendorType != null) 'vendor_type': supaSerialize(vendorType),
+         if (deactivatedAt != null)
+           'deactivated_at': supaSerialize(deactivatedAt),
        });
 
   /// Company Row
@@ -111,6 +114,14 @@ class CompanyRow extends SupabaseDataRow {
   set vendorType(VendorAdminType value) =>
       setField<VendorAdminType>(vendorTypeField, value);
 
+  /// Deactivated At field name
+  static const String deactivatedAtField = 'deactivated_at';
+
+  /// Deactivated At
+  DateTime? get deactivatedAt => getField<DateTime>(deactivatedAtField);
+  set deactivatedAt(DateTime? value) =>
+      setField<DateTime>(deactivatedAtField, value);
+
   /// Make a copy of the current [CompanyRow]
   /// overriding the provided fields
   CompanyRow copyWith({
@@ -121,6 +132,7 @@ class CompanyRow extends SupabaseDataRow {
     String? createdBy,
     String? ownedBy,
     VendorAdminType? vendorType,
+    DateTime? deactivatedAt,
   }) => CompanyRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -129,8 +141,9 @@ class CompanyRow extends SupabaseDataRow {
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'owned_by': supaSerialize(ownedBy) ?? data['owned_by'],
     'vendor_type': supaSerialize(vendorType) ?? data['vendor_type'],
+    'deactivated_at': supaSerialize(deactivatedAt) ?? data['deactivated_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-08 15:40:00.002803
+/// Date: 2026-01-15 14:21:42.905851

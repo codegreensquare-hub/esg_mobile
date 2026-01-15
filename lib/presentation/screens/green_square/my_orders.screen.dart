@@ -130,6 +130,21 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    String getOrderItemStatus(_OrderItemEntry entry) {
+      final item = entry.item;
+      if (item.cancelledAt != null) return '취소됨';
+      if (item.receivedDeliveryAt != null) return '수령완료';
+      if (item.sentForDeliveryAt != null) return '배송중';
+      if (item.preparingForDeliveryAt != null) return '배송준비완료';
+      return '배송준비';
+    }
+
+    String getOrderStatus(List<_OrderItemEntry> entries) {
+      if (entries.isEmpty) return '-';
+      final statuses = entries.map(getOrderItemStatus).toSet();
+      return statuses.length == 1 ? statuses.first : '혼합';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('주문 내역'),
@@ -215,6 +230,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
               final totalItemCountText = totalItemCount % 1 == 0
                   ? '${totalItemCount.toInt()}'
                   : totalItemCount.toString();
+              final deliveryStatus = getOrderStatus(entry.items);
 
               return Card(
                 child: Padding(
@@ -262,6 +278,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                               ),
                             ),
                           ),
+                          Text(
+                            '배송: $deliveryStatus',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Text(
                             '총 $totalItemCountText개',
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -473,7 +497,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            '배송 준비중',
+                                            getOrderItemStatus(e),
                                             style: theme.textTheme.labelSmall
                                                 ?.copyWith(
                                                   color: cs.onSurfaceVariant,
