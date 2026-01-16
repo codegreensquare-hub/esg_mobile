@@ -17,12 +17,13 @@ flutter config --no-analytics
 flutter pub get
 
 # pubspec bundles `.env` as an asset for local runs.
-# In Netlify CI, the repo does not include `.env` (gitignored), so create a safe placeholder.
-# Real values are served at runtime via `/.netlify/functions/config`.
-if [ ! -f ".env" ]; then
+# On Netlify, never allow a real `.env` (even "public" anon key/URL) into build output,
+# because secrets scanning can still flag it. Always overwrite with a safe placeholder.
+if [ "${NETLIFY:-}" = "true" ]; then
   cat > ".env" <<'EOF'
 SUPABASE_URL=
 SUPABASE_ANON_KEY=
+SUPABASE_USER_PHOTO_BUCKET=
 EOF
 fi
 
