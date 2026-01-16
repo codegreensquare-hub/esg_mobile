@@ -107,4 +107,4 @@ class StoryRelatedProductRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-15 14:21:42.932383
+/// Date: 2026-01-16 16:22:11.185800

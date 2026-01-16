@@ -29,12 +29,18 @@ class PaymentRow extends SupabaseDataRow {
     String? platformId,
     DateTime? paidAt,
     DateTime? createdAt,
+    double? amount,
+    String? status,
+    dynamic otherData,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (paymentBy != null) 'payment_by': supaSerialize(paymentBy),
          if (platformId != null) 'platform_id': supaSerialize(platformId),
          if (paidAt != null) 'paid_at': supaSerialize(paidAt),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
+         if (amount != null) 'amount': supaSerialize(amount),
+         if (status != null) 'status': supaSerialize(status),
+         if (otherData != null) 'other_data': supaSerialize(otherData),
        });
 
   /// Payment Row
@@ -87,6 +93,27 @@ class PaymentRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
+  /// Amount field name
+  static const String amountField = 'amount';
+
+  /// Amount
+  double? get amount => getField<double>(amountField);
+  set amount(double? value) => setField<double>(amountField, value);
+
+  /// Status field name
+  static const String statusField = 'status';
+
+  /// Status
+  String? get status => getField<String>(statusField);
+  set status(String? value) => setField<String>(statusField, value);
+
+  /// Other Data field name
+  static const String otherDataField = 'other_data';
+
+  /// Other Data
+  dynamic get otherData => getField<dynamic>(otherDataField);
+  set otherData(dynamic value) => setField<dynamic>(otherDataField, value);
+
   /// Make a copy of the current [PaymentRow]
   /// overriding the provided fields
   PaymentRow copyWith({
@@ -95,14 +122,20 @@ class PaymentRow extends SupabaseDataRow {
     String? platformId,
     DateTime? paidAt,
     DateTime? createdAt,
+    double? amount,
+    String? status,
+    dynamic otherData,
   }) => PaymentRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'payment_by': supaSerialize(paymentBy) ?? data['payment_by'],
     'platform_id': supaSerialize(platformId) ?? data['platform_id'],
     'paid_at': supaSerialize(paidAt) ?? data['paid_at'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
+    'amount': supaSerialize(amount) ?? data['amount'],
+    'status': supaSerialize(status) ?? data['status'],
+    'other_data': supaSerialize(otherData) ?? data['other_data'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-15 14:21:42.921328
+/// Date: 2026-01-16 16:22:11.173397
