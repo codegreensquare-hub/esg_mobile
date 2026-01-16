@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_codegen/supabase_codegen.dart' as supa_codegen;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,18 +14,20 @@ export 'package:esg_mobile/app/app.dart' show App, MyApp;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: 'assets/env/config.env', isOptional: true);
+
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  final supabaseUrl = (dotenv.env['SUPABASE_URL'] ?? '');
+  final supabaseAnonKey = (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
 
   if (supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) {
     throw StateError(
       'Missing SUPABASE_URL / SUPABASE_ANON_KEY. '
-      'Provide them via --dart-define (recommended for web deploys like Netlify).',
+      'Provide them via assets/env/config.env.',
     );
   }
 

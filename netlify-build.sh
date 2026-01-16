@@ -24,12 +24,18 @@ if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
 fi
 
 if [ -n "${SUPABASE_KEY:-}" ]; then
-  echo "ERROR: SUPABASE_KEY is set, but service-role keys must never be used in client builds." 1>&2
-  echo "Remove SUPABASE_KEY from Netlify environment variables for this site." 1>&2
-  exit 1
+  echo "WARNING: SUPABASE_KEY (service-role) detected in build environment; unsetting to prevent client exposure." 1>&2
+  unset SUPABASE_KEY
 fi
 
-flutter build web --release \
-  --dart-define=SUPABASE_URL="$SUPABASE_URL" \
-  --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
-  --dart-define=SUPABASE_USER_PHOTO_BUCKET="${SUPABASE_USER_PHOTO_BUCKET:-user}"
+# Prefer runtime .env via assets for Flutter web.
+# This file must only contain PUBLIC values (anon key + URL). Never write service-role keys here.
+ENV_ASSET_PATH="assets/env/config.env"
+mkdir -p "$(dirname "$ENV_ASSET_PATH")"
+cat > "$ENV_ASSET_PATH" <<EOF
+SUPABASE_URL=$SUPABASE_URL
+SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+SUPABASE_USER_PHOTO_BUCKET=${SUPABASE_USER_PHOTO_BUCKET:-user}
+EOF
+
+flutter build web --release
