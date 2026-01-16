@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_codegen/supabase_codegen.dart' as supa_codegen;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,20 +17,38 @@ export 'package:esg_mobile/app/app.dart' show App, MyApp;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: 'assets/env/config.env', isOptional: true);
+  await dotenv.load(fileName: '.env', isOptional: true);
 
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final supabaseUrl = (dotenv.env['SUPABASE_URL'] ?? '');
-  final supabaseAnonKey = (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+  var supabaseUrl = (dotenv.env['SUPABASE_URL'] ?? '');
+  var supabaseAnonKey = (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+
+  if ((supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) &&
+      kIsWeb) {
+    try {
+      final response = await http.get(Uri.parse('/.netlify/functions/config'));
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          supabaseUrl = (decoded['SUPABASE_URL'] ?? supabaseUrl).toString();
+          supabaseAnonKey = (decoded['SUPABASE_ANON_KEY'] ?? supabaseAnonKey)
+              .toString();
+        }
+      }
+    } catch (_) {
+      // Ignore and validate below.
+    }
+  }
 
   if (supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) {
     throw StateError(
       'Missing SUPABASE_URL / SUPABASE_ANON_KEY. '
-      'Provide them via assets/env/config.env.',
+      'Provide them via the root .env file (local), '
+      'or configure Netlify env vars for the config function (web).',
     );
   }
 

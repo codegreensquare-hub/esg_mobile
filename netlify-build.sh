@@ -16,6 +16,16 @@ flutter config --no-analytics
 
 flutter pub get
 
+# pubspec bundles `.env` as an asset for local runs.
+# In Netlify CI, the repo does not include `.env` (gitignored), so create a safe placeholder.
+# Real values are served at runtime via `/.netlify/functions/config`.
+if [ ! -f ".env" ]; then
+  cat > ".env" <<'EOF'
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+EOF
+fi
+
 # If you deploy under a sub-path, set this accordingly, e.g. --base-href /myapp/
 if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
   echo "ERROR: Missing Netlify environment variables SUPABASE_URL and/or SUPABASE_ANON_KEY" 1>&2
@@ -27,15 +37,5 @@ if [ -n "${SUPABASE_KEY:-}" ]; then
   echo "WARNING: SUPABASE_KEY (service-role) detected in build environment; unsetting to prevent client exposure." 1>&2
   unset SUPABASE_KEY
 fi
-
-# Prefer runtime .env via assets for Flutter web.
-# This file must only contain PUBLIC values (anon key + URL). Never write service-role keys here.
-ENV_ASSET_PATH="assets/env/config.env"
-mkdir -p "$(dirname "$ENV_ASSET_PATH")"
-cat > "$ENV_ASSET_PATH" <<EOF
-SUPABASE_URL=$SUPABASE_URL
-SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
-SUPABASE_USER_PHOTO_BUCKET=${SUPABASE_USER_PHOTO_BUCKET:-user}
-EOF
 
 flutter build web --release
