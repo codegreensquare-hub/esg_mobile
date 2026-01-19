@@ -61,7 +61,8 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
       final totalAmount =
           int.tryParse(testAmountRaw)?.clampMin(0) ?? widget.amount.toInt();
 
-      final orderName = '${isDev ? '[DEV] ' : ''}ESG Mobile Order Payment'.trim();
+      final orderName = '${isDev ? '[DEV] ' : ''}ESG Mobile Order Payment'
+          .trim();
       final merchantUid = isDev ? 'dev_${widget.paymentId}' : widget.paymentId;
 
       // Check if IMP is available
