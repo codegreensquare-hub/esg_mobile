@@ -1,3 +1,4 @@
+import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/core/services/database/settings.service.dart';
@@ -12,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_action_buttons_bar.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({
@@ -651,12 +653,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                 key: _actionButtonsKey,
                                 isAddingToCart: isAddingToCart,
                                 onAddToCart: _addToCart,
-                                onPurchase: () {
-                                  // TODO: Implement purchase functionality
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('구매 기능은 곧 추가됩니다.'),
-                                    ),
+                                onPurchase: () async {
+                                  if (userId == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('로그인이 필요합니다.'),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  Navigator.of(context).pop();
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 100),
+                                  );
+                                  final items = await CartService.instance
+                                      .fetchCartItems(userId!);
+                                  showModalBottomSheet(
+                                    context: navigatorKey.currentContext!,
+                                    builder: (_) =>
+                                        CartBottomSheet(items: items),
                                   );
                                 },
                               ),
@@ -705,12 +720,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 child: ProductActionButtonsBar(
                   isAddingToCart: isAddingToCart,
                   onAddToCart: _addToCart,
-                  onPurchase: () {
-                    // TODO: Implement purchase functionality
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('구매 기능은 곧 추가됩니다.'),
-                      ),
+                  onPurchase: () async {
+                    if (userId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('로그인이 필요합니다.')),
+                      );
+                      return;
+                    }
+                    Navigator.of(context).pop();
+                    await Future.delayed(const Duration(milliseconds: 100));
+                    final items = await CartService.instance.fetchCartItems(
+                      userId!,
+                    );
+                    showModalBottomSheet(
+                      context: navigatorKey.currentContext!,
+                      builder: (_) => CartBottomSheet(items: items),
                     );
                   },
                 ),

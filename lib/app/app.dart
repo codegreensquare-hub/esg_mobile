@@ -4,6 +4,9 @@ import 'package:esg_mobile/app/router.dart';
 import 'package:esg_mobile/core/theme/util.dart';
 import 'package:esg_mobile/core/theme/theme.dart';
 
+/// Global navigator key for accessing navigator from anywhere.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 /// Root application widget wiring theme + router.
 class App extends StatelessWidget {
   const App({super.key});
@@ -21,6 +24,7 @@ class App extends StatelessWidget {
     return DefaultTextStyle(
       style: const TextStyle(fontFamily: 'Noto Sans KR'),
       child: MaterialApp.router(
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         title: 'ESG Mobile',
         theme: materialTheme.light(),
