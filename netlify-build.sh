@@ -30,4 +30,21 @@ EOF
   unset SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_KEY SUPABASE_USER_PHOTO_BUCKET || true
 fi
 
-flutter build web --release
+# For Web builds, pass non-secret runtime config through dart-defines.
+# Note: dart-defines are compiled into JS bundle, so do not pass secrets.
+dart_defines=()
+for key in \
+  MODE \
+  PORTONE_V1_USER_CODE \
+  PORTONE_V1_USER_CODE_DEV \
+  PORTONE_V1_PG \
+  PORTONE_V1_PG_DEV \
+  PORTONE_V1_TEST_AMOUNT
+do
+  value="${!key:-}"
+  if [ -n "$value" ]; then
+    dart_defines+=("--dart-define=$key=$value")
+  fi
+done
+
+flutter build web --release "${dart_defines[@]}"

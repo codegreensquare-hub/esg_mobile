@@ -39,25 +39,49 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
     _initializePayment();
   }
 
-  String _readEnv(String key) => (dotenv.env[key] ?? '').trim();
+  String _readEnvOrDefine(String key) {
+    final fromDotEnv = (dotenv.env[key] ?? '').trim();
+    if (fromDotEnv.isNotEmpty) return fromDotEnv;
+
+    switch (key) {
+      case 'MODE':
+        return const String.fromEnvironment('MODE').trim();
+      case 'PORTONE_V1_USER_CODE':
+        return const String.fromEnvironment('PORTONE_V1_USER_CODE').trim();
+      case 'PORTONE_V1_USER_CODE_DEV':
+        return const String.fromEnvironment('PORTONE_V1_USER_CODE_DEV').trim();
+      case 'PORTONE_V1_PG':
+        return const String.fromEnvironment('PORTONE_V1_PG').trim();
+      case 'PORTONE_V1_PG_DEV':
+        return const String.fromEnvironment('PORTONE_V1_PG_DEV').trim();
+      case 'PORTONE_V1_TEST_AMOUNT':
+        return const String.fromEnvironment('PORTONE_V1_TEST_AMOUNT').trim();
+      default:
+        return '';
+    }
+  }
 
   void _initializePayment() {
     try {
-      final mode = _readEnv('MODE').toUpperCase();
+      final mode = _readEnvOrDefine('MODE').toUpperCase();
       final isDev = mode == 'DEV' || mode == 'DEVELOPMENT';
 
-      final userCode = (isDev ? _readEnv('PORTONE_V1_USER_CODE_DEV') : '')
-          .ifEmpty(_readEnv('PORTONE_V1_USER_CODE'));
+      final userCode =
+          (isDev ? _readEnvOrDefine('PORTONE_V1_USER_CODE_DEV') : '')
+              .ifEmpty(_readEnvOrDefine('PORTONE_V1_USER_CODE'));
 
       if (userCode.isEmpty) {
-        throw StateError('Missing PORTONE_V1_USER_CODE in .env');
+        throw StateError(
+          'Missing PORTONE_V1_USER_CODE. For web deployments, pass it via --dart-define (or provide it in .env for local runs).',
+        );
       }
 
-      final pg = (isDev ? _readEnv('PORTONE_V1_PG_DEV') : '')
-          .ifEmpty(_readEnv('PORTONE_V1_PG'))
+      final pg = (isDev ? _readEnvOrDefine('PORTONE_V1_PG_DEV') : '')
+          .ifEmpty(_readEnvOrDefine('PORTONE_V1_PG'))
           .ifEmpty('html5_inicis');
 
-      final testAmountRaw = isDev ? _readEnv('PORTONE_V1_TEST_AMOUNT') : '';
+      final testAmountRaw =
+          isDev ? _readEnvOrDefine('PORTONE_V1_TEST_AMOUNT') : '';
       final totalAmount =
           int.tryParse(testAmountRaw)?.clampMin(0) ?? widget.amount.toInt();
 
