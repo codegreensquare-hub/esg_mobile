@@ -24,7 +24,6 @@ class App extends StatelessWidget {
     return DefaultTextStyle(
       style: const TextStyle(fontFamily: 'Noto Sans KR'),
       child: MaterialApp.router(
-        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         title: 'ESG Mobile',
         theme: materialTheme.light(),

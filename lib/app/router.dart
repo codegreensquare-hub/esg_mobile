@@ -3,6 +3,7 @@ import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.d
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup.screen.dart';
 import 'package:esg_mobile/presentation/screens/main.screen.dart';
+import 'package:esg_mobile/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +11,7 @@ import 'package:go_router/go_router.dart';
 final UserAuthService _authService = UserAuthService.instance;
 
 final GoRouter router = GoRouter(
+  navigatorKey: navigatorKey,
   refreshListenable: _authService,
   redirect: (context, state) {
     final loggedIn = _authService.isLoggedIn;
