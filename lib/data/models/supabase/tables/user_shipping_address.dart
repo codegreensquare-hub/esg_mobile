@@ -35,6 +35,7 @@ class UserShippingAddressRow extends SupabaseDataRow {
     String? detailedAddress,
     String? requestsForDelivery,
     bool? reusableBoxesAreOkay,
+    String? postalCode,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -50,6 +51,7 @@ class UserShippingAddressRow extends SupabaseDataRow {
            'requests_for_delivery': supaSerialize(requestsForDelivery),
          if (reusableBoxesAreOkay != null)
            'reusable_boxes_are_okay': supaSerialize(reusableBoxesAreOkay),
+         if (postalCode != null) 'postal_code': supaSerialize(postalCode),
        });
 
   /// User Shipping Address Row
@@ -142,6 +144,13 @@ class UserShippingAddressRow extends SupabaseDataRow {
   set reusableBoxesAreOkay(bool value) =>
       setField<bool>(reusableBoxesAreOkayField, value);
 
+  /// Postal Code field name
+  static const String postalCodeField = 'postal_code';
+
+  /// Postal Code
+  String? get postalCode => getField<String>(postalCodeField);
+  set postalCode(String? value) => setField<String>(postalCodeField, value);
+
   /// Make a copy of the current [UserShippingAddressRow]
   /// overriding the provided fields
   UserShippingAddressRow copyWith({
@@ -155,6 +164,7 @@ class UserShippingAddressRow extends SupabaseDataRow {
     String? detailedAddress,
     String? requestsForDelivery,
     bool? reusableBoxesAreOkay,
+    String? postalCode,
   }) => UserShippingAddressRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -169,8 +179,9 @@ class UserShippingAddressRow extends SupabaseDataRow {
         supaSerialize(requestsForDelivery) ?? data['requests_for_delivery'],
     'reusable_boxes_are_okay':
         supaSerialize(reusableBoxesAreOkay) ?? data['reusable_boxes_are_okay'],
+    'postal_code': supaSerialize(postalCode) ?? data['postal_code'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-16 16:22:11.188504
+/// Date: 2026-01-16 16:59:29.545199

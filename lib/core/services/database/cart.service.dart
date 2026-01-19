@@ -461,4 +461,55 @@ class CartService {
     debugPrint('Checkout response: $response');
     return response as String?;
   }
+
+  Future<PaymentRow?> createPayment({
+    required double amount,
+    String? status,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null || userId.trim().isEmpty) {
+      throw StateError('User not logged in');
+    }
+
+    final payment = PaymentRow(
+      paymentBy: userId,
+      amount: amount,
+      status: status ?? 'pending',
+    );
+
+    final response = await _client
+        .from(PaymentTable().tableName)
+        .insert(payment.toJson())
+        .select()
+        .single();
+
+    return PaymentRow.fromJson(response);
+  }
+
+  Future<bool> updatePaymentStatus({
+    required String paymentId,
+    required String status,
+    DateTime? paidAt,
+    String? platformId,
+    dynamic otherData,
+  }) async {
+    try {
+      final updateData = {
+        PaymentRow.statusField: status,
+        if (paidAt != null) PaymentRow.paidAtField: paidAt.toIso8601String(),
+        if (platformId != null) PaymentRow.platformIdField: platformId,
+        if (otherData != null) PaymentRow.otherDataField: otherData,
+      };
+
+      await _client
+          .from(PaymentTable().tableName)
+          .update(updateData)
+          .eq(PaymentRow.idField, paymentId);
+
+      return true;
+    } catch (e) {
+      debugPrint('Error updating payment status: $e');
+      return false;
+    }
+  }
 }

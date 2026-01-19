@@ -3,7 +3,27 @@ import 'package:portone_flutter/iamport_payment.dart';
 import 'package:portone_flutter/model/payment_data.dart';
 
 class PortonePaymentScreen extends StatelessWidget {
-  const PortonePaymentScreen({super.key});
+  const PortonePaymentScreen({
+    super.key,
+    required this.paymentId,
+    required this.amount,
+    required this.shippingAddressId,
+    required this.buyerName,
+    required this.buyerTel,
+    required this.buyerEmail,
+    required this.buyerAddr,
+    required this.buyerPostcode,
+  });
+
+  final String paymentId;
+  final double amount;
+  final String shippingAddressId;
+
+  final String buyerName;
+  final String buyerTel;
+  final String buyerEmail;
+  final String buyerAddr;
+  final String buyerPostcode;
 
   @override
   Widget build(BuildContext context) {
@@ -26,21 +46,21 @@ class PortonePaymentScreen extends StatelessWidget {
       data: PaymentData(
         pg: 'html5_inicis',
         payMethod: 'card',
-        name: 'Sample Payment',
-        merchantUid: 'mid_${DateTime.now().millisecondsSinceEpoch}',
-        amount: 1000, // Example amount
-        buyerName: 'John Doe',
-        buyerTel: '01012345678',
-        buyerEmail: 'example@example.com',
-        buyerAddr: 'Seoul, South Korea',
-        buyerPostcode: '12345',
-        appScheme: 'esgmobile', // Matches the scheme we added
+        name: 'ESG Mobile Order Payment',
+        merchantUid: paymentId,
+        amount: amount.toInt(),
+        buyerName: buyerName,
+        buyerTel: buyerTel,
+        buyerEmail: buyerEmail,
+        buyerAddr: buyerAddr,
+        buyerPostcode: buyerPostcode,
+        appScheme: 'esgmobile',
         cardQuota: [2, 3],
       ),
       callback: (Map<String, String> result) {
         // Handle the result
         debugPrint('Payment result: $result');
-        // Navigate or show dialog
+        // Navigate back with result
         Navigator.pop(context, result);
       },
     );

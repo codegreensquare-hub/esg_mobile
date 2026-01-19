@@ -5,6 +5,8 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/order_item_inquiry.screen.dart';
 
+enum _OrderTab { all, waitingPayment, forDelivery, received, cancelled }
+
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
 
@@ -12,13 +14,75 @@ class MyOrdersScreen extends StatefulWidget {
   State<MyOrdersScreen> createState() => _MyOrdersScreenState();
 }
 
-class _MyOrdersScreenState extends State<MyOrdersScreen> {
+class _MyOrdersScreenState extends State<MyOrdersScreen>
+    with SingleTickerProviderStateMixin {
   late final Future<List<_OrderEntry>> _future;
+  late final TabController _tabController;
+
+  static const _tabs = [
+    Tab(text: '전체'),
+    Tab(text: '결제 대기'),
+    Tab(text: '배송중'),
+    Tab(text: '수령완료'),
+    Tab(text: '취소됨'),
+  ];
 
   @override
   void initState() {
     super.initState();
     _future = _fetchOrders();
+    _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  String _getOrderItemStatus(_OrderItemEntry entry) {
+    final item = entry.item;
+    if (item.cancelledAt != null) return '취소됨';
+    if (item.receivedDeliveryAt != null) return '수령완료';
+    if (item.sentForDeliveryAt != null) return '배송중';
+    if (item.preparingForDeliveryAt != null) return '배송준비완료';
+    return '배송준비';
+  }
+
+  List<_OrderEntry> _filterOrders(List<_OrderEntry> orders, _OrderTab tab) {
+    switch (tab) {
+      case _OrderTab.all:
+        return orders;
+      case _OrderTab.waitingPayment:
+        return orders.where((e) => e.payment?.paidAt == null).toList();
+      case _OrderTab.forDelivery:
+        return orders.where((e) {
+          if (e.payment?.paidAt == null) return false;
+          final statuses = e.items.map(_getOrderItemStatus).toSet();
+          return !statuses.contains('수령완료') &&
+              !statuses.contains('취소됨') &&
+              statuses.isNotEmpty;
+        }).toList();
+      case _OrderTab.received:
+        return orders
+            .where(
+              (e) =>
+                  e.items.isNotEmpty &&
+                  e.items.every((item) => item.item.receivedDeliveryAt != null),
+            )
+            .toList();
+      case _OrderTab.cancelled:
+        return orders
+            .where(
+              (e) =>
+                  e.items.isNotEmpty &&
+                  e.items.every((item) => item.item.cancelledAt != null),
+            )
+            .toList();
+    }
   }
 
   Future<List<_OrderEntry>> _fetchOrders() async {
@@ -130,24 +194,21 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    String getOrderItemStatus(_OrderItemEntry entry) {
-      final item = entry.item;
-      if (item.cancelledAt != null) return '취소됨';
-      if (item.receivedDeliveryAt != null) return '수령완료';
-      if (item.sentForDeliveryAt != null) return '배송중';
-      if (item.preparingForDeliveryAt != null) return '배송준비완료';
-      return '배송준비';
-    }
-
     String getOrderStatus(List<_OrderItemEntry> entries) {
       if (entries.isEmpty) return '-';
-      final statuses = entries.map(getOrderItemStatus).toSet();
+      final statuses = entries.map(_getOrderItemStatus).toSet();
       return statuses.length == 1 ? statuses.first : '혼합';
     }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('주문 내역'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: _tabs,
+          isScrollable: true,
+          tabAlignment: TabAlignment.center,
+        ),
       ),
       body: FutureBuilder<List<_OrderEntry>>(
         future: _future,
@@ -170,8 +231,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           }
 
           final items = snapshot.data ?? const <_OrderEntry>[];
+          final filteredItems = _filterOrders(
+            items,
+            _OrderTab.values[_tabController.index],
+          );
 
-          if (items.isEmpty) {
+          if (filteredItems.isEmpty) {
             return Center(
               child: Text(
                 '주문 내역이 없습니다.',
@@ -182,10 +247,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            itemCount: items.length,
+            itemCount: filteredItems.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              final entry = items[index];
+              final entry = filteredItems[index];
               final paidAt = entry.payment?.paidAt;
               final statusText = paidAt == null ? '결제 대기' : '결제 완료';
               final statusColor = paidAt == null
@@ -497,7 +562,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            getOrderItemStatus(e),
+                                            _getOrderItemStatus(e),
                                             style: theme.textTheme.labelSmall
                                                 ?.copyWith(
                                                   color: cs.onSurfaceVariant,

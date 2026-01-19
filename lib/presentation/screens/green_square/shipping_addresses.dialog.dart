@@ -73,6 +73,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
       recipientName: result.recipientName,
       phoneNumber: result.phoneNumber,
       address: result.address,
+      postalCode: result.postalCode,
       detailedAddress: result.detailedAddress,
       requestsForDelivery: result.requestsForDelivery,
       reusableBoxesAreOkay: result.reusableBoxesAreOkay,
@@ -112,6 +113,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
       recipientName: result.recipientName,
       phoneNumber: result.phoneNumber,
       address: result.address,
+      postalCode: result.postalCode,
       detailedAddress: result.detailedAddress,
       requestsForDelivery: result.requestsForDelivery,
       reusableBoxesAreOkay: result.reusableBoxesAreOkay,
@@ -231,6 +233,7 @@ class _ShippingAddressesDialogState extends State<ShippingAddressesDialog> {
                             const SizedBox(height: 8),
                             Text('수령인: ${address.recipientName ?? '-'}'),
                             Text('전화번호: ${address.phoneNumber ?? '-'}'),
+                            Text('우편번호: ${address.postalCode ?? '-'}'),
                             const SizedBox(height: 8),
                             Text(address.address ?? ''),
                             if ((address.detailedAddress ?? '').isNotEmpty)

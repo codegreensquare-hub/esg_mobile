@@ -68,4 +68,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-16 16:22:11.188905
+/// Date: 2026-01-16 16:59:29.545579

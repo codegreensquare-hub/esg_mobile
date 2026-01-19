@@ -32,6 +32,7 @@ class UserShippingAddressService {
     required String recipientName,
     required String phoneNumber,
     required String address,
+    required String postalCode,
     String? detailedAddress,
     String? requestsForDelivery,
     bool reusableBoxesAreOkay = false,
@@ -45,6 +46,7 @@ class UserShippingAddressService {
             UserShippingAddressRow.recipientNameField: recipientName,
             UserShippingAddressRow.phoneNumberField: phoneNumber,
             UserShippingAddressRow.addressField: address,
+            UserShippingAddressRow.postalCodeField: postalCode,
             UserShippingAddressRow.detailedAddressField: detailedAddress,
             UserShippingAddressRow.requestsForDeliveryField:
                 requestsForDelivery,
@@ -67,6 +69,7 @@ class UserShippingAddressService {
     required String recipientName,
     required String phoneNumber,
     required String address,
+    required String postalCode,
     String? detailedAddress,
     String? requestsForDelivery,
     bool reusableBoxesAreOkay = false,
@@ -79,6 +82,7 @@ class UserShippingAddressService {
             UserShippingAddressRow.recipientNameField: recipientName,
             UserShippingAddressRow.phoneNumberField: phoneNumber,
             UserShippingAddressRow.addressField: address,
+            UserShippingAddressRow.postalCodeField: postalCode,
             UserShippingAddressRow.detailedAddressField: detailedAddress,
             UserShippingAddressRow.requestsForDeliveryField:
                 requestsForDelivery,

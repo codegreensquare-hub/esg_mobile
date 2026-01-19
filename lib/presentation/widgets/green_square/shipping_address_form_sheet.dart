@@ -8,6 +8,7 @@ class ShippingAddressFormResult {
     required this.recipientName,
     required this.phoneNumber,
     required this.address,
+    required this.postalCode,
     this.detailedAddress,
     this.requestsForDelivery,
     required this.reusableBoxesAreOkay,
@@ -19,6 +20,7 @@ class ShippingAddressFormResult {
   final String recipientName;
   final String phoneNumber;
   final String address;
+  final String postalCode;
   final String? detailedAddress;
   final String? requestsForDelivery;
   final bool reusableBoxesAreOkay;
@@ -48,6 +50,7 @@ class _ShippingAddressFormSheetState extends State<ShippingAddressFormSheet> {
   late final TextEditingController _recipientNameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _addressController;
+  late final TextEditingController _postalCodeController;
   late final TextEditingController _detailAddressController;
   late final TextEditingController _requestController;
   late bool _reusableBoxesAreOkay;
@@ -68,6 +71,9 @@ class _ShippingAddressFormSheetState extends State<ShippingAddressFormSheet> {
     _addressController = TextEditingController(
       text: widget.initialAddress?.address ?? '',
     );
+    _postalCodeController = TextEditingController(
+      text: widget.initialAddress?.postalCode ?? '',
+    );
     _detailAddressController = TextEditingController(
       text: widget.initialAddress?.detailedAddress ?? '',
     );
@@ -85,6 +91,7 @@ class _ShippingAddressFormSheetState extends State<ShippingAddressFormSheet> {
     _recipientNameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
+    _postalCodeController.dispose();
     _detailAddressController.dispose();
     _requestController.dispose();
     super.dispose();
@@ -101,6 +108,7 @@ class _ShippingAddressFormSheetState extends State<ShippingAddressFormSheet> {
       recipientName: _recipientNameController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
       address: _addressController.text.trim(),
+      postalCode: _postalCodeController.text.trim(),
       detailedAddress: _detailAddressController.text.trim().isEmpty
           ? null
           : _detailAddressController.text.trim(),
@@ -162,6 +170,12 @@ class _ShippingAddressFormSheetState extends State<ShippingAddressFormSheet> {
                 controller: _addressController,
                 label: '주소',
                 validator: _requiredValidator,
+              ),
+              _SheetTextField(
+                controller: _postalCodeController,
+                label: '우편번호',
+                validator: _requiredValidator,
+                keyboardType: TextInputType.number,
               ),
               _SheetTextField(
                 controller: _detailAddressController,

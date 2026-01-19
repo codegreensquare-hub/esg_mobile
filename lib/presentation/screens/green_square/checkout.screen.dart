@@ -1,12 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/user_shipping_address.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
-import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/data/models/supabase/tables/user_shipping_address.dart';
+import 'package:esg_mobile/portone_payment.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/shipping_address_form_sheet.dart';
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({
@@ -123,6 +124,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       recipientName: result.recipientName,
       phoneNumber: result.phoneNumber,
       address: result.address,
+      postalCode: result.postalCode,
       detailedAddress: result.detailedAddress,
       requestsForDelivery: result.requestsForDelivery,
       reusableBoxesAreOkay: result.reusableBoxesAreOkay,
@@ -158,21 +160,92 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final address = _selectedAddress;
+    if (address == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('배송지를 불러오지 못했습니다. 다시 선택해주세요.')),
+      );
+      return;
+    }
+
+    final buyerName = (address.recipientName ?? address.name ?? '').trim();
+    final buyerTel = (address.phoneNumber ?? '').trim();
+    final buyerEmail =
+        (Supabase.instance.client.auth.currentUser?.email ?? '').trim();
+    final buyerAddr =
+        '${(address.address ?? '').trim()} ${(address.detailedAddress ?? '').trim()}'
+            .trim();
+    final buyerPostcode = (address.postalCode ?? '').trim();
+
     setState(() => _isSubmitting = true);
     try {
-      final orderId = await CartService.instance.checkoutCart(
-        shippingAddressId: addressId,
+      // Create payment record
+      final payment = await CartService.instance.createPayment(
+        amount: _totalPoints,
+        status: 'pending',
       );
 
-      if (!mounted) return;
-      if ((orderId ?? '').isEmpty) {
+      if (payment == null) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('주문에 실패했습니다. 다시 시도해주세요.')),
+          const SnackBar(content: Text('결제 생성에 실패했습니다. 다시 시도해주세요.')),
         );
         return;
       }
 
-      Navigator.of(context).pop(orderId);
+      // Navigate to PortOne payment screen
+      final result = await Navigator.of(context).push<Map<String, String>>(
+        MaterialPageRoute(
+          builder: (context) => PortonePaymentScreen(
+            paymentId: payment.id,
+            amount: _totalPoints,
+            shippingAddressId: addressId,
+            buyerName: buyerName.isEmpty ? '고객' : buyerName,
+            buyerTel: buyerTel,
+            buyerEmail: buyerEmail,
+            buyerAddr: buyerAddr,
+            buyerPostcode: buyerPostcode,
+          ),
+        ),
+      );
+
+      if (!mounted) return;
+
+      if (result != null && result['imp_success'] == 'true') {
+        // Payment successful, create order
+        final orderId = await CartService.instance.checkoutCart(
+          shippingAddressId: addressId,
+        );
+
+        if ((orderId ?? '').isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('주문 생성에 실패했습니다.')),
+          );
+          return;
+        }
+
+        // Update payment status
+        await CartService.instance.updatePaymentStatus(
+          paymentId: payment.id,
+          status: 'paid',
+          paidAt: DateTime.now(),
+          platformId: result['imp_uid'],
+          otherData: result,
+        );
+
+        Navigator.of(context).pop(orderId);
+      } else {
+        // Payment failed or cancelled
+        await CartService.instance.updatePaymentStatus(
+          paymentId: payment.id,
+          status: 'failed',
+          otherData: result,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('결제가 취소되었습니다.')),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -274,6 +347,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       '연락처: ${_selectedAddress?.phoneNumber ?? ''}',
                                       style: theme.textTheme.bodyMedium,
                                     ),
+                                    if ((_selectedAddress?.postalCode ?? '')
+                                        .trim()
+                                        .isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '우편번호: ${_selectedAddress?.postalCode}',
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                    ],
                                     const SizedBox(height: 8),
                                     Text(
                                       '주소: ${_selectedAddress?.address ?? ''}',
