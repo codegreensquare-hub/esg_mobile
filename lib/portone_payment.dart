@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portone_flutter/iamport_payment.dart';
 import 'package:portone_flutter/model/payment_data.dart';
 
@@ -27,42 +28,79 @@ class PortonePaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String readEnv(String key) => (dotenv.env[key] ?? '').trim();
+
+    final mode = readEnv('MODE').toUpperCase();
+    final isDev = mode == 'DEV' || mode == 'DEVELOPMENT';
+
+    final appScheme = (dotenv.env['PORTONE_APP_SCHEME'] ?? 'esgmobile').trim();
+    final userCode = (isDev ? readEnv('PORTONE_V1_USER_CODE_DEV') : '').ifEmpty(
+      readEnv('PORTONE_V1_USER_CODE'),
+    );
+    final pg = (isDev ? readEnv('PORTONE_V1_PG_DEV') : '')
+        .ifEmpty(readEnv('PORTONE_V1_PG'))
+        .ifEmpty('html5_inicis');
+
+    final testAmountRaw = isDev ? readEnv('PORTONE_V1_TEST_AMOUNT') : '';
+    final totalAmount =
+        int.tryParse(testAmountRaw).clampMin(0) ?? amount.toInt();
+
+    final orderName = '${isDev ? '[DEV] ' : ''}ESG Mobile Order Payment'.trim();
+    final merchantUid = isDev ? 'dev_$paymentId' : paymentId;
+
+    if (userCode.isEmpty) {
+      throw StateError('Missing PORTONE_V1_USER_CODE in .env');
+    }
+
+    if (isDev && readEnv('PORTONE_V1_USER_CODE_DEV').isEmpty) {
+      debugPrint(
+        'MODE=DEV but PORTONE_V1_USER_CODE_DEV is not set; using PORTONE_V1_USER_CODE.',
+      );
+    }
+
     return IamportPayment(
       appBar: AppBar(
-        title: Text('PortOne Payment'),
+        title: const Text('PortOne Payment'),
       ),
-      initialChild: Center(
+      initialChild: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Assuming you have an image asset, replace with your own
-            // Image.asset('assets/images/iamport-logo.png'),
             Padding(padding: EdgeInsets.symmetric(vertical: 15)),
             Text('Please wait...', style: TextStyle(fontSize: 20)),
           ],
         ),
       ),
-      userCode: 'iamport', // Replace with your actual user code
+      userCode: userCode,
       data: PaymentData(
-        pg: 'html5_inicis',
+        pg: pg,
         payMethod: 'card',
-        name: 'ESG Mobile Order Payment',
-        merchantUid: paymentId,
-        amount: amount.toInt(),
+        name: orderName,
+        merchantUid: merchantUid,
+        amount: totalAmount,
         buyerName: buyerName,
         buyerTel: buyerTel,
         buyerEmail: buyerEmail,
         buyerAddr: buyerAddr,
         buyerPostcode: buyerPostcode,
-        appScheme: 'esgmobile',
-        cardQuota: [2, 3],
+        appScheme: appScheme,
       ),
       callback: (Map<String, String> result) {
-        // Handle the result
         debugPrint('Payment result: $result');
-        // Navigate back with result
         Navigator.pop(context, result);
       },
     );
+  }
+}
+
+extension on String {
+  String ifEmpty(String fallback) => trim().isEmpty ? fallback : this;
+}
+
+extension on int? {
+  int? clampMin(int min) {
+    final value = this;
+    if (value == null) return null;
+    return value < min ? min : value;
   }
 }

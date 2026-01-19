@@ -111,6 +111,11 @@
 		<string>supertoss</string>
 		<string>newsmartpib</string>
 		<string>naversearchthirdlogin</string>
+		<string>shinhan-sr-ansimclick-naverpay</string>
+		<string>kakaobank</string>
+		<string>kakaokompassauth</string>
+		<string>kakaolink</string>
+		<string>kakaoplus</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>

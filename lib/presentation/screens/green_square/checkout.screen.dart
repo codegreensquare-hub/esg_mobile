@@ -170,8 +170,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     final buyerName = (address.recipientName ?? address.name ?? '').trim();
     final buyerTel = (address.phoneNumber ?? '').trim();
-    final buyerEmail =
-        (Supabase.instance.client.auth.currentUser?.email ?? '').trim();
+    final buyerEmail = (Supabase.instance.client.auth.currentUser?.email ?? '')
+        .trim();
     final buyerAddr =
         '${(address.address ?? '').trim()} ${(address.detailedAddress ?? '').trim()}'
             .trim();
