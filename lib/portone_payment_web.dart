@@ -8,6 +8,7 @@ class PortonePaymentScreen extends StatefulWidget {
     required this.paymentId,
     required this.amount,
     required this.shippingAddressId,
+    required this.userId,
     required this.buyerName,
     required this.buyerTel,
     required this.buyerEmail,
@@ -18,6 +19,7 @@ class PortonePaymentScreen extends StatefulWidget {
   final String paymentId;
   final double amount;
   final String shippingAddressId;
+  final String userId;
 
   final String buyerName;
   final String buyerTel;
@@ -67,8 +69,9 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
       final isDev = mode == 'DEV' || mode == 'DEVELOPMENT';
 
       final userCode =
-          (isDev ? _readEnvOrDefine('PORTONE_V1_USER_CODE_DEV') : '')
-              .ifEmpty(_readEnvOrDefine('PORTONE_V1_USER_CODE'));
+          (isDev ? _readEnvOrDefine('PORTONE_V1_USER_CODE_DEV') : '').ifEmpty(
+            _readEnvOrDefine('PORTONE_V1_USER_CODE'),
+          );
 
       if (userCode.isEmpty) {
         throw StateError(
@@ -80,8 +83,9 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
           .ifEmpty(_readEnvOrDefine('PORTONE_V1_PG'))
           .ifEmpty('html5_inicis');
 
-      final testAmountRaw =
-          isDev ? _readEnvOrDefine('PORTONE_V1_TEST_AMOUNT') : '';
+      final testAmountRaw = isDev
+          ? _readEnvOrDefine('PORTONE_V1_TEST_AMOUNT')
+          : '';
       final totalAmount =
           int.tryParse(testAmountRaw)?.clampMin(0) ?? widget.amount.toInt();
 
@@ -111,6 +115,11 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
         'buyer_tel': widget.buyerTel,
         'buyer_addr': widget.buyerAddr,
         'buyer_postcode': widget.buyerPostcode,
+        'custom_data': {
+          'user_id': widget.userId,
+          'shipping_address_id': widget.shippingAddressId,
+          'payment_id': widget.paymentId,
+        },
       });
 
       // Define callback

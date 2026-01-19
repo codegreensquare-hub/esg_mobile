@@ -9,6 +9,7 @@ class PortonePaymentScreen extends StatelessWidget {
     required this.paymentId,
     required this.amount,
     required this.shippingAddressId,
+    required this.userId,
     required this.buyerName,
     required this.buyerTel,
     required this.buyerEmail,
@@ -19,6 +20,7 @@ class PortonePaymentScreen extends StatelessWidget {
   final String paymentId;
   final double amount;
   final String shippingAddressId;
+  final String userId;
 
   final String buyerName;
   final String buyerTel;
@@ -84,6 +86,11 @@ class PortonePaymentScreen extends StatelessWidget {
         buyerAddr: buyerAddr,
         buyerPostcode: buyerPostcode,
         appScheme: appScheme,
+        customData: {
+          'user_id': userId,
+          'shipping_address_id': shippingAddressId,
+          'payment_id': paymentId,
+        },
       ),
       callback: (Map<String, String> result) {
         debugPrint('Payment result: $result');

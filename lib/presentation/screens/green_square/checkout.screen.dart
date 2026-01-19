@@ -200,6 +200,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             paymentId: payment.id,
             amount: _totalPoints,
             shippingAddressId: addressId,
+            userId: _userId!,
             buyerName: buyerName.isEmpty ? '고객' : buyerName,
             buyerTel: buyerTel,
             buyerEmail: buyerEmail,
