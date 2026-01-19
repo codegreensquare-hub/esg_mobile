@@ -22,6 +22,12 @@
       "deviceId": "RT7TITAN5G008792"
     },
     {
+      "name": "TabXC (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "b2c8888"
+    },
+    {
       "name": "iPhone 17 Pro Max (mobile)",
       "request": "launch",
       "type": "dart",

@@ -28,6 +28,7 @@ class _ProductCardState extends State<ProductCard> {
   String? _selectedImageUrl;
   String? _selectedColorHex;
   double _baseDiscountRate = 0.0;
+  bool _isHeartHovered = false;
 
   @override
   void initState() {
@@ -137,13 +138,17 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
                   // Heart Button
-                  if (widget.onWishlistToggle != null)
-                    Positioned(
-                      top: 8,
-                      right: 8,
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isHeartHovered = true),
+                      onExit: (_) => setState(() => _isHeartHovered = false),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: cs.outline.withValues(alpha: 0.4),
+                          color: _isHeartHovered
+                              ? cs.outline.withValues(alpha: 0.8)
+                              : cs.outline.withValues(alpha: 0.4),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
@@ -165,6 +170,7 @@ class _ProductCardState extends State<ProductCard> {
                         ),
                       ),
                     ),
+                  ),
 
                   if (_colorValues.isNotEmpty)
                     Positioned(

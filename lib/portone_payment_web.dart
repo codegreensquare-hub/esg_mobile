@@ -89,8 +89,8 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
       final totalAmount =
           int.tryParse(testAmountRaw)?.clampMin(0) ?? widget.amount.toInt();
 
-      final orderName = '${isDev ? '[DEV] ' : ''}ESG Mobile Order Payment'
-          .trim();
+        final orderName =
+          '${isDev ? '[DEV] ' : ''}ESG Order - ${widget.buyerName}'.trim();
       final merchantUid = isDev ? 'dev_${widget.paymentId}' : widget.paymentId;
 
       // Check if IMP is available
@@ -119,6 +119,11 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
           'user_id': widget.userId,
           'shipping_address_id': widget.shippingAddressId,
           'payment_id': widget.paymentId,
+          'buyer_name': widget.buyerName,
+          'buyer_email': widget.buyerEmail,
+          'buyer_tel': widget.buyerTel,
+          'buyer_addr': widget.buyerAddr,
+          'buyer_postcode': widget.buyerPostcode,
         },
       });
 

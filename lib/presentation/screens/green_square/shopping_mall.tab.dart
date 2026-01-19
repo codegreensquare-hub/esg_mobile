@@ -343,24 +343,39 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
               ),
             )
           else
-            MasonryGridView.count(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              crossAxisCount: 2,
-              mainAxisSpacing: 4,
-              crossAxisSpacing: 4,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final productWithDetails = products[index];
-                return ProductCard(
-                  productWithDetails: productWithDetails,
-                  onWishlistToggle: userId != null
-                      ? () => _toggleWishlist(productWithDetails)
-                      : null,
-                  onTap: () => _navigateToProductDetail(productWithDetails),
-                );
-              },
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    int crossAxisCount = 2;
+                    if (constraints.maxWidth >= 1200) {
+                      crossAxisCount = 4;
+                    } else if (constraints.maxWidth >= 700) {
+                      crossAxisCount = 3;
+                    }
+                    return MasonryGridView.count(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: 4,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final productWithDetails = products[index];
+                        return ProductCard(
+                          productWithDetails: productWithDetails,
+                          onWishlistToggle: () =>
+                              _toggleWishlist(productWithDetails),
+                          onTap: () =>
+                              _navigateToProductDetail(productWithDetails),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
             ),
         ],
       ),

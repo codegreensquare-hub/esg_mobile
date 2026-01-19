@@ -47,7 +47,8 @@ class PortonePaymentScreen extends StatelessWidget {
     final totalAmount =
         int.tryParse(testAmountRaw).clampMin(0) ?? amount.toInt();
 
-    final orderName = '${isDev ? '[DEV] ' : ''}ESG Mobile Order Payment'.trim();
+    final orderName =
+      '${isDev ? '[DEV] ' : ''}ESG Order - $buyerName'.trim();
     final merchantUid = isDev ? 'dev_$paymentId' : paymentId;
 
     if (userCode.isEmpty) {
@@ -90,6 +91,11 @@ class PortonePaymentScreen extends StatelessWidget {
           'user_id': userId,
           'shipping_address_id': shippingAddressId,
           'payment_id': paymentId,
+          'buyer_name': buyerName,
+          'buyer_email': buyerEmail,
+          'buyer_tel': buyerTel,
+          'buyer_addr': buyerAddr,
+          'buyer_postcode': buyerPostcode,
         },
       ),
       callback: (Map<String, String> result) {
