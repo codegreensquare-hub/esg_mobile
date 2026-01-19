@@ -27,6 +27,7 @@ import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/nav_header.delegate.dart';
 import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
+import 'package:esg_mobile/presentation/widgets/layout/green_square_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
@@ -153,64 +154,11 @@ class _MainScreenState extends State<MainScreen> {
               onSelect: _handleGreenSquareDrawerSelection,
             )
           : null,
-      floatingActionButton: isGreenSquare
-          ? FloatingActionButton(
-              heroTag: 'green-square-knock-fab',
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32),
-              ),
-              onPressed: _onTapKnock,
-              tooltip: 'Knock',
-              child: const Text(
-                "콕!",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : null,
-      floatingActionButtonLocation: isGreenSquare
-          ? FloatingActionButtonLocation.centerDocked
-          : null,
       bottomNavigationBar: isGreenSquare
-          ? BottomAppBar(
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 6,
-              child: SizedBox(
-                height: 64,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildGsItem(
-                      context,
-                      index: 0,
-                      icon: Icons.auto_stories_outlined,
-                      label: '스토리',
-                    ),
-                    _buildGsItem(
-                      context,
-                      index: 1,
-                      icon: Icons.storefront_outlined,
-                      label: '쇼핑몰',
-                    ),
-                    const SizedBox(width: 56), // space for FAB notch
-                    _buildGsItem(
-                      context,
-                      index: 2,
-                      icon: Icons.group_outlined,
-                      label: '미션 참여',
-                    ),
-                    _buildGsItem(
-                      context,
-                      index: 3,
-                      icon: Icons.person_outline,
-                      label: '나의 콕',
-                    ),
-                  ],
-                ),
-              ),
+          ? GreenSquareBottomNavBar(
+              selectedIndex: _greenIndex,
+              onItemSelected: (index) => setState(() => _greenIndex = index),
+              onGreenButtonPressed: _onTapKnock,
             )
           : null,
       body: CustomScrollView(
@@ -507,36 +455,6 @@ class _MainScreenState extends State<MainScreen> {
         setState(() => _selectedIndex = idx);
       }
     }
-  }
-
-  Widget _buildGsItem(
-    BuildContext context, {
-    required int index,
-    required IconData icon,
-    required String label,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    final bool selected = _greenIndex == index;
-    final Color color = selected ? cs.primary : cs.onSurfaceVariant;
-    return InkWell(
-      customBorder: const StadiumBorder(),
-      onTap: () => setState(() => _greenIndex = index),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color),
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: color),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _showCartBottomSheet() async {

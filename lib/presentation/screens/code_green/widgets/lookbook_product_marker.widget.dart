@@ -116,16 +116,17 @@ class _LookbookProductMarkerState extends State<LookbookProductMarker> {
                                             fit: BoxFit.cover,
                                             errorBuilder:
                                                 (context, error, stackTrace) {
-                                              return Container(
-                                                color:
-                                                    cs.surfaceContainerHighest,
-                                                child: Icon(
-                                                  Icons
-                                                      .image_not_supported_outlined,
-                                                  color: cs.onSurfaceVariant,
-                                                ),
-                                              );
-                                            },
+                                                  return Container(
+                                                    color: cs
+                                                        .surfaceContainerHighest,
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported_outlined,
+                                                      color:
+                                                          cs.onSurfaceVariant,
+                                                    ),
+                                                  );
+                                                },
                                           )
                                         : Container(
                                             color: cs.surfaceContainerHighest,
@@ -147,38 +148,40 @@ class _LookbookProductMarkerState extends State<LookbookProductMarker> {
                                         widget.productName,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style:
-                                            theme.textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                       ),
                                       if (priceText.isNotEmpty)
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 4),
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
                                           child: Text(
                                             priceText,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: theme.textTheme.bodySmall
                                                 ?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                                  color: cs.onSurfaceVariant,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
                                           ),
                                         ),
                                       if (description.isNotEmpty)
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 4),
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
                                           child: Text(
                                             description,
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: theme.textTheme.bodySmall
                                                 ?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                            ),
+                                                  color: cs.onSurfaceVariant,
+                                                ),
                                           ),
                                         ),
                                     ],
