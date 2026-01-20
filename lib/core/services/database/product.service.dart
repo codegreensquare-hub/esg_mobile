@@ -305,4 +305,66 @@ class ProductService {
       return 0.0;
     }
   }
+
+  Future<List<ProductReviewRow>> fetchProductReviews(
+    String productId, {
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      var query = _client
+          .from(ProductReviewTable().tableName)
+          .select()
+          .eq(ProductReviewRow.productField, productId)
+          .order(ProductReviewRow.createdAtField, ascending: false);
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+      if (offset != null) {
+        query = query.range(offset, offset + (limit ?? 10) - 1);
+      }
+
+      final response = await query;
+      return response.map(ProductReviewRow.fromJson).toList();
+    } catch (e) {
+      debugPrint('Error fetching product reviews: $e');
+      return [];
+    }
+  }
+
+  Future<double> getProductAverageStars(String productId) async {
+    try {
+      final response = await _client
+          .from(ProductReviewTable().tableName)
+          .select('stars')
+          .eq(ProductReviewRow.productField, productId);
+
+      if (response.isEmpty) return 0.0;
+
+      final total = response.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['stars'] as num),
+      );
+      return total / response.length;
+    } catch (e) {
+      debugPrint('Error fetching product average stars: $e');
+      return 0.0;
+    }
+  }
+
+  Future<int> getProductReviewCount(String productId) async {
+    try {
+      final response = await _client
+          .from(ProductReviewTable().tableName)
+          .select('*')
+          .eq(ProductReviewRow.productField, productId)
+          .count(CountOption.exact);
+
+      return response.count;
+    } catch (e) {
+      debugPrint('Error fetching product review count: $e');
+      return 0;
+    }
+  }
 }

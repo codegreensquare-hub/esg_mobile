@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 
 class OrderItemInquiryScreen extends StatefulWidget {
   const OrderItemInquiryScreen({
@@ -273,70 +275,107 @@ class _OrderItemInquiryScreenState extends State<OrderItemInquiryScreen>
       body: Column(
         children: [
           // Order Item Info Section
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerLow,
-              border: Border(
-                bottom: BorderSide(
-                  color: cs.outlineVariant,
-                  width: 1,
+          InkWell(
+            onTap: () async {
+              if (product == null) return;
+
+              try {
+                final productDetailsList = await ProductService.instance
+                    .fetchProductsByIds(
+                      productIds: [product.id],
+                      userId: currentUserId,
+                    );
+
+                if (productDetailsList.isEmpty) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('상품 정보를 불러올 수 없습니다.')),
+                  );
+                  return;
+                }
+
+                if (!context.mounted) return;
+
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailScreen(
+                      productWithDetails: productDetailsList.first,
+                    ),
+                  ),
+                );
+              } catch (e) {
+                debugPrint('Error navigating to product detail: $e');
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('상품 정보를 불러올 수 없습니다.')),
+                );
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerLow,
+                border: Border(
+                  bottom: BorderSide(
+                    color: cs.outlineVariant,
+                    width: 1,
+                  ),
                 ),
               ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: SizedBox(
-                    width: 64,
-                    height: 64,
-                    child: imageUrl != null
-                        ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color: cs.surfaceContainerHighest,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    color: cs.onSurfaceVariant,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: imageUrl != null
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    color: cs.surfaceContainerHighest,
+                                    child: Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: cs.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
-                          )
-                        : Container(
-                            color: cs.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.image_outlined,
-                              color: cs.onSurfaceVariant,
+                            )
+                          : Container(
+                              color: cs.surfaceContainerHighest,
+                              child: Icon(
+                                Icons.image_outlined,
+                                color: cs.onSurfaceVariant,
+                              ),
                             ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          titleText,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        titleText,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '수량: $quantityText',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
+                        const SizedBox(height: 4),
+                        Text(
+                          '수량: $quantityText',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 

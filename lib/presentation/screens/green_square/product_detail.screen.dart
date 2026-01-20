@@ -41,6 +41,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   String? selectedVariantImageUrl;
   double currentAwardPoints = 0.0;
   double baseDiscountRate = 0.0;
+  double reviewAverage = 0.0;
+  int reviewCount = 0;
   late final TabController _tabController;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _actionButtonsKey = GlobalKey();
@@ -58,6 +60,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     _loadProductOptions();
     _loadAwardPoints();
     _loadBaseDiscountRate();
+    _loadReviewStats();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _updateStickyActionsVisibility(),
     );
@@ -167,6 +170,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       setState(() => baseDiscountRate = rate);
     } catch (e) {
       debugPrint('Error loading base discount rate: $e');
+    }
+  }
+
+  Future<void> _loadReviewStats() async {
+    try {
+      final average = await ProductService.instance.getProductAverageStars(
+        productWithDetails.product.id,
+      );
+      final count = await ProductService.instance.getProductReviewCount(
+        productWithDetails.product.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        reviewAverage = average;
+        reviewCount = count;
+      });
+    } catch (e) {
+      debugPrint('Error loading review stats: $e');
     }
   }
 
@@ -682,9 +703,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         const SizedBox(height: 24),
                         TabBar(
                           controller: _tabController,
-                          tabs: const [
-                            Tab(text: '제품 설명'),
-                            Tab(text: '리뷰 (0)'),
+                          tabs: [
+                            const Tab(text: '제품 설명'),
+                            Tab(text: '리뷰 ($reviewCount)'),
                           ],
                         ),
                         AnimatedSize(
@@ -693,7 +714,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           alignment: Alignment.topCenter,
                           child: _tabController.index == 0
                               ? ProductDescriptionTab(product: product)
-                              : ReviewsTab(product: product),
+                              : ReviewsTab(
+                                  productId: product.id,
+                                  averageStars: reviewAverage,
+                                ),
                         ),
                       ],
                     ),
