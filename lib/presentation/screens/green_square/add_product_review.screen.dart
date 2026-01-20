@@ -79,27 +79,26 @@ class _AddProductReviewScreenState extends State<AddProductReviewScreen> {
           .select()
           .single();
 
-      final review = ProductReviewRow.fromJson(reviewResponse);
+      final reviewId = reviewResponse['id'] as String;
 
       // Upload images
       for (final image in _selectedImages) {
         final file = File(image.path);
         final fileName = '$DateTime.now().millisecondsSinceEpoch_${image.name}';
-        final folderPath = '$userId/$review.id';
+        final folderPath = '$userId/$reviewId';
 
         await client.storage
             .from(bucket.product)
             .upload(
-              '$bucketFolder.product.reviews/$folderPath/$fileName',
+              'reviews/$folderPath/$fileName',
               file,
             );
 
         await client.from(ProductReviewImageTable().tableName).insert({
           ProductReviewImageRow.uploadedByField: userId,
-          ProductReviewImageRow.reviewField: review.id,
+          ProductReviewImageRow.reviewField: reviewId,
           ProductReviewImageRow.bucketField: bucket.product,
-          ProductReviewImageRow.folderPathField:
-              '$bucketFolder.product.reviews/$folderPath',
+          ProductReviewImageRow.folderPathField: 'reviews/$folderPath',
           ProductReviewImageRow.fileNameField: fileName,
         });
       }
@@ -217,7 +216,7 @@ class _AddProductReviewScreenState extends State<AddProductReviewScreen> {
                   },
                   icon: Icon(
                     index < _rating ? Icons.star : Icons.star_border,
-                    color: cs.primary,
+                    color: index < _rating ? Colors.yellow[600] : cs.primary,
                     size: 32,
                   ),
                 );
