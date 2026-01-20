@@ -89,7 +89,7 @@ class _PortonePaymentScreenState extends State<PortonePaymentScreen> {
       final totalAmount =
           int.tryParse(testAmountRaw)?.clampMin(0) ?? widget.amount.toInt();
 
-        final orderName =
+      final orderName =
           '${isDev ? '[DEV] ' : ''}ESG Order - ${widget.buyerName}'.trim();
       final merchantUid = isDev ? 'dev_${widget.paymentId}' : widget.paymentId;
 

@@ -9,50 +9,52 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Product Option Parameter Table
-class ProductOptionParameterTable
-    extends SupabaseTable<ProductOptionParameterRow> {
+/// Product Review Table
+class ProductReviewTable extends SupabaseTable<ProductReviewRow> {
   /// Table Name
   @override
-  String get tableName => 'product_option_parameter';
+  String get tableName => 'product_review';
 
-  /// Create a [ProductOptionParameterRow] from the [data] provided
+  /// Create a [ProductReviewRow] from the [data] provided
   @override
-  ProductOptionParameterRow createRow(Map<String, dynamic> data) =>
-      ProductOptionParameterRow.fromJson(data);
+  ProductReviewRow createRow(Map<String, dynamic> data) =>
+      ProductReviewRow.fromJson(data);
 }
 
-/// Product Option Parameter Row
-class ProductOptionParameterRow extends SupabaseDataRow {
-  /// Product Option Parameter Row
-  ProductOptionParameterRow({
+/// Product Review Row
+class ProductReviewRow extends SupabaseDataRow {
+  /// Product Review Row
+  ProductReviewRow({
+    required double stars,
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? optionParameter,
+    String? review,
     String? product,
+    String? order,
   }) : super({
+         'stars': supaSerialize(stars),
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
-         if (optionParameter != null)
-           'option_parameter': supaSerialize(optionParameter),
+         if (review != null) 'review': supaSerialize(review),
          if (product != null) 'product': supaSerialize(product),
+         if (order != null) 'order': supaSerialize(order),
        });
 
-  /// Product Option Parameter Row
-  const ProductOptionParameterRow._(super.data);
+  /// Product Review Row
+  const ProductReviewRow._(super.data);
 
-  /// Create Product Option Parameter Row from a [data] map
-  factory ProductOptionParameterRow.fromJson(Map<String, dynamic> data) =>
-      ProductOptionParameterRow._(data.cleaned);
+  /// Create Product Review Row from a [data] map
+  factory ProductReviewRow.fromJson(Map<String, dynamic> data) =>
+      ProductReviewRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => ProductOptionParameterTable();
+  SupabaseTable get table => ProductReviewTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -76,13 +78,19 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   String? get createdBy => getField<String>(createdByField);
   set createdBy(String? value) => setField<String>(createdByField, value);
 
-  /// Option Parameter field name
-  static const String optionParameterField = 'option_parameter';
+  /// Stars field name
+  static const String starsField = 'stars';
 
-  /// Option Parameter
-  String? get optionParameter => getField<String>(optionParameterField);
-  set optionParameter(String? value) =>
-      setField<String>(optionParameterField, value);
+  /// Stars
+  double get stars => getField<double>(starsField)!;
+  set stars(double value) => setField<double>(starsField, value);
+
+  /// Review field name
+  static const String reviewField = 'review';
+
+  /// Review
+  String? get review => getField<String>(reviewField);
+  set review(String? value) => setField<String>(reviewField, value);
 
   /// Product field name
   static const String productField = 'product';
@@ -91,23 +99,33 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   String? get product => getField<String>(productField);
   set product(String? value) => setField<String>(productField, value);
 
-  /// Make a copy of the current [ProductOptionParameterRow]
+  /// Order field name
+  static const String orderField = 'order';
+
+  /// Order
+  String? get order => getField<String>(orderField);
+  set order(String? value) => setField<String>(orderField, value);
+
+  /// Make a copy of the current [ProductReviewRow]
   /// overriding the provided fields
-  ProductOptionParameterRow copyWith({
+  ProductReviewRow copyWith({
+    double? stars,
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? optionParameter,
+    String? review,
     String? product,
-  }) => ProductOptionParameterRow.fromJson({
+    String? order,
+  }) => ProductReviewRow.fromJson({
+    'stars': supaSerialize(stars) ?? data['stars'],
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
-    'option_parameter':
-        supaSerialize(optionParameter) ?? data['option_parameter'],
+    'review': supaSerialize(review) ?? data['review'],
     'product': supaSerialize(product) ?? data['product'],
+    'order': supaSerialize(order) ?? data['order'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-20 16:49:24.345005
+/// Date: 2026-01-20 16:49:24.345635

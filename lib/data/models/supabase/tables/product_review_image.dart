@@ -9,52 +9,52 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Product Image Table
-class ProductImageTable extends SupabaseTable<ProductImageRow> {
+/// Product Review Image Table
+class ProductReviewImageTable extends SupabaseTable<ProductReviewImageRow> {
   /// Table Name
   @override
-  String get tableName => 'product_image';
+  String get tableName => 'product_review_image';
 
-  /// Create a [ProductImageRow] from the [data] provided
+  /// Create a [ProductReviewImageRow] from the [data] provided
   @override
-  ProductImageRow createRow(Map<String, dynamic> data) =>
-      ProductImageRow.fromJson(data);
+  ProductReviewImageRow createRow(Map<String, dynamic> data) =>
+      ProductReviewImageRow.fromJson(data);
 }
 
-/// Product Image Row
-class ProductImageRow extends SupabaseDataRow {
-  /// Product Image Row
-  ProductImageRow({
+/// Product Review Image Row
+class ProductReviewImageRow extends SupabaseDataRow {
+  /// Product Review Image Row
+  ProductReviewImageRow({
     String? id,
     DateTime? createdAt,
     String? uploadedBy,
+    String? review,
     String? bucket,
     String? folderPath,
     String? fileName,
-    String? product,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (uploadedBy != null) 'uploaded_by': supaSerialize(uploadedBy),
+         if (review != null) 'review': supaSerialize(review),
          if (bucket != null) 'bucket': supaSerialize(bucket),
          if (folderPath != null) 'folder_path': supaSerialize(folderPath),
          if (fileName != null) 'file_name': supaSerialize(fileName),
-         if (product != null) 'product': supaSerialize(product),
        });
 
-  /// Product Image Row
-  const ProductImageRow._(super.data);
+  /// Product Review Image Row
+  const ProductReviewImageRow._(super.data);
 
-  /// Create Product Image Row from a [data] map
-  factory ProductImageRow.fromJson(Map<String, dynamic> data) =>
-      ProductImageRow._(data.cleaned);
+  /// Create Product Review Image Row from a [data] map
+  factory ProductReviewImageRow.fromJson(Map<String, dynamic> data) =>
+      ProductReviewImageRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => ProductImageTable();
+  SupabaseTable get table => ProductReviewImageTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -78,6 +78,13 @@ class ProductImageRow extends SupabaseDataRow {
   String? get uploadedBy => getField<String>(uploadedByField);
   set uploadedBy(String? value) => setField<String>(uploadedByField, value);
 
+  /// Review field name
+  static const String reviewField = 'review';
+
+  /// Review
+  String? get review => getField<String>(reviewField);
+  set review(String? value) => setField<String>(reviewField, value);
+
   /// Bucket field name
   static const String bucketField = 'bucket';
 
@@ -99,33 +106,26 @@ class ProductImageRow extends SupabaseDataRow {
   String? get fileName => getField<String>(fileNameField);
   set fileName(String? value) => setField<String>(fileNameField, value);
 
-  /// Product field name
-  static const String productField = 'product';
-
-  /// Product
-  String? get product => getField<String>(productField);
-  set product(String? value) => setField<String>(productField, value);
-
-  /// Make a copy of the current [ProductImageRow]
+  /// Make a copy of the current [ProductReviewImageRow]
   /// overriding the provided fields
-  ProductImageRow copyWith({
+  ProductReviewImageRow copyWith({
     String? id,
     DateTime? createdAt,
     String? uploadedBy,
+    String? review,
     String? bucket,
     String? folderPath,
     String? fileName,
-    String? product,
-  }) => ProductImageRow.fromJson({
+  }) => ProductReviewImageRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'uploaded_by': supaSerialize(uploadedBy) ?? data['uploaded_by'],
+    'review': supaSerialize(review) ?? data['review'],
     'bucket': supaSerialize(bucket) ?? data['bucket'],
     'folder_path': supaSerialize(folderPath) ?? data['folder_path'],
     'file_name': supaSerialize(fileName) ?? data['file_name'],
-    'product': supaSerialize(product) ?? data['product'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-20 16:49:24.343523
+/// Date: 2026-01-20 16:49:24.345948

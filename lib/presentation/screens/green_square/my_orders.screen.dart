@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/screens/green_square/add_product_review.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/order_item_inquiry.screen.dart';
 
 enum _OrderTab { all, waitingPayment, forDelivery, received, cancelled }
@@ -57,7 +58,11 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
       case _OrderTab.all:
         return orders;
       case _OrderTab.waitingPayment:
-        return orders.where((e) => e.payment?.paidAt == null).toList();
+        return orders.where((e) {
+          final payment = e.payment;
+          return payment == null ||
+              (payment.paidAt == null && payment.cancellationId == null);
+        }).toList();
       case _OrderTab.forDelivery:
         return orders.where((e) {
           if (e.payment?.paidAt == null) return false;
@@ -95,7 +100,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
     final response = await client
         .from(OrderTable().tableName)
-        .select('*, payment:payment(*)')
+        .select('*, payment!order_payment_fkey(*)')
         .eq(OrderRow.orderByField, userId)
         .order(OrderRow.createdAtField, ascending: false);
 
@@ -148,23 +153,33 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
     final orderItemsResponse = await client
         .from(OrderItemTable().tableName)
-        .select('*, product:product(*)')
-        // NOTE: `order` is a reserved PostgREST query parameter for sorting,
-        // so filtering with `order=in.(...)` fails to parse. Use `or=(...)`.
-        .or(
-          orderIds.map((id) => '${OrderItemRow.orderField}.eq.$id').join(','),
-        );
+        .select('*, product:product(*, company:company(*))');
 
-    final itemsByOrderId = orderItemsResponse
+    final filteredOrderItems = orderItemsResponse
         .whereType<Map<String, dynamic>>()
+        .where((row) => orderIds.contains(row[OrderItemRow.orderField]))
+        .toList();
+
+    final itemsByOrderId = filteredOrderItems
         .map((row) {
           final item = OrderItemRow.fromJson(row);
           final productData = row['product'];
           final product = productData is Map<String, dynamic>
               ? ProductRow.fromJson(productData)
               : null;
+          final companyData = productData is Map<String, dynamic>
+              ? productData['company']
+              : null;
+          final company = companyData is Map<String, dynamic>
+              ? CompanyRow.fromJson(companyData)
+              : null;
 
-          return _OrderItemEntry(item: item, product: product);
+          return _OrderItemEntry(
+            item: item,
+            product: product,
+            company: company,
+            hasReview: false,
+          );
         })
         .where((e) => (e.item.order ?? '').trim().isNotEmpty)
         .fold(<String, List<_OrderItemEntry>>{}, (acc, e) {
@@ -172,6 +187,52 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
           (acc[orderId] ??= <_OrderItemEntry>[]).add(e);
           return acc;
         });
+
+    final productIds = itemsByOrderId.values
+        .expand((list) => list)
+        .map((e) => (e.product?.id ?? '').trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    final orderIdsForReview = itemsByOrderId.keys.toList();
+
+    Set<String> reviewedKeys = {};
+    if (productIds.isNotEmpty) {
+      final reviewsResponse = await client
+          .from(ProductReviewTable().tableName)
+          .select()
+          .eq(ProductReviewRow.createdByField, userId)
+          .inFilter(ProductReviewRow.productField, productIds);
+
+      final allReviews = reviewsResponse
+          .whereType<Map<String, dynamic>>()
+          .map(ProductReviewRow.fromJson)
+          .toList();
+
+      reviewedKeys = allReviews
+          .where((r) => orderIdsForReview.contains(r.order))
+          .map((r) => '${r.product}-${r.order}')
+          .toSet();
+    }
+
+    final itemsByOrderIdWithReview = itemsByOrderId.map((orderId, items) {
+      return MapEntry(
+        orderId,
+        items
+            .map(
+              (e) => _OrderItemEntry(
+                item: e.item,
+                product: e.product,
+                company: e.company,
+                hasReview:
+                    e.product != null &&
+                    reviewedKeys.contains('${e.product!.id}-${e.item.order}'),
+              ),
+            )
+            .toList(),
+      );
+    });
 
     return baseOrders
         .map((entry) {
@@ -183,7 +244,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
             shippingAddress: shippingAddressId == null
                 ? null
                 : addressesById[shippingAddressId],
-            items: itemsByOrderId[entry.order.id] ?? const <_OrderItemEntry>[],
+            items:
+                itemsByOrderIdWithReview[entry.order.id] ??
+                const <_OrderItemEntry>[],
           );
         })
         .toList(growable: false);
@@ -251,14 +314,27 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
             separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final entry = filteredItems[index];
-              final paidAt = entry.payment?.paidAt;
-              final statusText = paidAt == null ? '결제 대기' : '결제 완료';
-              final statusColor = paidAt == null
-                  ? cs.onSurfaceVariant
-                  : cs.onPrimaryContainer;
-              final statusBackground = paidAt == null
-                  ? cs.surfaceContainerHighest
-                  : cs.primaryContainer;
+              final payment = entry.payment;
+              String statusText;
+              Color statusColor;
+              Color statusBackground;
+              if (payment == null) {
+                statusText = '결제 대기';
+                statusColor = cs.onSurfaceVariant;
+                statusBackground = cs.surfaceContainerHighest;
+              } else if (payment.cancellationId != null) {
+                statusText = '결제 취소';
+                statusColor = cs.onErrorContainer;
+                statusBackground = cs.errorContainer;
+              } else if (payment.paidAt != null) {
+                statusText = '결제 완료';
+                statusColor = cs.onPrimaryContainer;
+                statusBackground = cs.primaryContainer;
+              } else {
+                statusText = '결제 대기';
+                statusColor = cs.onSurfaceVariant;
+                statusBackground = cs.surfaceContainerHighest;
+              }
               final createdText = entry.order.createdAt
                   .toLocal()
                   .toString()
@@ -282,8 +358,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               final companyGroups = entry.items.fold(
                 <String, List<_OrderItemEntry>>{},
                 (acc, e) {
-                  final company = e.product?.company?.trim();
-                  final key = (company ?? '').isEmpty ? '기타' : company!;
+                  final companyName = e.company?.name?.trim();
+                  final key = (companyName ?? '').isEmpty ? '기타' : companyName!;
                   (acc[key] ??= <_OrderItemEntry>[]).add(e);
                   return acc;
                 },
@@ -306,11 +382,22 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              '주문',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '주문',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  entry.order.id.toUpperCase(),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           Container(
@@ -479,97 +566,132 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                                   borderRadius: BorderRadius.circular(12),
                                   child: Ink(
                                     padding: const EdgeInsets.all(8),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                    child: Column(
                                       children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          child: SizedBox(
-                                            width: 56,
-                                            height: 56,
-                                            child: imageUrl != null
-                                                ? Image.network(
-                                                    imageUrl,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder:
-                                                        (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) => Container(
-                                                          color: cs
-                                                              .surfaceContainerHighest,
-                                                          child: Icon(
-                                                            Icons
-                                                                .image_not_supported_outlined,
-                                                            color: cs
-                                                                .onSurfaceVariant,
-                                                          ),
-                                                        ),
-                                                  )
-                                                : Container(
-                                                    color: cs
-                                                        .surfaceContainerHighest,
-                                                    child: Icon(
-                                                      Icons.image_outlined,
-                                                      color:
-                                                          cs.onSurfaceVariant,
-                                                    ),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    10,
                                                   ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                titleText,
+                                              child: SizedBox(
+                                                width: 56,
+                                                height: 56,
+                                                child: imageUrl != null
+                                                    ? Image.network(
+                                                        imageUrl,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder:
+                                                            (
+                                                              context,
+                                                              error,
+                                                              stackTrace,
+                                                            ) => Container(
+                                                              color: cs
+                                                                  .surfaceContainerHighest,
+                                                              child: Icon(
+                                                                Icons
+                                                                    .image_not_supported_outlined,
+                                                                color: cs
+                                                                    .onSurfaceVariant,
+                                                              ),
+                                                            ),
+                                                      )
+                                                    : Container(
+                                                        color: cs
+                                                            .surfaceContainerHighest,
+                                                        child: Icon(
+                                                          Icons.image_outlined,
+                                                          color: cs
+                                                              .onSurfaceVariant,
+                                                        ),
+                                                      ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    titleText,
+                                                    style: theme
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '수량: $quantityText',
+                                                    style: theme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.copyWith(
+                                                          color: cs
+                                                              .onSurfaceVariant,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    cs.surfaceContainerHighest,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      999,
+                                                    ),
+                                              ),
+                                              child: Text(
+                                                _getOrderItemStatus(e),
                                                 style: theme
                                                     .textTheme
-                                                    .bodyMedium
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '수량: $quantityText',
-                                                style: theme.textTheme.bodySmall
+                                                    .labelSmall
                                                     ?.copyWith(
                                                       color:
                                                           cs.onSurfaceVariant,
+                                                      fontWeight:
+                                                          FontWeight.w700,
                                                     ),
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: cs.surfaceContainerHighest,
-                                            borderRadius: BorderRadius.circular(
-                                              999,
+                                        if (_getOrderItemStatus(e) == '수령완료' &&
+                                            !e.hasReview) ...[
+                                          const SizedBox(height: 8),
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AddProductReviewScreen(
+                                                          orderItem: e.item,
+                                                          product: e.product,
+                                                        ),
+                                                  ),
+                                                );
+                                              },
+                                              child: const Text('리뷰 작성'),
                                             ),
                                           ),
-                                          child: Text(
-                                            _getOrderItemStatus(e),
-                                            style: theme.textTheme.labelSmall
-                                                ?.copyWith(
-                                                  color: cs.onSurfaceVariant,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                          ),
-                                        ),
+                                        ],
                                       ],
                                     ),
                                   ),
@@ -609,8 +731,12 @@ class _OrderItemEntry {
   const _OrderItemEntry({
     required this.item,
     required this.product,
+    required this.company,
+    required this.hasReview,
   });
 
   final OrderItemRow item;
   final ProductRow? product;
+  final CompanyRow? company;
+  final bool hasReview;
 }

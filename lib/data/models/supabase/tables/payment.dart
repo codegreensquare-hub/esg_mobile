@@ -32,6 +32,9 @@ class PaymentRow extends SupabaseDataRow {
     double? amount,
     String? status,
     dynamic otherData,
+    String? cancellationId,
+    DateTime? cancelledAt,
+    String? orderBeingPaid,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (paymentBy != null) 'payment_by': supaSerialize(paymentBy),
@@ -41,6 +44,11 @@ class PaymentRow extends SupabaseDataRow {
          if (amount != null) 'amount': supaSerialize(amount),
          if (status != null) 'status': supaSerialize(status),
          if (otherData != null) 'other_data': supaSerialize(otherData),
+         if (cancellationId != null)
+           'cancellation_id': supaSerialize(cancellationId),
+         if (cancelledAt != null) 'cancelled_at': supaSerialize(cancelledAt),
+         if (orderBeingPaid != null)
+           'order_being_paid': supaSerialize(orderBeingPaid),
        });
 
   /// Payment Row
@@ -114,6 +122,30 @@ class PaymentRow extends SupabaseDataRow {
   dynamic get otherData => getField<dynamic>(otherDataField);
   set otherData(dynamic value) => setField<dynamic>(otherDataField, value);
 
+  /// Cancellation Id field name
+  static const String cancellationIdField = 'cancellation_id';
+
+  /// Cancellation Id
+  String? get cancellationId => getField<String>(cancellationIdField);
+  set cancellationId(String? value) =>
+      setField<String>(cancellationIdField, value);
+
+  /// Cancelled At field name
+  static const String cancelledAtField = 'cancelled_at';
+
+  /// Cancelled At
+  DateTime? get cancelledAt => getField<DateTime>(cancelledAtField);
+  set cancelledAt(DateTime? value) =>
+      setField<DateTime>(cancelledAtField, value);
+
+  /// Order Being Paid field name
+  static const String orderBeingPaidField = 'order_being_paid';
+
+  /// Order Being Paid
+  String? get orderBeingPaid => getField<String>(orderBeingPaidField);
+  set orderBeingPaid(String? value) =>
+      setField<String>(orderBeingPaidField, value);
+
   /// Make a copy of the current [PaymentRow]
   /// overriding the provided fields
   PaymentRow copyWith({
@@ -125,6 +157,9 @@ class PaymentRow extends SupabaseDataRow {
     double? amount,
     String? status,
     dynamic otherData,
+    String? cancellationId,
+    DateTime? cancelledAt,
+    String? orderBeingPaid,
   }) => PaymentRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'payment_by': supaSerialize(paymentBy) ?? data['payment_by'],
@@ -134,8 +169,12 @@ class PaymentRow extends SupabaseDataRow {
     'amount': supaSerialize(amount) ?? data['amount'],
     'status': supaSerialize(status) ?? data['status'],
     'other_data': supaSerialize(otherData) ?? data['other_data'],
+    'cancellation_id': supaSerialize(cancellationId) ?? data['cancellation_id'],
+    'cancelled_at': supaSerialize(cancelledAt) ?? data['cancelled_at'],
+    'order_being_paid':
+        supaSerialize(orderBeingPaid) ?? data['order_being_paid'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-16 16:59:29.532645
+/// Date: 2026-01-20 16:49:24.340949

@@ -465,6 +465,7 @@ class CartService {
   Future<PaymentRow?> createPayment({
     required double amount,
     String? status,
+    String? orderId,
   }) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null || userId.trim().isEmpty) {
@@ -475,6 +476,7 @@ class CartService {
       paymentBy: userId,
       amount: amount,
       status: status ?? 'pending',
+      // order_being_paid: orderId, assuming field exists
     );
 
     final response = await _client

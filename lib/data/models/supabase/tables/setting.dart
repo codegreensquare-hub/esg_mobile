@@ -105,4 +105,4 @@ class SettingRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-16 16:59:29.539084
+/// Date: 2026-01-20 16:49:24.348673

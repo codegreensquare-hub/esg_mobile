@@ -22,6 +22,7 @@ const bucketFolder = (
     main: "main",
     additional: "additional",
     lookbook: "lookbook",
+    reviews: "reviews",
   ),
 );
 

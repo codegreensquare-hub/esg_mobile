@@ -47,8 +47,7 @@ class PortonePaymentScreen extends StatelessWidget {
     final totalAmount =
         int.tryParse(testAmountRaw).clampMin(0) ?? amount.toInt();
 
-    final orderName =
-      '${isDev ? '[DEV] ' : ''}ESG Order - $buyerName'.trim();
+    final orderName = '${isDev ? '[DEV] ' : ''}ESG Order - $buyerName'.trim();
     final merchantUid = isDev ? 'dev_$paymentId' : paymentId;
 
     if (userCode.isEmpty) {

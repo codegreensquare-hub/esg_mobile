@@ -4,7 +4,7 @@ import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/user_shipping_address.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
-import 'package:esg_mobile/data/models/supabase/tables/user_shipping_address.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/portone_payment.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/shipping_address_form_sheet.dart';
@@ -179,10 +179,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      // Create payment record
+      // Create order first
+      final orderId = await CartService.instance.checkoutCart(
+        shippingAddressId: addressId,
+      );
+
+      if ((orderId ?? '').isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('주문 생성에 실패했습니다.')),
+        );
+        return;
+      }
+
+      // Create payment record with order_being_paid
       final payment = await CartService.instance.createPayment(
         amount: _totalPoints,
         status: 'pending',
+        orderId: orderId,
       );
 
       if (payment == null) {
@@ -192,6 +206,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
         return;
       }
+
+      // Link payment to order
+      await Supabase.instance.client
+          .from('order')
+          .update({OrderRow.paymentField: payment.id})
+          .eq(OrderRow.idField, orderId!.trim());
 
       // Navigate to PortOne payment screen
       final result = await Navigator.of(context).push<Map<String, String>>(
@@ -213,18 +233,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) return;
 
       if (result != null && result['imp_success'] == 'true') {
-        // Payment successful, create order
-        final orderId = await CartService.instance.checkoutCart(
-          shippingAddressId: addressId,
-        );
-
-        if ((orderId ?? '').isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('주문 생성에 실패했습니다.')),
-          );
-          return;
-        }
-
         // Update payment status
         await CartService.instance.updatePaymentStatus(
           paymentId: payment.id,

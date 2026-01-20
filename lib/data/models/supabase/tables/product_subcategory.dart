@@ -9,46 +9,48 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Organization Table
-class OrganizationTable extends SupabaseTable<OrganizationRow> {
+/// Product Subcategory Table
+class ProductSubcategoryTable extends SupabaseTable<ProductSubcategoryRow> {
   /// Table Name
   @override
-  String get tableName => 'organization';
+  String get tableName => 'product_subcategory';
 
-  /// Create a [OrganizationRow] from the [data] provided
+  /// Create a [ProductSubcategoryRow] from the [data] provided
   @override
-  OrganizationRow createRow(Map<String, dynamic> data) =>
-      OrganizationRow.fromJson(data);
+  ProductSubcategoryRow createRow(Map<String, dynamic> data) =>
+      ProductSubcategoryRow.fromJson(data);
 }
 
-/// Organization Row
-class OrganizationRow extends SupabaseDataRow {
-  /// Organization Row
-  OrganizationRow({
+/// Product Subcategory Row
+class ProductSubcategoryRow extends SupabaseDataRow {
+  /// Product Subcategory Row
+  ProductSubcategoryRow({
     String? id,
     DateTime? createdAt,
-    String? name,
     String? createdBy,
+    String? category,
+    String? name,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (name != null) 'name': supaSerialize(name),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
+         if (category != null) 'category': supaSerialize(category),
+         if (name != null) 'name': supaSerialize(name),
        });
 
-  /// Organization Row
-  const OrganizationRow._(super.data);
+  /// Product Subcategory Row
+  const ProductSubcategoryRow._(super.data);
 
-  /// Create Organization Row from a [data] map
-  factory OrganizationRow.fromJson(Map<String, dynamic> data) =>
-      OrganizationRow._(data.cleaned);
+  /// Create Product Subcategory Row from a [data] map
+  factory ProductSubcategoryRow.fromJson(Map<String, dynamic> data) =>
+      ProductSubcategoryRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => OrganizationTable();
+  SupabaseTable get table => ProductSubcategoryTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -65,6 +67,20 @@ class OrganizationRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
+  /// Created By field name
+  static const String createdByField = 'created_by';
+
+  /// Created By
+  String? get createdBy => getField<String>(createdByField);
+  set createdBy(String? value) => setField<String>(createdByField, value);
+
+  /// Category field name
+  static const String categoryField = 'category';
+
+  /// Category
+  String? get category => getField<String>(categoryField);
+  set category(String? value) => setField<String>(categoryField, value);
+
   /// Name field name
   static const String nameField = 'name';
 
@@ -72,28 +88,22 @@ class OrganizationRow extends SupabaseDataRow {
   String? get name => getField<String>(nameField);
   set name(String? value) => setField<String>(nameField, value);
 
-  /// Created By field name
-  static const String createdByField = 'created_by';
-
-  /// Created By
-  String get createdBy =>
-      getField<String>(createdByField, defaultValue: 'auth.')!;
-  set createdBy(String value) => setField<String>(createdByField, value);
-
-  /// Make a copy of the current [OrganizationRow]
+  /// Make a copy of the current [ProductSubcategoryRow]
   /// overriding the provided fields
-  OrganizationRow copyWith({
+  ProductSubcategoryRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? name,
     String? createdBy,
-  }) => OrganizationRow.fromJson({
+    String? category,
+    String? name,
+  }) => ProductSubcategoryRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'name': supaSerialize(name) ?? data['name'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
+    'category': supaSerialize(category) ?? data['category'],
+    'name': supaSerialize(name) ?? data['name'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-20 16:49:24.340488
+/// Date: 2026-01-20 16:49:24.346203

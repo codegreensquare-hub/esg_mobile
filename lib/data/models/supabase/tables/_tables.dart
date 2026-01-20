@@ -48,6 +48,9 @@ export 'product_image_description.dart';
 export 'product_option_color.dart';
 export 'product_option_parameter.dart';
 export 'product_option_value.dart';
+export 'product_review.dart';
+export 'product_review_image.dart';
+export 'product_subcategory.dart';
 export 'product_wishlist.dart';
 export 'push_notification.dart';
 export 'push_notification_token.dart';
@@ -68,4 +71,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-16 16:59:29.545579
+/// Date: 2026-01-20 16:49:24.355126
