@@ -17,7 +17,7 @@ class ProductCard extends StatefulWidget {
   });
 
   final ProductWithOtherDetails productWithDetails;
-  final VoidCallback? onWishlistToggle;
+  final ValueChanged<bool>? onWishlistToggle;
   final VoidCallback? onTap;
 
   @override
@@ -30,10 +30,12 @@ class _ProductCardState extends State<ProductCard> {
   String? _selectedColorHex;
   double _baseDiscountRate = 0.0;
   bool _isHeartHovered = false;
+  bool _isInWishlist = false;
 
   @override
   void initState() {
     super.initState();
+    _isInWishlist = widget.productWithDetails.isInWishlist;
     _loadColors();
     _loadBaseDiscountRate();
   }
@@ -48,6 +50,7 @@ class _ProductCardState extends State<ProductCard> {
       _selectedColorHex = null;
       _loadColors();
     }
+    _isInWishlist = widget.productWithDetails.isInWishlist;
   }
 
   Future<void> _loadColors() async {
@@ -163,14 +166,15 @@ class _ProductCardState extends State<ProductCard> {
                             vertical: -3,
                           ),
                           icon: Icon(
-                            productWithDetails.isInWishlist
+                            _isInWishlist
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color: productWithDetails.isInWishlist
-                                ? Colors.red
-                                : cs.surface,
+                            color: _isInWishlist ? Colors.red : cs.surface,
                           ),
-                          onPressed: widget.onWishlistToggle,
+                          onPressed: () {
+                            widget.onWishlistToggle?.call(_isInWishlist);
+                            setState(() => _isInWishlist = !_isInWishlist);
+                          },
                           iconSize: 20,
                           padding: EdgeInsets.all(0),
                         ),

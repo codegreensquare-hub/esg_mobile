@@ -6,25 +6,11 @@ class GreenSquareBottomNavBar extends StatefulWidget {
     required this.selectedIndex,
     required this.onItemSelected,
     required this.onGreenButtonPressed,
-    required this.onCartPressed,
-    required this.onKakaoPressed,
-    required this.onWishlistPressed,
-    required this.cartItemCount,
-    required this.wishlistItemCount,
-    required this.scrollOffset,
-    required this.onScrollUp,
   });
 
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
   final VoidCallback onGreenButtonPressed;
-  final VoidCallback onCartPressed;
-  final VoidCallback onKakaoPressed;
-  final VoidCallback onWishlistPressed;
-  final int cartItemCount;
-  final int wishlistItemCount;
-  final double scrollOffset;
-  final VoidCallback onScrollUp;
 
   @override
   State<GreenSquareBottomNavBar> createState() =>
@@ -140,54 +126,6 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
                   ),
                 ),
               ),
-              // Floating action buttons on the bottom right
-              Positioned(
-                bottom: 100,
-                right: 16,
-                child: SafeArea(
-                  top: false,
-                  bottom: false,
-                  left: true,
-                  right: true,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Conditional scroll up button
-                      if (widget.scrollOffset > 100)
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _ScrollUpButton(
-                              onPressed: widget.onScrollUp,
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-
-                      // Cart button
-                      _FloatingActionButtonWithBadge(
-                        icon: Icons.shopping_cart_outlined,
-                        badgeCount: widget.cartItemCount,
-                        tooltip: '장바구니',
-                        onPressed: widget.onCartPressed,
-                      ),
-                      const SizedBox(height: 8),
-                      // KakaoTalk button
-                      _KakaoTalkButton(
-                        onPressed: widget.onKakaoPressed,
-                      ),
-                      const SizedBox(height: 8),
-                      // Wishlist button
-                      _FloatingActionButtonWithBadge(
-                        icon: Icons.favorite_border,
-                        badgeCount: widget.wishlistItemCount,
-                        tooltip: '찜 목록',
-                        onPressed: widget.onWishlistPressed,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -292,8 +230,8 @@ class _NavItemState extends State<_NavItem> {
   }
 }
 
-class _FloatingActionButtonWithBadge extends StatelessWidget {
-  const _FloatingActionButtonWithBadge({
+class FloatingActionButtonWithBadge extends StatelessWidget {
+  const FloatingActionButtonWithBadge({
     required this.icon,
     required this.badgeCount,
     required this.tooltip,
@@ -375,8 +313,8 @@ class _FloatingActionButtonWithBadge extends StatelessWidget {
   }
 }
 
-class _KakaoTalkButton extends StatelessWidget {
-  const _KakaoTalkButton({
+class KakaoTalkButton extends StatelessWidget {
+  const KakaoTalkButton({
     required this.onPressed,
   });
 
@@ -424,8 +362,8 @@ class _KakaoTalkButton extends StatelessWidget {
   }
 }
 
-class _ScrollUpButton extends StatelessWidget {
-  const _ScrollUpButton({
+class ScrollUpButton extends StatelessWidget {
+  const ScrollUpButton({
     required this.onPressed,
   });
 

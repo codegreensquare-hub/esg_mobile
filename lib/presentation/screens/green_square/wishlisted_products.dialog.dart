@@ -9,9 +9,11 @@ class WishlistedProductsDialog extends StatefulWidget {
   const WishlistedProductsDialog({
     super.key,
     required this.userId,
+    this.onBadgeUpdate,
   });
 
   final String userId;
+  final VoidCallback? onBadgeUpdate;
 
   @override
   State<WishlistedProductsDialog> createState() =>
@@ -40,21 +42,38 @@ class _WishlistedProductsDialogState extends State<WishlistedProductsDialog> {
     });
   }
 
-  Future<void> _toggleWishlist(WishlistedProduct wishlistedProduct) async {
-    await ProductService.instance.toggleWishlist(
-      wishlistedProduct.product.product.id,
-      widget.userId,
-    );
+  Future<void> _toggleWishlist(
+    WishlistedProduct wishlistedProduct,
+    bool isInWishlist,
+  ) async {
+    if (isInWishlist) {
+      await ProductService.instance.removeFromWishlist(
+        wishlistedProduct.product.product.id,
+        widget.userId,
+      );
+    } else {
+      await ProductService.instance.addToWishlist(
+        wishlistedProduct.product.product.id,
+        widget.userId,
+      );
+    }
 
     if (!mounted) return;
-    setState(() {
-      wishlistedProducts = wishlistedProducts
-          .where(
-            (item) =>
-                item.product.product.id != wishlistedProduct.product.product.id,
-          )
-          .toList();
-    });
+    if (isInWishlist) {
+      setState(() {
+        wishlistedProducts = wishlistedProducts
+            .where(
+              (item) =>
+                  item.product.product.id !=
+                  wishlistedProduct.product.product.id,
+            )
+            .toList();
+      });
+    } else {
+      // If adding, reload the list
+      _loadWishlist();
+    }
+    widget.onBadgeUpdate?.call();
   }
 
   void _navigateToDetail(WishlistedProduct wishlistedProduct) {
@@ -69,6 +88,7 @@ class _WishlistedProductsDialogState extends State<WishlistedProductsDialog> {
         )
         .then((_) {
           _loadWishlist();
+          widget.onBadgeUpdate?.call();
         });
   }
 
@@ -88,33 +108,35 @@ class _WishlistedProductsDialogState extends State<WishlistedProductsDialog> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : wishlistedProducts.isEmpty
-            ? const Center(child: Text('찜한 상품이 없습니다.'))
-            : MasonryGridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                itemCount: wishlistedProducts.length,
-                itemBuilder: (context, index) {
-                  final wishlistedProduct = wishlistedProducts[index];
-                  return ProductCard(
-                    productWithDetails: wishlistedProduct.product,
-                    onWishlistToggle: () => _toggleWishlist(wishlistedProduct),
-                    onTap: () => _navigateToDetail(wishlistedProduct),
-                  );
-                },
-              ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          '총 ${wishlistedProducts.length}개의 찜한 상품',
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: cs.onSurfaceVariant,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : wishlistedProducts.isEmpty
+          ? const Center(child: Text('찜한 상품이 없습니다.'))
+          : MasonryGridView.count(
+              padding: const EdgeInsets.all(16),
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              itemCount: wishlistedProducts.length,
+              itemBuilder: (context, index) {
+                final wishlistedProduct = wishlistedProducts[index];
+                return ProductCard(
+                  productWithDetails: wishlistedProduct.product,
+                  onWishlistToggle: (isInWishlist) =>
+                      _toggleWishlist(wishlistedProduct, isInWishlist),
+                  onTap: () => _navigateToDetail(wishlistedProduct),
+                );
+              },
+            ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 12, 18, 8),
+          child: Text(
+            '총 ${wishlistedProducts.length}개의 찜한 상품',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
           ),
         ),
       ),

@@ -241,6 +241,32 @@ class ProductService {
     }
   }
 
+  Future<void> addToWishlist(String productId, String userId) async {
+    try {
+      await _client.from(ProductWishlistTable().tableName).insert({
+        ProductWishlistRow.productField: productId,
+        ProductWishlistRow.wishlistByField: userId,
+        ProductWishlistRow.createdAtField: DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('Error adding to wishlist: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> removeFromWishlist(String productId, String userId) async {
+    try {
+      await _client
+          .from(ProductWishlistTable().tableName)
+          .delete()
+          .eq(ProductWishlistRow.productField, productId)
+          .eq(ProductWishlistRow.wishlistByField, userId);
+    } catch (e) {
+      debugPrint('Error removing from wishlist: $e');
+      rethrow;
+    }
+  }
+
   Future<List<WishlistedProduct>> fetchWishlistedProducts(String userId) async {
     try {
       final response = await _client

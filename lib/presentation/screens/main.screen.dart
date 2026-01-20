@@ -193,106 +193,147 @@ class _MainScreenState extends State<MainScreen> {
               selectedIndex: _greenIndex,
               onItemSelected: (index) => setState(() => _greenIndex = index),
               onGreenButtonPressed: _onTapKnock,
-              onCartPressed: _showCartBottomSheet,
-              onKakaoPressed: _launchKakaoTalk,
-              onWishlistPressed: _showWishlistDialog,
-              cartItemCount: _cartItemCount,
-              wishlistItemCount: _wishlistItemCount,
-              scrollOffset: _scrollOffset,
-              onScrollUp: _scrollToTop,
             )
           : null,
-      body: CustomScrollView(
-        controller: _scrollController,
+      body: Stack(
+        children: [
+          CustomScrollView(
+            controller: _scrollController,
 
-        physics: ClampingScrollPhysics(),
-        slivers: [
-          CodeGreenTopHeader(
-            initialValue: _selectedMainTab,
-            onChanged: (tab) => setState(() => _selectedMainTab = tab),
-            actions: [
-              if (_selectedMainTab == MainTab.greenSquare)
-                IconButton(
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Colors.white,
+            physics: ClampingScrollPhysics(),
+            slivers: [
+              CodeGreenTopHeader(
+                initialValue: _selectedMainTab,
+                onChanged: (tab) => setState(() => _selectedMainTab = tab),
+                actions: [
+                  if (_selectedMainTab == MainTab.greenSquare)
+                    IconButton(
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                      ),
+                      tooltip: '그린스퀘어 메뉴',
+                      onPressed: () =>
+                          _scaffoldKey.currentState?.openEndDrawer(),
+                    ),
+                ],
+              ),
+              if (_selectedMainTab == MainTab.codeGreen)
+                SliverPersistentHeader(
+                  floating: true,
+                  pinned: false,
+                  delegate: CodeGreenNavHeaderDelegate(
+                    tabs: codeGreenTabs,
+                    theme: theme,
+                    toolbarHeight: _toolbarHeight,
+                    topPad: topPad,
+                    labels: codeGreenLabels,
+                    currentWidth: width,
+                    homeTab: HomeTab.tab,
+                    selectedIndex: _selectedIndex,
+                    onTabSelected: (index, _) {
+                      if (index != _selectedIndex) {
+                        setState(() => _selectedIndex = index);
+                      }
+                    },
+                    onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                    onTapLogin: _openCodeGreenLogin,
+                    onTapCart: _showCartBottomSheet,
+                    onSelectSubTab: _handleCodeGreenSubTab,
                   ),
-                  tooltip: '그린스퀘어 메뉴',
-                  onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                ),
+              if (shouldShowHeroBanner)
+                SliverToBoxAdapter(
+                  child: CodeGreenHeroBanner(),
+                ),
+              if (_selectedMainTab == MainTab.greenSquare)
+                SliverToBoxAdapter(
+                  child: Container(
+                    // constraints: const BoxConstraints(minHeight: 600),
+                    padding: EdgeInsets.zero,
+                    margin: EdgeInsets.zero,
+                    width: double.infinity,
+                    color: theme.colorScheme.surfaceContainer,
+                    child: _buildGreenSquareContent(_greenIndex),
+                  ),
+                ),
+
+              if (_selectedMainTab == MainTab.codeGreen)
+                SliverToBoxAdapter(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    layoutBuilder: (currentChild, previousChildren) {
+                      return Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.zero,
+                      key: ValueKey(activeTabId),
+                      constraints: const BoxConstraints(minHeight: 600),
+                      color: theme.colorScheme.surface,
+                      width: double.infinity,
+                      child: _buildTabContent(activeTabId),
+                    ),
+                  ),
+                ),
+
+              if (_selectedMainTab == MainTab.codeGreen)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  fillOverscroll: true,
+                  child: const CodeGreenFooter(),
                 ),
             ],
           ),
-          if (_selectedMainTab == MainTab.codeGreen)
-            SliverPersistentHeader(
-              floating: true,
-              pinned: false,
-              delegate: CodeGreenNavHeaderDelegate(
-                tabs: codeGreenTabs,
-                theme: theme,
-                toolbarHeight: _toolbarHeight,
-                topPad: topPad,
-                labels: codeGreenLabels,
-                currentWidth: width,
-                homeTab: HomeTab.tab,
-                selectedIndex: _selectedIndex,
-                onTabSelected: (index, _) {
-                  if (index != _selectedIndex) {
-                    setState(() => _selectedIndex = index);
-                  }
-                },
-                onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
-                onTapLogin: _openCodeGreenLogin,
-                onTapCart: _showCartBottomSheet,
-                onSelectSubTab: _handleCodeGreenSubTab,
-              ),
-            ),
-          if (shouldShowHeroBanner)
-            SliverToBoxAdapter(
-              child: CodeGreenHeroBanner(),
-            ),
           if (_selectedMainTab == MainTab.greenSquare)
-            SliverToBoxAdapter(
+            SafeArea(
+              top: false,
+              bottom: false,
               child: Container(
-                // constraints: const BoxConstraints(minHeight: 600),
-                padding: EdgeInsets.zero,
-                margin: EdgeInsets.zero,
-                width: double.infinity,
-                color: theme.colorScheme.surfaceContainer,
-                child: _buildGreenSquareContent(_greenIndex),
-              ),
-            ),
+                alignment: Alignment.bottomRight,
+                margin: const EdgeInsets.only(right: 8, bottom: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
 
-          if (_selectedMainTab == MainTab.codeGreen)
-            SliverToBoxAdapter(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
-                layoutBuilder: (currentChild, previousChildren) {
-                  return Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      ...previousChildren,
-                      if (currentChild != null) currentChild,
-                    ],
-                  );
-                },
-                child: Container(
-                  padding: EdgeInsets.zero,
-                  key: ValueKey(activeTabId),
-                  constraints: const BoxConstraints(minHeight: 600),
-                  color: theme.colorScheme.surface,
-                  width: double.infinity,
-                  child: _buildTabContent(activeTabId),
+                  children: [
+                    if (_scrollOffset > 100)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ScrollUpButton(
+                            onPressed: _scrollToTop,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    FloatingActionButtonWithBadge(
+                      icon: Icons.shopping_cart_outlined,
+                      badgeCount: _cartItemCount,
+                      tooltip: '장바구니',
+                      onPressed: _showCartBottomSheet,
+                    ),
+                    const SizedBox(height: 8),
+                    KakaoTalkButton(
+                      onPressed: _launchKakaoTalk,
+                    ),
+                    const SizedBox(height: 8),
+                    FloatingActionButtonWithBadge(
+                      icon: Icons.favorite_border,
+                      badgeCount: _wishlistItemCount,
+                      tooltip: '찜 목록',
+                      onPressed: _showWishlistDialog,
+                    ),
+                  ],
                 ),
               ),
-            ),
-
-          if (_selectedMainTab == MainTab.codeGreen)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: true,
-              child: const CodeGreenFooter(),
             ),
         ],
       ),
@@ -531,9 +572,14 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (_) => WishlistedProductsDialog(userId: userId),
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => WishlistedProductsDialog(
+          userId: userId,
+          onBadgeUpdate: _updateBadgeCounts,
+        ),
+      ),
     );
   }
 
@@ -726,7 +772,7 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return const StoryTab(); // Story placeholder for now
       case 1:
-        return const ShoppingMallTab();
+        return ShoppingMallTab(onBadgeUpdate: _updateBadgeCounts);
       case 2:
         return MissionParticipationTab();
       case 3:

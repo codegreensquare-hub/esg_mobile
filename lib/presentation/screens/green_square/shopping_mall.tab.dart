@@ -12,7 +12,12 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ShoppingMallTab extends StatefulWidget {
-  const ShoppingMallTab({super.key});
+  const ShoppingMallTab({
+    super.key,
+    this.onBadgeUpdate,
+  });
+
+  final VoidCallback? onBadgeUpdate;
 
   @override
   State<ShoppingMallTab> createState() => _ShoppingMallTabState();
@@ -152,6 +157,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
 
   Future<void> _toggleWishlist(
     ProductWithOtherDetails productWithDetails,
+    bool isInWishlist,
   ) async {
     if (userId == null) {
       // Handle not logged in - maybe show login prompt
@@ -162,10 +168,17 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     }
 
     try {
-      await ProductService.instance.toggleWishlist(
-        productWithDetails.product.id,
-        userId!,
-      );
+      if (isInWishlist) {
+        await ProductService.instance.removeFromWishlist(
+          productWithDetails.product.id,
+          userId!,
+        );
+      } else {
+        await ProductService.instance.addToWishlist(
+          productWithDetails.product.id,
+          userId!,
+        );
+      }
 
       // Update the local state
       setState(() {
@@ -182,6 +195,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
           );
         }
       });
+      widget.onBadgeUpdate?.call();
     } catch (e) {
       debugPrint('Error toggling wishlist: $e');
       if (!mounted) return;
@@ -203,6 +217,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
         .then((_) {
           _loadProducts();
           _loadCartCount();
+          widget.onBadgeUpdate?.call();
         });
   }
 
@@ -366,8 +381,8 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
                         final productWithDetails = products[index];
                         return ProductCard(
                           productWithDetails: productWithDetails,
-                          onWishlistToggle: () =>
-                              _toggleWishlist(productWithDetails),
+                          onWishlistToggle: (isInWishlist) =>
+                              _toggleWishlist(productWithDetails, isInWishlist),
                           onTap: () =>
                               _navigateToProductDetail(productWithDetails),
                         );

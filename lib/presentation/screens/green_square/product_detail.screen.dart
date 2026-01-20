@@ -62,6 +62,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     _loadAwardPoints();
     _loadBaseDiscountRate();
     _loadReviewStats();
+    _fetchWishlistStatus();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _updateStickyActionsVisibility(),
     );
@@ -107,10 +108,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     }
 
     try {
-      await ProductService.instance.toggleWishlist(
-        productWithDetails.product.id,
-        userId!,
-      );
+      if (isInWishlist) {
+        await ProductService.instance.removeFromWishlist(
+          productWithDetails.product.id,
+          userId!,
+        );
+      } else {
+        await ProductService.instance.addToWishlist(
+          productWithDetails.product.id,
+          userId!,
+        );
+      }
 
       setState(() {
         isInWishlist = !isInWishlist;
@@ -189,6 +197,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       });
     } catch (e) {
       debugPrint('Error loading review stats: $e');
+    }
+  }
+
+  Future<void> _fetchWishlistStatus() async {
+    if (userId == null) return;
+    try {
+      final isIn = await ProductService.instance.isProductInWishlist(
+        productWithDetails.product.id,
+        userId!,
+      );
+      if (mounted) {
+        setState(() => isInWishlist = isIn);
+      }
+    } catch (e) {
+      debugPrint('Error fetching wishlist status: $e');
     }
   }
 
