@@ -1,4 +1,6 @@
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/screens/green_square/review_images_fullscreen.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 
@@ -18,6 +20,7 @@ class ReviewsTab extends StatefulWidget {
 
 class _ReviewsTabState extends State<ReviewsTab> {
   List<ProductReviewRow> reviews = [];
+  List<ProductReviewImageRow> allImages = [];
   bool isLoading = true;
   bool isLoadingMore = false;
   bool hasMore = true;
@@ -48,14 +51,28 @@ class _ReviewsTabState extends State<ReviewsTab> {
         offset: loadMore ? currentOffset : 0,
       );
 
+      final newImages = <ProductReviewImageRow>[];
+      for (final review in newReviews) {
+        final imagesData =
+            review.data['product_review_image'] as List<dynamic>? ?? [];
+        newImages.addAll(
+          imagesData.map(
+            (img) =>
+                ProductReviewImageRow.fromJson(img as Map<String, dynamic>),
+          ),
+        );
+      }
+
       setState(() {
         if (loadMore) {
           reviews.addAll(newReviews);
+          allImages.addAll(newImages);
           currentOffset += newReviews.length;
           hasMore = newReviews.length == pageSize;
           isLoadingMore = false;
         } else {
           reviews = newReviews;
+          allImages = newImages;
           currentOffset = newReviews.length;
           hasMore = newReviews.length == pageSize;
           isLoading = false;
@@ -75,7 +92,7 @@ class _ReviewsTabState extends State<ReviewsTab> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -109,20 +126,14 @@ class _ReviewsTabState extends State<ReviewsTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: [
-                        Icon(
-                          Icons.star,
+                      children: List.generate(5, (index) {
+                        final isFilled = index < review.stars.round();
+                        return Icon(
+                          isFilled ? Icons.star : Icons.star_border,
                           color: Colors.amber,
                           size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${review.stars}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                        );
+                      }),
                     ),
                     const SizedBox(height: 4),
                     if (review.review != null && review.review!.isNotEmpty)
@@ -137,6 +148,14 @@ class _ReviewsTabState extends State<ReviewsTab> {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'by ${(review.data['user'] as Map<String, dynamic>?)?['username'] as String? ?? 'Anonymous'}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -149,6 +168,82 @@ class _ReviewsTabState extends State<ReviewsTab> {
               ),
             ),
           if (isLoadingMore) const Center(child: CircularProgressIndicator()),
+          if (allImages.isNotEmpty) ...[
+            GridView.count(
+              crossAxisCount: 3,
+              childAspectRatio: 1,
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              children: List.generate(
+                allImages.length > 6 ? 6 : allImages.length,
+                (index) {
+                  if (index == 5 && allImages.length > 6) {
+                    // See more
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ReviewImagesFullscreen(
+                              images: allImages,
+                              initialIndex: 0,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '+${allImages.length - 5}',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  } else {
+                    final image = allImages[index];
+                    final url = getImageLink(
+                      image.bucket ?? '',
+                      image.fileName ?? '',
+                      folderPath: image.folderPath,
+                    );
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ReviewImagesFullscreen(
+                              images: allImages,
+                              initialIndex: index,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Hero(
+                        tag: 'review-image-${image.id}',
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            image: DecorationImage(
+                              image: NetworkImage(url),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );

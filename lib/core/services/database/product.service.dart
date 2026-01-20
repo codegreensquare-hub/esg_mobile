@@ -314,7 +314,7 @@ class ProductService {
     try {
       var query = _client
           .from(ProductReviewTable().tableName)
-          .select()
+          .select('*, user:created_by(username), product_review_image(*)')
           .eq(ProductReviewRow.productField, productId)
           .order(ProductReviewRow.createdAtField, ascending: false);
 
