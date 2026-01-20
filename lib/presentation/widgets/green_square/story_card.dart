@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:flutter/material.dart';
@@ -55,8 +56,8 @@ class StoryCard extends StatelessWidget {
                     story.thumbnailFileName!.isNotEmpty)
                   Hero(
                     tag: 'green-square-story-image-${story.id}',
-                    child: Image.network(
-                      getImageLink(
+                    child: CachedNetworkImage(
+                      imageUrl: getImageLink(
                         story.thumbnailBucket!,
                         story.thumbnailFileName!,
                         folderPath: story.thumbnailFolderPath,
@@ -64,8 +65,14 @@ class StoryCard extends StatelessWidget {
                       height: imageHeight,
                       width: effectiveWidth,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const SizedBox.shrink(),
+                      errorWidget: (context, url, error) => Container(
+                        height: imageHeight,
+                        width: effectiveWidth,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.image_not_supported),
+                      ),
                     ),
                   ),
                 Padding(

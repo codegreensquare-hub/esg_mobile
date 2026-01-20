@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class GreenSquareBottomNavBar extends StatelessWidget {
+class GreenSquareBottomNavBar extends StatefulWidget {
   const GreenSquareBottomNavBar({
     super.key,
     required this.selectedIndex,
@@ -11,6 +11,14 @@ class GreenSquareBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
   final VoidCallback onGreenButtonPressed;
+
+  @override
+  State<GreenSquareBottomNavBar> createState() =>
+      _GreenSquareBottomNavBarState();
+}
+
+class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
+  bool _isGreenHovered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +50,15 @@ class GreenSquareBottomNavBar extends StatelessWidget {
                           index: 0,
                           icon: Icons.auto_stories_outlined,
                           label: '스토리',
-                          selected: selectedIndex == 0,
-                          onTap: () => onItemSelected(0),
+                          selected: widget.selectedIndex == 0,
+                          onTap: () => widget.onItemSelected(0),
                         ),
                         _NavItem(
                           index: 1,
                           icon: Icons.storefront_outlined,
                           label: '쇼핑몰',
-                          selected: selectedIndex == 1,
-                          onTap: () => onItemSelected(1),
+                          selected: widget.selectedIndex == 1,
+                          onTap: () => widget.onItemSelected(1),
                         ),
                         // add empty space for the center button
                         const SizedBox(width: 36),
@@ -58,15 +66,15 @@ class GreenSquareBottomNavBar extends StatelessWidget {
                           index: 2,
                           icon: Icons.group_outlined,
                           label: '미션 참여',
-                          selected: selectedIndex == 2,
-                          onTap: () => onItemSelected(2),
+                          selected: widget.selectedIndex == 2,
+                          onTap: () => widget.onItemSelected(2),
                         ),
                         _NavItem(
                           index: 3,
                           icon: Icons.person_outline,
                           label: '나의 콕',
-                          selected: selectedIndex == 3,
-                          onTap: () => onItemSelected(3),
+                          selected: widget.selectedIndex == 3,
+                          onTap: () => widget.onItemSelected(3),
                         ),
                       ],
                     ),
@@ -78,28 +86,39 @@ class GreenSquareBottomNavBar extends StatelessWidget {
                 left: size.width / 2 - 28,
                 child: Transform.translate(
                   offset: const Offset(0, -48),
-                  child: GestureDetector(
-                    onTap: onGreenButtonPressed,
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.shadow.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+                  child: Tooltip(
+                    message: 'See Missions',
+                    preferBelow: false,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) => setState(() => _isGreenHovered = true),
+                      onExit: (_) => setState(() => _isGreenHovered = false),
+                      child: GestureDetector(
+                        onTap: widget.onGreenButtonPressed,
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: cs.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: cs.shadow.withValues(
+                                  alpha: _isGreenHovered ? 0.5 : 0.3,
+                                ),
+                                blurRadius: _isGreenHovered ? 12 : 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          "콕!",
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          child: Center(
+                            child: Text(
+                              "콕!",
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ),

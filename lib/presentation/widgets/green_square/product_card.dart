@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
@@ -120,16 +121,21 @@ class _ProductCardState extends State<ProductCard> {
                     child: Hero(
                       tag: 'green-square-product-image-${product.id}',
                       child: resolvedImageUrl != null
-                          ? Image.network(
-                              resolvedImageUrl,
+                          ? CachedNetworkImage(
+                              imageUrl: resolvedImageUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Container(
-                                    color: cs.surfaceContainerHighest,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                    ),
-                                  ),
+                              placeholder: (context, url) => Container(
+                                color: cs.surfaceContainerHighest,
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: cs.surfaceContainerHighest,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                ),
+                              ),
                             )
                           : Container(
                               color: cs.surfaceContainerHighest,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
@@ -86,6 +87,7 @@ class _StoryDialogState extends State<StoryDialog> {
         ? false
         : await StoryService.instance.hasUserLiked(storyId, userId!);
 
+    if (!mounted) return;
     setState(() {
       isLoadingRecommendations = true;
       isLoadingPreviousStories = true;
@@ -102,6 +104,7 @@ class _StoryDialogState extends State<StoryDialog> {
     final fetchedPreviousStories = await StoryService.instance
         .fetchPreviousStories(widget.story);
 
+    if (!mounted) return;
     setState(() {
       comments = fetchedComments;
       likeCount = count;
@@ -237,8 +240,8 @@ class _StoryDialogState extends State<StoryDialog> {
                                           Hero(
                                             tag:
                                                 'green-square-story-image-${story.id}',
-                                            child: Image.network(
-                                              getImageLink(
+                                            child: CachedNetworkImage(
+                                              imageUrl: getImageLink(
                                                 story.thumbnailBucket!,
                                                 story.thumbnailFileName!,
                                                 folderPath:
@@ -247,6 +250,13 @@ class _StoryDialogState extends State<StoryDialog> {
                                               height: photoHeight,
                                               width: double.infinity,
                                               fit: BoxFit.cover,
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
+                                                        height: photoHeight,
+                                                        width: double.infinity,
+                                                        color: Colors.grey[300],
+                                                      ),
                                             ),
                                           )
                                         else
@@ -888,10 +898,10 @@ class _RecommendedStoryGridTile extends StatelessWidget {
                     )
                   : Hero(
                       tag: 'green-square-story-image-${story.id}',
-                      child: Image.network(
-                        imageUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
+                        errorWidget: (context, url, error) => Container(
                           color: cs.surfaceContainerHighest,
                           child: Icon(
                             Icons.image_not_supported_outlined,
@@ -959,10 +969,10 @@ class _RecommendedProductListTile extends StatelessWidget {
                     color: cs.onSurfaceVariant,
                   ),
                 )
-              : Image.network(
-                  imageUrl,
+              : CachedNetworkImage(
+                  imageUrl: imageUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  errorWidget: (context, url, error) => Container(
                     color: cs.surfaceContainerHighest,
                     child: Icon(
                       Icons.image_not_supported_outlined,

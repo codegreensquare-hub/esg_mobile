@@ -133,22 +133,24 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainer,
       key: _scaffoldKey,
-      drawer: CodeGreenLeftDrawer(
-        tabs: codeGreenTabs,
-        selectedIndex: _selectedIndex,
-        labels: codeGreenLabels,
-        homeTab: HomeTab.tab,
-        onSelect: (index) {
-          if (index != _selectedIndex) {
-            setState(() => _selectedIndex = index);
-          }
-        },
-        onTapGreenSquare: () {
-          setState(() => _selectedMainTab = MainTab.greenSquare);
-        },
-        onTapLogin: _openCodeGreenLogin,
-        onSelectSubTab: _handleCodeGreenSubTab,
-      ),
+      drawer: _selectedMainTab == MainTab.codeGreen
+          ? CodeGreenLeftDrawer(
+              tabs: codeGreenTabs,
+              selectedIndex: _selectedIndex,
+              labels: codeGreenLabels,
+              homeTab: HomeTab.tab,
+              onSelect: (index) {
+                if (index != _selectedIndex) {
+                  setState(() => _selectedIndex = index);
+                }
+              },
+              onTapGreenSquare: () {
+                setState(() => _selectedMainTab = MainTab.greenSquare);
+              },
+              onTapLogin: _openCodeGreenLogin,
+              onSelectSubTab: _handleCodeGreenSubTab,
+            )
+          : null,
       endDrawer: isGreenSquare
           ? GreenSquareRightDrawer(
               onSelect: _handleGreenSquareDrawerSelection,
