@@ -283,23 +283,16 @@ class FloatingActionButtonWithBadge extends StatelessWidget {
                 ),
                 if (badgeCount > 0)
                   Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: cs.error,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          badgeCount > 99 ? '99+' : badgeCount.toString(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: cs.onError,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    top: 0,
+                    right: 0,
+                    child: Badge(
+                      backgroundColor: Colors.black,
+                      label: Text(
+                        badgeCount > 99 ? '99+' : badgeCount.toString(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),

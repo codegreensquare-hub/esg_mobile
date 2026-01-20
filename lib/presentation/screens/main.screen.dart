@@ -101,6 +101,7 @@ class _MainScreenState extends State<MainScreen> {
         setState(() => _scrollOffset = offset);
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateBadgeCounts());
   }
 
   @override
