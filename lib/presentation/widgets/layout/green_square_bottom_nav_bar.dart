@@ -6,11 +6,25 @@ class GreenSquareBottomNavBar extends StatefulWidget {
     required this.selectedIndex,
     required this.onItemSelected,
     required this.onGreenButtonPressed,
+    required this.onCartPressed,
+    required this.onKakaoPressed,
+    required this.onWishlistPressed,
+    required this.cartItemCount,
+    required this.wishlistItemCount,
+    required this.scrollOffset,
+    required this.onScrollUp,
   });
 
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
   final VoidCallback onGreenButtonPressed;
+  final VoidCallback onCartPressed;
+  final VoidCallback onKakaoPressed;
+  final VoidCallback onWishlistPressed;
+  final int cartItemCount;
+  final int wishlistItemCount;
+  final double scrollOffset;
+  final VoidCallback onScrollUp;
 
   @override
   State<GreenSquareBottomNavBar> createState() =>
@@ -126,6 +140,54 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
                   ),
                 ),
               ),
+              // Floating action buttons on the bottom right
+              Positioned(
+                bottom: 100,
+                right: 16,
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  left: true,
+                  right: true,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Conditional scroll up button
+                      if (widget.scrollOffset > 100)
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _ScrollUpButton(
+                              onPressed: widget.onScrollUp,
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+
+                      // Cart button
+                      _FloatingActionButtonWithBadge(
+                        icon: Icons.shopping_cart_outlined,
+                        badgeCount: widget.cartItemCount,
+                        tooltip: '장바구니',
+                        onPressed: widget.onCartPressed,
+                      ),
+                      const SizedBox(height: 8),
+                      // KakaoTalk button
+                      _KakaoTalkButton(
+                        onPressed: widget.onKakaoPressed,
+                      ),
+                      const SizedBox(height: 8),
+                      // Wishlist button
+                      _FloatingActionButtonWithBadge(
+                        icon: Icons.favorite_border,
+                        badgeCount: widget.wishlistItemCount,
+                        tooltip: '찜 목록',
+                        onPressed: widget.onWishlistPressed,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -227,5 +289,199 @@ class _NavItemState extends State<_NavItem> {
       return Icons.person;
     }
     return outlinedIcon; // fallback
+  }
+}
+
+class _FloatingActionButtonWithBadge extends StatelessWidget {
+  const _FloatingActionButtonWithBadge({
+    required this.icon,
+    required this.badgeCount,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final int badgeCount;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Tooltip(
+      message: tooltip,
+      preferBelow: false,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          debugPrint('Tapped floating button: $tooltip');
+          onPressed();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: cs.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: cs.shadow.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: cs.onSurface,
+                  size: 24,
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: cs.error,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          badgeCount > 99 ? '99+' : badgeCount.toString(),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: cs.onError,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _KakaoTalkButton extends StatelessWidget {
+  const _KakaoTalkButton({
+    required this.onPressed,
+  });
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Tooltip(
+      message: '카카오톡 문의',
+      preferBelow: false,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          debugPrint('Tapped KakaoTalk button');
+          onPressed();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEE500), // KakaoTalk yellow
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: cs.shadow.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.chat_bubble_outline,
+              color: Colors.black,
+              size: 24,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ScrollUpButton extends StatelessWidget {
+  const _ScrollUpButton({
+    required this.onPressed,
+  });
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Tooltip(
+      message: '맨 위로',
+      preferBelow: false,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          debugPrint('Tapped scroll up button');
+          onPressed();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: cs.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: cs.shadow.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.keyboard_arrow_up,
+                  color: cs.onSurface,
+                  size: 20,
+                ),
+                Text(
+                  '올라가기',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: cs.onSurface,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

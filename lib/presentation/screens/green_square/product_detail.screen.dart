@@ -9,6 +9,7 @@ import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_action_buttons_bar.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
@@ -348,17 +349,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     child: Hero(
                       tag: 'green-square-product-image-${product.id}',
                       child: resolvedImageUrl != null
-                          ? Image.network(
-                              resolvedImageUrl,
+                          ? CachedNetworkImage(
+                              imageUrl: resolvedImageUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Container(
-                                    color: cs.surfaceContainerHighest,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 64,
-                                    ),
-                                  ),
+                              errorWidget: (context, url, error) => Container(
+                                color: cs.surfaceContainerHighest,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  size: 64,
+                                ),
+                              ),
                             )
                           : Container(
                               color: cs.surfaceContainerHighest,

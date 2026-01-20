@@ -2,6 +2,7 @@ import 'package:esg_mobile/core/enums/navigations.dart';
 import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
+import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_shop.tab.dart';
@@ -15,6 +16,7 @@ import 'package:esg_mobile/presentation/screens/code_green/product_detail.tab.da
 import 'package:esg_mobile/presentation/screens/green_square/account/account.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/mission_participation.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.dart';
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/story_dialog.dart';
@@ -70,6 +72,10 @@ class _MainScreenState extends State<MainScreen> {
   String? _selectedLookbookId;
   String? _selectedLookbookTitle;
 
+  // Badge counts for floating buttons
+  int _cartItemCount = 0;
+  int _wishlistItemCount = 0;
+
   static const Set<String> _codeGreenHeroTabs = {
     HomeTab.tab,
     CurationShopTab.tab,
@@ -104,6 +110,32 @@ class _MainScreenState extends State<MainScreen> {
     _originalShopController.dispose();
     _productDetailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateBadgeCounts() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      setState(() {
+        _cartItemCount = 0;
+        _wishlistItemCount = 0;
+      });
+      return;
+    }
+
+    try {
+      final cartItems = await CartService.instance.fetchCartItems(userId);
+      final wishlistedProducts = await ProductService.instance
+          .fetchWishlistedProducts(userId);
+
+      if (mounted) {
+        setState(() {
+          _cartItemCount = cartItems.length;
+          _wishlistItemCount = wishlistedProducts.length;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error updating badge counts: $e');
+    }
   }
 
   @override
@@ -161,6 +193,13 @@ class _MainScreenState extends State<MainScreen> {
               selectedIndex: _greenIndex,
               onItemSelected: (index) => setState(() => _greenIndex = index),
               onGreenButtonPressed: _onTapKnock,
+              onCartPressed: _showCartBottomSheet,
+              onKakaoPressed: _launchKakaoTalk,
+              onWishlistPressed: _showWishlistDialog,
+              cartItemCount: _cartItemCount,
+              wishlistItemCount: _wishlistItemCount,
+              scrollOffset: _scrollOffset,
+              onScrollUp: _scrollToTop,
             )
           : null,
       body: CustomScrollView(
@@ -411,6 +450,7 @@ class _MainScreenState extends State<MainScreen> {
       _selectedMainTab = MainTab.greenSquare;
       _selectedIndex = 0;
     });
+    _updateBadgeCounts();
   }
 
   void _openGreenSquareStory(StoryWithTags storyWithTags) {
@@ -419,6 +459,7 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = 0;
       _greenIndex = 0; // ensure Green Square "스토리" tab
     });
+    _updateBadgeCounts();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -477,6 +518,39 @@ class _MainScreenState extends State<MainScreen> {
       isScrollControlled: true,
       builder: (_) => CartBottomSheet(items: items),
     );
+  }
+
+  Future<void> _showWishlistDialog() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (_) => WishlistedProductsDialog(userId: userId),
+    );
+  }
+
+  Future<void> _launchKakaoTalk() async {
+    await _launchExternal(
+      Uri.parse('https://pf.kakao.com/_taxoxdG'),
+    );
+  }
+
+  void _scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Future<void> _onTapKnock() async {
