@@ -47,4 +47,4 @@ do
   fi
 done
 
-flutter build web --release "${dart_defines[@]}"
+flutter build web --wasm "${dart_defines[@]}"

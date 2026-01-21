@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:esg_mobile/data/entities/active_mission.dart';
+import 'package:esg_mobile/data/entities/participation.dart';
 
 class AccountLoggedInContent extends StatelessWidget {
   const AccountLoggedInContent({
@@ -17,8 +19,8 @@ class AccountLoggedInContent extends StatelessWidget {
 
   final String userName;
   final double totalMileage;
-  final List<Map<String, dynamic>> activeMissions;
-  final List<Map<String, dynamic>> participations;
+  final List<ActiveMission> activeMissions;
+  final List<Participation> participations;
   final VoidCallback onManageShipping;
   final VoidCallback onOrderLookup;
   final VoidCallback onWishlist;
@@ -197,16 +199,17 @@ class AccountLoggedInContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          mission['title'] ?? '미션',
+                          mission.title ?? '미션',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        // TODO add the stamp here
                         const Spacer(),
                         Text(
-                          '+${mission['earned']} 회',
+                          '+${mission.earned} 회',
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: cs.primary,
                             fontWeight: FontWeight.bold,
@@ -235,12 +238,8 @@ class AccountLoggedInContent extends StatelessWidget {
               itemCount: participations.length,
               itemBuilder: (context, index) {
                 final participation = participations[index];
-                final status = participation['status'] as String;
-                final isApproved = status == 'approved';
-                final isPending = status == 'pending';
-                final photoUrl = participation['photo_url'] as String?;
-                final rejectionReason =
-                    participation['rejection_reason'] as String?;
+                final photoUrl = participation.photoUrl;
+                final rejectionReason = participation.rejectionReason;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -273,17 +272,18 @@ class AccountLoggedInContent extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              participation['mission_title'] ?? '미션',
+                              participation.missionTitle,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '참여일: ${DateTime.parse(participation['created_at']).toLocal().toString().split(' ')[0]}',
+                              '참여일: ${participation.createdAt.toLocal().toString().split(' ')[0]}',
                               style: theme.textTheme.bodySmall,
                             ),
-                            if (!isApproved && rejectionReason != null)
+                            if (!participation.isApproved &&
+                                rejectionReason != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
@@ -302,23 +302,23 @@ class AccountLoggedInContent extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: isApproved
+                          color: participation.isApproved
                               ? Colors.green.shade100
-                              : isPending
+                              : participation.isPending
                               ? Colors.orange.shade100
                               : Colors.red.shade100,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          isApproved
+                          participation.isApproved
                               ? '승인됨'
-                              : isPending
+                              : participation.isPending
                               ? '심사 중'
                               : '거부됨',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: isApproved
+                            color: participation.isApproved
                                 ? Colors.green.shade800
-                                : isPending
+                                : participation.isPending
                                 ? Colors.orange.shade800
                                 : Colors.red.shade800,
                             fontWeight: FontWeight.bold,

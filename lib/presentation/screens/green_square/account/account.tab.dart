@@ -2,6 +2,8 @@ import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
+import 'package:esg_mobile/data/entities/active_mission.dart';
+import 'package:esg_mobile/data/entities/participation.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
@@ -26,8 +28,8 @@ class _AccountTabState extends State<AccountTab> {
   String? userName;
   String? userId;
   double totalMileage = 0;
-  List<Map<String, dynamic>> activeMissions = [];
-  List<Map<String, dynamic>> participations = [];
+  List<ActiveMission> activeMissions = [];
+  List<Participation> participations = [];
   bool isLoading = true;
   bool _authInProgress = false;
 
@@ -68,7 +70,7 @@ class _AccountTabState extends State<AccountTab> {
       );
 
       // For each mission, calculate earned points
-      final List<Map<String, dynamic>> missionsWithPoints = [];
+      final List<ActiveMission> missionsWithPoints = [];
       for (final mission in missionList) {
         final missionId = mission.id;
         final sumResponse = await client
@@ -84,12 +86,14 @@ class _AccountTabState extends State<AccountTab> {
             )
             .fold(0, (sum, points) => sum + points);
 
-        missionsWithPoints.add({
-          'id': missionId,
-          'title': mission.title,
-          'award_points': mission.awardPoints,
-          'earned': earned,
-        });
+        missionsWithPoints.add(
+          ActiveMission(
+            id: missionId,
+            title: mission.title,
+            awardPoints: mission.awardPoints,
+            earned: earned,
+          ),
+        );
       }
 
       activeMissions = missionsWithPoints;
@@ -125,14 +129,16 @@ class _AccountTabState extends State<AccountTab> {
               .getPublicUrl(path);
         }
         final missionData = p['mission'] as Map<String, dynamic>?;
-        return {
-          'id': p['id'],
-          'mission_title': missionData != null ? missionData['title'] : '미션',
-          'status': status,
-          'created_at': p['created_at'],
-          'photo_url': photoUrl,
-          'rejection_reason': rejectionReason,
-        };
+        return Participation(
+          id: p['id'] as String,
+          missionTitle: missionData != null
+              ? missionData['title'] as String
+              : '미션',
+          status: status,
+          createdAt: DateTime.parse(p['created_at'] as String),
+          photoUrl: photoUrl,
+          rejectionReason: rejectionReason,
+        );
       }).toList();
     } catch (e) {
       debugPrint('Error fetching account data: $e');
