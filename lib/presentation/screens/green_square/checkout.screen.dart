@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
+import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/services/database/user_shipping_address.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/portone_payment.dart';
@@ -28,17 +31,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _selectedAddressId;
   UserShippingAddressRow? _selectedAddress;
   bool _hasShownForm = false;
+  double _baseDiscountRate = 0.0;
+  double _userAwardPoints = 0.0;
+  bool _hasSetDefaultAwardPoints = false;
+  final TextEditingController _awardPointsController = TextEditingController();
 
   double get _totalPoints => widget.items.fold<double>(
     0,
     (sum, item) => sum + item.totalPrice,
   );
 
+  double get _maxUsableAwardPoints => widget.items.fold<double>(0, (sum, item) {
+    final totalDiscountRate =
+        _baseDiscountRate + item.product.additionalDiscountRate;
+    return sum +
+        usableAwardPointsAmount(
+              regularPrice: item.unitPrice,
+              totalDiscountRate: totalDiscountRate,
+            ) *
+            item.quantity;
+  });
+
+  double get _usedAwardPoints =>
+      double.tryParse(_awardPointsController.text) ?? 0;
+
+  double get _chargedAmount => _totalPoints - _usedAwardPoints;
+
   @override
   void initState() {
     super.initState();
     _userId = Supabase.instance.client.auth.currentUser?.id;
     _loadDefaultAddress();
+    _loadBaseDiscountRate();
+    _loadUserAwardPoints();
   }
 
   Future<void> _loadDefaultAddress() async {
@@ -76,6 +101,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _selectedAddress = address;
       _isLoadingAddress = false;
     });
+  }
+
+  Future<void> _loadBaseDiscountRate() async {
+    final rate = await SettingsService.instance.getBaseDiscountRate();
+    if (!mounted) return;
+    setState(() => _baseDiscountRate = rate);
+  }
+
+  Future<void> _loadUserAwardPoints() async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      final pointsRow = await Supabase.instance.client
+          .from('award_points')
+          .select('points')
+          .eq('user', userId)
+          .single();
+
+      if (!mounted) return;
+      setState(
+        () =>
+            _userAwardPoints = (pointsRow['points'] as num?)?.toDouble() ?? 0.0,
+      );
+    } catch (e) {
+      debugPrint('Error loading user award points: $e');
+    }
   }
 
   Future<void> _manageAddresses() async {
@@ -194,7 +246,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       // Create payment record with order_being_paid
       final payment = await CartService.instance.createPayment(
-        amount: _totalPoints,
+        amount: _chargedAmount,
         status: 'pending',
         orderId: orderId,
       );
@@ -218,7 +270,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         MaterialPageRoute(
           builder: (context) => PortonePaymentScreen(
             paymentId: payment.id,
-            amount: _totalPoints,
+            amount: _chargedAmount,
             shippingAddressId: addressId,
             userId: _userId!,
             buyerName: buyerName.isEmpty ? '고객' : buyerName,
@@ -233,6 +285,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) return;
 
       if (result != null && result['imp_success'] == 'true') {
+        // Deduct used award points
+        if (_usedAwardPoints > 0) {
+          final newPoints = _userAwardPoints - _usedAwardPoints;
+          await Supabase.instance.client
+              .from('award_points')
+              .update({'points': newPoints})
+              .eq('user', _userId!);
+        }
+
         // Update payment status
         await CartService.instance.updatePaymentStatus(
           paymentId: payment.id,
@@ -269,13 +330,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   @override
+  void dispose() {
+    _awardPointsController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (!_isLoadingAddress && _selectedAddress == null && !_hasShownForm) {
       _hasShownForm = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _showAddressForm());
     }
 
+    // Set default award points value
+    if (!_hasSetDefaultAwardPoints &&
+        _userAwardPoints > 0 &&
+        _baseDiscountRate >= 0) {
+      final maxAllowed = _userAwardPoints < _maxUsableAwardPoints
+          ? _userAwardPoints
+          : _maxUsableAwardPoints;
+      if (maxAllowed > 0) {
+        _awardPointsController.text = maxAllowed.toStringAsFixed(0);
+        _hasSetDefaultAwardPoints = true;
+      }
+    }
+
     final theme = Theme.of(context);
+    final formatter = NumberFormat('#,###');
 
     return Scaffold(
       appBar: AppBar(
@@ -437,6 +518,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 folderPath: item.product.mainImageFolderPath,
                               )
                             : null;
+                        final double totalDiscountRate =
+                            _baseDiscountRate +
+                            item.product.additionalDiscountRate;
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: Padding(
@@ -498,8 +582,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '합계: ${item.totalPrice.toStringAsFixed(0)} P',
+                                        '합계: ${formatter.format(item.totalPrice.toInt())}',
                                         style: theme.textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '사용 가능 포인트: ${formatter.format(usableAwardPointsAmount(regularPrice: item.unitPrice, totalDiscountRate: totalDiscountRate) * item.quantity)}',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color:
+                                                  theme.colorScheme.secondary,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -534,16 +627,96 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Row(
+                      children: [
+                        Text(
+                          '사용 포인트',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _awardPointsController,
+                            keyboardType: TextInputType.number,
+                            style: TextStyle(
+                              color: theme.colorScheme.secondary,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '0',
+                              suffixText: 'P',
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              final parsed = double.tryParse(value) ?? 0;
+                              final maxAllowed =
+                                  _userAwardPoints < _maxUsableAwardPoints
+                                  ? _userAwardPoints
+                                  : _maxUsableAwardPoints;
+                              final clamped = parsed.clamp(0, maxAllowed);
+                              if (parsed != clamped) {
+                                _awardPointsController.text = clamped
+                                    .toStringAsFixed(0);
+                                _awardPointsController
+                                    .selection = TextSelection.collapsed(
+                                  offset: _awardPointsController.text.length,
+                                );
+                              }
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '총 포인트',
-                          style: theme.textTheme.titleMedium,
+                          style: theme.textTheme.bodyMedium,
                         ),
                         Text(
-                          '${_totalPoints.toStringAsFixed(0)}',
+                          formatter.format(_totalPoints.toInt()),
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '사용 포인트',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                        Text(
+                          '-${formatter.format(_usedAwardPoints.toInt())}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '결제 금액',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${formatter.format(_chargedAmount.toInt())}',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                       ],
