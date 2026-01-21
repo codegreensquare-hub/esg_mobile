@@ -1,8 +1,74 @@
 import 'package:esg_mobile/presentation/widgets/green_square/underline_value.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class GreenSquareStatisticsBanner extends StatelessWidget {
+class GreenSquareStatisticsBanner extends StatefulWidget {
   const GreenSquareStatisticsBanner({super.key});
+
+  @override
+  State<GreenSquareStatisticsBanner> createState() =>
+      _GreenSquareStatisticsBannerState();
+}
+
+class _GreenSquareStatisticsBannerState
+    extends State<GreenSquareStatisticsBanner> {
+  List<Map<String, dynamic>> topMissions = [];
+  int totalApprovedParticipations = 0;
+  double totalAwardPoints = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    await Future.wait([
+      _fetchTopMissions(),
+      _fetchTotalApprovedParticipations(),
+      _fetchTotalAwardPoints(),
+    ]);
+  }
+
+  Future<void> _fetchTopMissions() async {
+    try {
+      final result = await Supabase.instance.client.rpc(
+        'get_top_missions_by_approved_participations',
+      );
+      if (mounted) {
+        setState(() => topMissions = List<Map<String, dynamic>>.from(result));
+      }
+    } catch (e) {
+      debugPrint('Error fetching top missions: $e');
+    }
+  }
+
+  Future<void> _fetchTotalApprovedParticipations() async {
+    try {
+      final result = await Supabase.instance.client.rpc(
+        'get_total_approved_participations',
+      );
+      if (mounted) {
+        setState(() => totalApprovedParticipations = result as int);
+      }
+    } catch (e) {
+      debugPrint('Error fetching total approved participations: $e');
+    }
+  }
+
+  Future<void> _fetchTotalAwardPoints() async {
+    try {
+      final result = await Supabase.instance.client.rpc(
+        'get_total_award_points_from_approved_participations',
+      );
+      if (mounted) {
+        setState(() => totalAwardPoints = (result as num).toDouble());
+      }
+    } catch (e) {
+      debugPrint('Error fetching total award points: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +122,7 @@ class GreenSquareStatisticsBanner extends StatelessWidget {
                   vertical: 12,
                 ),
                 child: Text(
-                  '99,999,999원',
+                  '${NumberFormat.decimalPattern().format(totalAwardPoints.toInt())}원',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
@@ -104,7 +170,7 @@ class GreenSquareStatisticsBanner extends StatelessWidget {
                   vertical: 12,
                 ),
                 child: Text(
-                  '99,999,999원',
+                  '${NumberFormat.decimalPattern().format(totalApprovedParticipations)}회',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
@@ -128,28 +194,32 @@ class GreenSquareStatisticsBanner extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    UnderlineValue(
-                      title: '대중교통 이용하기',
-                      value: 12345,
-                    ),
-                    UnderlineValue(
-                      title: '텀블러 사용하기',
-                      value: 55658,
-                    ),
+                    if (topMissions.isNotEmpty)
+                      UnderlineValue(
+                        title: topMissions[0]['title'] as String? ?? '미션',
+                        value: topMissions[0]['approved_count'] as int? ?? 0,
+                      ),
+                    if (topMissions.length > 1)
+                      UnderlineValue(
+                        title: topMissions[1]['title'] as String? ?? '미션',
+                        value: topMissions[1]['approved_count'] as int? ?? 0,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    UnderlineValue(
-                      title: '분리배출 하기',
-                      value: 543210,
-                    ),
-                    UnderlineValue(
-                      title: '재사용가방 활용하기',
-                      value: 321098,
-                    ),
+                    if (topMissions.length > 2)
+                      UnderlineValue(
+                        title: topMissions[2]['title'] as String? ?? '미션',
+                        value: topMissions[2]['approved_count'] as int? ?? 0,
+                      ),
+                    if (topMissions.length > 3)
+                      UnderlineValue(
+                        title: topMissions[3]['title'] as String? ?? '미션',
+                        value: topMissions[3]['approved_count'] as int? ?? 0,
+                      ),
                   ],
                 ),
               ],

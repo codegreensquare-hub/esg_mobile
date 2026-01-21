@@ -6,6 +6,7 @@ class Participation {
     required this.createdAt,
     this.photoUrl,
     this.rejectionReason,
+    this.stampUrl,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class Participation {
   final DateTime createdAt;
   final String? photoUrl;
   final String? rejectionReason;
+  final String? stampUrl;
 
   bool get isApproved => status == 'approved';
   bool get isPending => status == 'pending';
@@ -27,6 +29,7 @@ class Participation {
       createdAt: DateTime.parse(json['created_at'] as String),
       photoUrl: json['photo_url'] as String?,
       rejectionReason: json['rejection_reason'] as String?,
+      stampUrl: json['stamp_url'] as String?,
     );
   }
 
@@ -38,6 +41,7 @@ class Participation {
       'created_at': createdAt.toIso8601String(),
       'photo_url': photoUrl,
       'rejection_reason': rejectionReason,
+      'stamp_url': stampUrl,
     };
   }
 }

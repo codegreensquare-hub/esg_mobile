@@ -115,7 +115,12 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     try {
       userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId != null) {
-        awardPoints = await ProductService.instance.getUserAwardPoints(userId!);
+        final pointsRow = await Supabase.instance.client
+            .from('award_points')
+            .select('points')
+            .eq('"user"', userId!)
+            .maybeSingle();
+        awardPoints = (pointsRow?['points'] as num?)?.toDouble() ?? 0.0;
         _loadCartCount();
       }
 

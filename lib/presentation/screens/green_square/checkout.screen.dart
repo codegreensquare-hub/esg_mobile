@@ -541,7 +541,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: theme.textTheme.titleMedium,
                         ),
                         Text(
-                          '${_totalPoints.toStringAsFixed(0)} P',
+                          '${_totalPoints.toStringAsFixed(0)}',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

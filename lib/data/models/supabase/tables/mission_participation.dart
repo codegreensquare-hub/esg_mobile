@@ -37,6 +37,8 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? photoBucket,
     String? photoFolderPath,
     String? photoFileName,
+    double? awardPoints,
+    double? cost,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (participatedBy != null)
@@ -54,6 +56,8 @@ class MissionParticipationRow extends SupabaseDataRow {
            'photo_folder_path': supaSerialize(photoFolderPath),
          if (photoFileName != null)
            'photo_file_name': supaSerialize(photoFileName),
+         if (awardPoints != null) 'award_points': supaSerialize(awardPoints),
+         if (cost != null) 'cost': supaSerialize(cost),
        });
 
   /// Mission Participation Row
@@ -161,6 +165,20 @@ class MissionParticipationRow extends SupabaseDataRow {
   set photoFileName(String? value) =>
       setField<String>(photoFileNameField, value);
 
+  /// Award Points field name
+  static const String awardPointsField = 'award_points';
+
+  /// Award Points
+  double? get awardPoints => getField<double>(awardPointsField);
+  set awardPoints(double? value) => setField<double>(awardPointsField, value);
+
+  /// Cost field name
+  static const String costField = 'cost';
+
+  /// Cost
+  double? get cost => getField<double>(costField);
+  set cost(double? value) => setField<double>(costField, value);
+
   /// Make a copy of the current [MissionParticipationRow]
   /// overriding the provided fields
   MissionParticipationRow copyWith({
@@ -176,6 +194,8 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? photoBucket,
     String? photoFolderPath,
     String? photoFileName,
+    double? awardPoints,
+    double? cost,
   }) => MissionParticipationRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'participated_by': supaSerialize(participatedBy) ?? data['participated_by'],
@@ -191,8 +211,10 @@ class MissionParticipationRow extends SupabaseDataRow {
     'photo_folder_path':
         supaSerialize(photoFolderPath) ?? data['photo_folder_path'],
     'photo_file_name': supaSerialize(photoFileName) ?? data['photo_file_name'],
+    'award_points': supaSerialize(awardPoints) ?? data['award_points'],
+    'cost': supaSerialize(cost) ?? data['cost'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-20 16:49:24.336020
+/// Date: 2026-01-21 21:59:57.928301

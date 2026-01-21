@@ -1,8 +1,7 @@
-import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
-import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
+import 'package:esg_mobile/data/entities/stamp.dart';
 import 'package:esg_mobile/data/entities/participation.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
@@ -63,35 +62,56 @@ class _AccountTabState extends State<AccountTab> {
           (pointsRow?[AwardPointsRow.pointsField] as num?)?.toDouble() ?? 0;
 
       // Fetch all active missions
-      final missionList = await MissionService.instance.fetchList(
-        isPublished: true,
-        status: MissionStatus.current,
-        publicity: MissionPublicity.public,
-      );
+      final now = DateTime.now().toIso8601String().split('T')[0];
+      final missionResponse = await client
+          .from('mission')
+          .select(
+            'id, title, award_points, stamp(bucket, folder_path, file_name)',
+          )
+          .eq('is_published', true)
+          .eq('publicity', 'public')
+          .lte('start_active_date', now)
+          .gte('last_active_date', now)
+          .order('order');
 
-      // For each mission, calculate earned points
+      final missionIds = missionResponse.map((m) => m['id'] as String).toList();
+
+      // Fetch earned points for all missions in one query
+      final earnedResponse = missionIds.isNotEmpty
+          ? await client
+                .from('mission_participation')
+                .select('id, award_points, mission')
+                .eq('participated_by', user.id)
+                .filter('mission', 'in', missionIds)
+          : [];
+
+      final earnedMap = <String, int>{};
+      for (final row in earnedResponse) {
+        final mid = row['mission'] as String?;
+        final points = (row?['award_points'] ?? 0) as int;
+        if (mid != null) {
+          earnedMap[mid] = (earnedMap[mid] ?? 0) + points;
+        }
+      }
+
+      // Build active missions
       final List<ActiveMission> missionsWithPoints = [];
-      for (final mission in missionList) {
-        final missionId = mission.id;
-        final sumResponse = await client
-            .from(MissionParticipationTable().tableName)
-            .select('mission(award_points)')
-            .eq(MissionParticipationRow.participatedByField, user.id)
-            .eq(MissionParticipationRow.missionField, missionId);
+      for (final missionData in missionResponse) {
+        final missionId = missionData['id'] as String;
+        final title = missionData['title'] as String?;
+        final awardPoints = missionData['award_points'] as int?;
+        final earned = earnedMap[missionId] ?? 0;
 
-        final earned = sumResponse
-            .map(
-              (p) =>
-                  (p['mission'] as Map<String, dynamic>)['award_points'] as int,
-            )
-            .fold(0, (sum, points) => sum + points);
+        final stampData = missionData['stamp'] as Map<String, dynamic>?;
+        final stamp = stampData != null ? Stamp.fromJson(stampData) : null;
 
         missionsWithPoints.add(
           ActiveMission(
             id: missionId,
-            title: mission.title,
-            awardPoints: mission.awardPoints,
+            title: title,
+            awardPoints: awardPoints,
             earned: earned,
+            stamp: stamp,
           ),
         );
       }
@@ -102,7 +122,7 @@ class _AccountTabState extends State<AccountTab> {
       final participationsResponse = await client
           .from(MissionParticipationTable().tableName)
           .select(
-            'id, mission(title), created_at, approved_at, rejected_at, rejected_by, rejection_reason, photo_bucket, photo_folder_path, photo_file_name',
+            'id, mission(title, stamp(bucket, folder_path, file_name)), created_at, approved_at, rejected_at, rejected_by, rejection_reason, photo_bucket, photo_folder_path, photo_file_name',
           )
           .eq(MissionParticipationRow.participatedByField, user.id)
           .order('created_at', ascending: false);
@@ -129,15 +149,31 @@ class _AccountTabState extends State<AccountTab> {
               .getPublicUrl(path);
         }
         final missionData = p['mission'] as Map<String, dynamic>?;
+        String? stampUrl;
+        if (missionData != null) {
+          final stampData = missionData['stamp'] as Map<String, dynamic>?;
+          if (stampData != null) {
+            final bucket = stampData['bucket'] as String?;
+            final folder = stampData['folder_path'] as String?;
+            final fileName = stampData['file_name'] as String?;
+            if (bucket != null && fileName != null) {
+              final path = folder != null && folder.isNotEmpty
+                  ? '$folder/$fileName'
+                  : fileName;
+              stampUrl = Supabase.instance.client.storage
+                  .from(bucket)
+                  .getPublicUrl(path);
+            }
+          }
+        }
         return Participation(
           id: p['id'] as String,
-          missionTitle: missionData != null
-              ? missionData['title'] as String
-              : '미션',
+          missionTitle: missionData?['title'] as String? ?? '미션',
           status: status,
           createdAt: DateTime.parse(p['created_at'] as String),
           photoUrl: photoUrl,
           rejectionReason: rejectionReason,
+          stampUrl: stampUrl,
         );
       }).toList();
     } catch (e) {
@@ -249,8 +285,12 @@ class _AccountTabState extends State<AccountTab> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return SizedBox(
+        height: screenHeight - 200,
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (!UserAuthService.instance.isLoggedIn) {

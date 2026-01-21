@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
@@ -120,6 +121,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       future: _colorHexByIdFuture,
       builder: (context, snapshot) {
         final colorHexById = snapshot.data ?? const <String, String>{};
+        final formatter = NumberFormat('#,###');
 
         return SafeArea(
           child: DraggableScrollableSheet(
@@ -367,7 +369,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '단가: ${item.unitPrice.toStringAsFixed(0)} P',
+                                            '단가: ${formatter.format(item.unitPrice.toInt())}',
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: cs.onSurfaceVariant,
@@ -375,7 +377,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '합계: ${item.totalPrice.toStringAsFixed(0)} P',
+                                            '합계: ${formatter.format(item.totalPrice.toInt())}',
                                             style: theme.textTheme.bodyLarge
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.bold,
@@ -423,7 +425,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                               style: theme.textTheme.titleMedium,
                             ),
                             Text(
-                              '${_totalPoints.toStringAsFixed(0)} P',
+                              formatter.format(_totalPoints.toInt()),
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: cs.primary,
