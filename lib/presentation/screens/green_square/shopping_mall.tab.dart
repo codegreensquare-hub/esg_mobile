@@ -257,60 +257,70 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
 
         children: [
           // Award Points Display
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SvgPicture.asset(
-                  'assets/images/award_points/c_milage.svg',
-                  width: 20,
-                  height: 20,
-                  semanticsLabel: '마일리지',
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  mileageText,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cs.primary,
+          Center(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              constraints: BoxConstraints(
+                maxWidth: 800,
+              ),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/award_points/c_milage.svg',
+                    width: 20,
+                    height: 20,
+                    semanticsLabel: '마일리지',
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '(현재 보유 마일리지)',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(width: 8),
+                  Text(
+                    mileageText,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.primary,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '(현재 보유 마일리지)',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
 
           // Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '상품 검색',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              constraints: BoxConstraints(
+                maxWidth: 800,
               ),
-              onChanged: (value) => _loadProducts(),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: '상품 검색',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+                ),
+                onChanged: (value) => _loadProducts(),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -318,27 +328,32 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
           // Category Tabs
           if (_tabController != null &&
               _tabController!.length == categories.length + 1)
-            SizedBox(
-              height: 30,
-              child: TabBar(
-                padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                indicatorColor: cs.secondary,
-                indicatorWeight: 3,
-                labelColor: cs.onSurface,
-                unselectedLabelColor: cs.outline,
-                labelPadding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-                labelStyle: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+            Center(
+              child: Container(
+                height: 30,
+                constraints: BoxConstraints(
+                  maxWidth: 800,
                 ),
-                unselectedLabelStyle: theme.textTheme.bodySmall,
-                tabs: [
-                  const Tab(text: '전체'),
-                  ...categories.map((category) => Tab(text: category.name)),
-                ],
+                child: TabBar(
+                  padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                  controller: _tabController,
+                  dividerColor: Colors.transparent,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicatorColor: cs.secondary,
+                  indicatorWeight: 3,
+                  labelColor: cs.onSurface,
+                  unselectedLabelColor: cs.outline,
+                  labelPadding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                  labelStyle: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                  unselectedLabelStyle: theme.textTheme.bodySmall,
+                  tabs: [
+                    const Tab(text: '전체'),
+                    ...categories.map((category) => Tab(text: category.name)),
+                  ],
+                ),
               ),
             ),
 

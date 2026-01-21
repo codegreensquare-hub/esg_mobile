@@ -390,7 +390,7 @@ class OrderCard extends StatelessWidget {
                                             index < (e.review!.stars.toInt())
                                                 ? Icons.star
                                                 : Icons.star_border,
-                                            color: Colors.yellow,
+                                            color: Colors.yellow[600],
                                             size: 16,
                                           ),
                                         ),

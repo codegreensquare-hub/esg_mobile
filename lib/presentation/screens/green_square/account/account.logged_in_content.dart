@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AccountLoggedInContent extends StatelessWidget {
   const AccountLoggedInContent({
@@ -72,67 +73,95 @@ class AccountLoggedInContent extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
             decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(12),
+              color: cs.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(6),
+
+              border: Border.all(color: cs.outlineVariant, width: 0.5),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   '현재 보유 마일리지',
-                  style: theme.textTheme.titleMedium,
-                ),
-                Text(
-                  '$mileageText P',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cs.primary,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: cs.outline,
                   ),
+                ),
+                const SizedBox(height: 8),
+                // Text(
+                //   '$mileageText P',
+                //   style: theme.textTheme.headlineSmall?.copyWith(
+                //     fontWeight: FontWeight.bold,
+                //     color: cs.primary,
+                //   ),
+                // ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/images/award_points/c_milage.svg',
+                      width: 20,
+                      height: 20,
+                      semanticsLabel: '마일리지',
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      mileageText,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.local_shipping_outlined,
-                  label: '주문배송조회',
-                  onTap: onOrderLookup,
+          Container(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: cs.outlineVariant, width: 0.5),
+            ),
+            padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.local_shipping_outlined,
+                    label: '주문배송조회',
+                    onTap: onOrderLookup,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.favorite_outline,
-                  label: '찜한 상품',
-                  onTap: onWishlist,
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.favorite_outline,
+                    label: '찜한 상품',
+                    onTap: onWishlist,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.comment_outlined,
-                  label: '내가 쓴 댓글',
-                  onTap: onMyComments,
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.comment_outlined,
+                    label: '내가 쓴 댓글',
+                    onTap: onMyComments,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.thumb_up_outlined,
-                  label: '좋아요 한 글',
-                  onTap: onLikedStories,
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.thumb_up_outlined,
+                    label: '좋아요 한 글',
+                    onTap: onLikedStories,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 32),
           Text(
@@ -152,12 +181,16 @@ class AccountLoggedInContent extends StatelessWidget {
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               children: activeMissions.map((mission) {
-                return Card(
-                  // padding: const EdgeInsets.all(16),
-                  // decoration: BoxDecoration(
-                  //   color: cs.surface,
-                  //   borderRadius: BorderRadius.circular(12),
-                  // ),
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: cs.outlineVariant,
+                      width: 0.5,
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -173,7 +206,7 @@ class AccountLoggedInContent extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          '+${mission['earned']} P',
+                          '+${mission['earned']} 회',
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: cs.primary,
                             fontWeight: FontWeight.bold,
@@ -316,7 +349,7 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return TextButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -326,9 +359,11 @@ class _ActionButton extends StatelessWidget {
       ),
       child: Column(
         children: [
+          const SizedBox(height: 8),
           Icon(icon),
           const SizedBox(height: 4),
           Text(label, style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: 8),
         ],
       ),
     );

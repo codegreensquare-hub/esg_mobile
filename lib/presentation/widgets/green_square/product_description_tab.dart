@@ -172,7 +172,13 @@ class _ProductDescriptionTabState extends State<ProductDescriptionTab> {
           builder: (context, snapshot) {
             final urls = snapshot.data ?? const <String>[];
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox.shrink();
+              return Center(
+                child: Container(
+                  padding: EdgeInsets.all(24),
+                  height: 400,
+                  child: CircularProgressIndicator.adaptive(),
+                ),
+              );
             }
 
             if (snapshot.hasError) {

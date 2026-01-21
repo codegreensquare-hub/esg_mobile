@@ -236,12 +236,16 @@ class FloatingActionButtonWithBadge extends StatelessWidget {
     required this.badgeCount,
     required this.tooltip,
     required this.onPressed,
+    this.backgroundColor,
+    this.iconColor,
   });
 
   final IconData icon;
   final int badgeCount;
   final String tooltip;
   final VoidCallback onPressed;
+  final Color? backgroundColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +267,7 @@ class FloatingActionButtonWithBadge extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: cs.surface,
+              color: backgroundColor ?? cs.surface,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -278,7 +282,7 @@ class FloatingActionButtonWithBadge extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: cs.onSurface,
+                  color: iconColor ?? cs.onSurface,
                   size: 24,
                 ),
                 if (badgeCount > 0)
