@@ -34,8 +34,57 @@
 
     <!-- PortOne Payment SDK -->
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+
+    <style>
+      body {
+        background-color: #0e3010;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      #loading-image {
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+      }
+      #loading-text {
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        text-align: center;
+        margin-top: 20px;
+        line-height: 1.5;
+      }
+      #loading-subtitle {
+        color: #ccc;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 10px;
+      }
+    </style>
   </head>
   <body>
+    <img
+      id="loading-image"
+      src="https://vmqnzfnupmwcstgbgdgk.supabase.co/storage/v1/object/public/asset/images/loading/transition.78694b57.gif"
+      alt="Loading..."
+    />
+    <br />
+    <br />
+    <div id="loading-text">
+      모든<br />
+      친환경 라이프 스타일은<br />
+      그린 스퀘어로 통한다.
+    </div>
+    <br />
+    <div id="loading-subtitle">그린스퀘어로 이동중...</div>
+    <br />
+
     <script src="flutter_bootstrap.js" async></script>
   </body>
 </html>
