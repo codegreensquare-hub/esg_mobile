@@ -234,6 +234,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // Create order first
       final orderId = await CartService.instance.checkoutCart(
         shippingAddressId: addressId,
+        awardPoints: _usedAwardPoints,
       );
 
       if ((orderId ?? '').isEmpty) {
@@ -285,15 +286,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) return;
 
       if (result != null && result['imp_success'] == 'true') {
-        // Deduct used award points
-        if (_usedAwardPoints > 0) {
-          final newPoints = _userAwardPoints - _usedAwardPoints;
-          await Supabase.instance.client
-              .from('award_points')
-              .update({'points': newPoints})
-              .eq('user', _userId!);
-        }
-
         // Update payment status
         await CartService.instance.updatePaymentStatus(
           paymentId: payment.id,

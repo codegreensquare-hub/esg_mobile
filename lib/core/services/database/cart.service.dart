@@ -407,6 +407,7 @@ class CartService {
 
   Future<String?> checkoutCart({
     required String shippingAddressId,
+    double awardPoints = 0,
   }) async {
     final normalized = shippingAddressId.trim();
     if (normalized.isEmpty) {
@@ -451,11 +452,14 @@ class CartService {
       }
     }
 
-    debugPrint('Checking out cart with shippingAddressId: "$normalized"');
+    debugPrint(
+      'Checking out cart with shippingAddressId: "$normalized" and awardPoints: $awardPoints',
+    );
     final response = await _client.rpc(
       'checkout_cart',
       params: {
         'p_shipping_address': normalized,
+        'p_award_points': awardPoints,
       },
     );
     debugPrint('Checkout response: $response');

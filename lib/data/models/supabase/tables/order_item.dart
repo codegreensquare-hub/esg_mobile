@@ -34,6 +34,7 @@ class OrderItemRow extends SupabaseDataRow {
     DateTime? receivedDeliveryAt,
     DateTime? preparingForDeliveryAt,
     DateTime? cancelledAt,
+    double? price,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -47,6 +48,7 @@ class OrderItemRow extends SupabaseDataRow {
          if (preparingForDeliveryAt != null)
            'preparing_for_delivery_at': supaSerialize(preparingForDeliveryAt),
          if (cancelledAt != null) 'cancelled_at': supaSerialize(cancelledAt),
+         if (price != null) 'price': supaSerialize(price),
        });
 
   /// Order Item Row
@@ -133,6 +135,13 @@ class OrderItemRow extends SupabaseDataRow {
   set cancelledAt(DateTime? value) =>
       setField<DateTime>(cancelledAtField, value);
 
+  /// Price field name
+  static const String priceField = 'price';
+
+  /// Price
+  double? get price => getField<double>(priceField);
+  set price(double? value) => setField<double>(priceField, value);
+
   /// Make a copy of the current [OrderItemRow]
   /// overriding the provided fields
   OrderItemRow copyWith({
@@ -145,6 +154,7 @@ class OrderItemRow extends SupabaseDataRow {
     DateTime? receivedDeliveryAt,
     DateTime? preparingForDeliveryAt,
     DateTime? cancelledAt,
+    double? price,
   }) => OrderItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -159,8 +169,9 @@ class OrderItemRow extends SupabaseDataRow {
         supaSerialize(preparingForDeliveryAt) ??
         data['preparing_for_delivery_at'],
     'cancelled_at': supaSerialize(cancelledAt) ?? data['cancelled_at'],
+    'price': supaSerialize(price) ?? data['price'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-21 21:59:57.931621
+/// Date: 2026-01-26 14:41:58.018577

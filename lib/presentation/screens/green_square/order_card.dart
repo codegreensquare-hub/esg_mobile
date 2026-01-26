@@ -92,6 +92,12 @@ class OrderCard extends StatelessWidget {
 
     final deliveryStatus = getOrderStatus(entry.items);
 
+    final totalItemPrice = entry.items.fold<double>(
+      0,
+      (sum, e) => sum + ((e.item.price ?? 0) * (e.item.quantity ?? 0)),
+    );
+    final totalAmount = totalItemPrice - (entry.order.awardPointsUsed ?? 0);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -166,6 +172,36 @@ class OrderCard extends StatelessWidget {
                 ),
               ],
             ),
+            if ((entry.order.awardPointsUsed ?? 0) > 0) ...[
+              const SizedBox(height: 4),
+              Text(
+                '사용 포인트: ${entry.order.awardPointsUsed!.toInt()}P',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.secondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              '결제 금액: ${totalItemPrice.toInt()}원',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '총 금액: ${totalItemPrice.toInt()}원 - ${entry.order.awardPointsUsed?.toInt() ?? 0}원 = ${totalAmount.toInt()}원',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+
+            // add computation here
+            // Total Amount: sum of (item.price * item.quantity)
+            // minus award points used
             const SizedBox(height: 10),
             Text(
               '배송지',
@@ -353,6 +389,14 @@ class OrderCard extends StatelessWidget {
                                                 color: cs.onSurfaceVariant,
                                               ),
                                         ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '가격: ${e.item.price?.toInt() ?? 0}원',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: cs.onSurfaceVariant,
+                                              ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -508,6 +552,7 @@ class OrderItemEntry {
     required this.hasReview,
     this.review,
     this.reviewImages = const [],
+    this.price,
   });
 
   final OrderItemRow item;
@@ -516,4 +561,5 @@ class OrderItemEntry {
   final bool hasReview;
   final ProductReviewRow? review;
   final List<ProductReviewImageRow> reviewImages;
+  final double? price;
 }

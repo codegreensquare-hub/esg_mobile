@@ -73,8 +73,9 @@ class ProductOptionParameterRow extends SupabaseDataRow {
   static const String createdByField = 'created_by';
 
   /// Created By
-  String? get createdBy => getField<String>(createdByField);
-  set createdBy(String? value) => setField<String>(createdByField, value);
+  String get createdBy =>
+      getField<String>(createdByField, defaultValue: 'auth.')!;
+  set createdBy(String value) => setField<String>(createdByField, value);
 
   /// Option Parameter field name
   static const String optionParameterField = 'option_parameter';
@@ -110,4 +111,4 @@ class ProductOptionParameterRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-21 21:59:57.936779
+/// Date: 2026-01-26 14:41:58.023448

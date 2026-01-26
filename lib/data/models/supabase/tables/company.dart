@@ -32,6 +32,8 @@ class CompanyRow extends SupabaseDataRow {
     String? ownedBy,
     VendorAdminType? vendorType,
     DateTime? deactivatedAt,
+    double? costBudget,
+    double? discountRate,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -42,6 +44,8 @@ class CompanyRow extends SupabaseDataRow {
          if (vendorType != null) 'vendor_type': supaSerialize(vendorType),
          if (deactivatedAt != null)
            'deactivated_at': supaSerialize(deactivatedAt),
+         if (costBudget != null) 'cost_budget': supaSerialize(costBudget),
+         if (discountRate != null) 'discount_rate': supaSerialize(discountRate),
        });
 
   /// Company Row
@@ -122,6 +126,20 @@ class CompanyRow extends SupabaseDataRow {
   set deactivatedAt(DateTime? value) =>
       setField<DateTime>(deactivatedAtField, value);
 
+  /// Cost Budget field name
+  static const String costBudgetField = 'cost_budget';
+
+  /// Cost Budget
+  double? get costBudget => getField<double>(costBudgetField);
+  set costBudget(double? value) => setField<double>(costBudgetField, value);
+
+  /// Discount Rate field name
+  static const String discountRateField = 'discount_rate';
+
+  /// Discount Rate
+  double? get discountRate => getField<double>(discountRateField);
+  set discountRate(double? value) => setField<double>(discountRateField, value);
+
   /// Make a copy of the current [CompanyRow]
   /// overriding the provided fields
   CompanyRow copyWith({
@@ -133,6 +151,8 @@ class CompanyRow extends SupabaseDataRow {
     String? ownedBy,
     VendorAdminType? vendorType,
     DateTime? deactivatedAt,
+    double? costBudget,
+    double? discountRate,
   }) => CompanyRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -142,8 +162,10 @@ class CompanyRow extends SupabaseDataRow {
     'owned_by': supaSerialize(ownedBy) ?? data['owned_by'],
     'vendor_type': supaSerialize(vendorType) ?? data['vendor_type'],
     'deactivated_at': supaSerialize(deactivatedAt) ?? data['deactivated_at'],
+    'cost_budget': supaSerialize(costBudget) ?? data['cost_budget'],
+    'discount_rate': supaSerialize(discountRate) ?? data['discount_rate'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-21 21:59:57.916336
+/// Date: 2026-01-26 14:41:58.002587

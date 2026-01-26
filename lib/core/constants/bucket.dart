@@ -1,4 +1,5 @@
 const bucket = (
+  asset: "asset",
   mission: "mission",
   pushNotification: "push_notification",
   popup: "popup",

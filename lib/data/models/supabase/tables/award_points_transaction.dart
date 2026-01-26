@@ -34,6 +34,7 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
     String? createdBy,
     String? transactionBy,
     double? previousAmount,
+    String? relatedParticipation,
   }) : super({
          'award_amount': supaSerialize(awardAmount),
          'new_amount': supaSerialize(newAmount),
@@ -45,6 +46,8 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
            'transaction_by': supaSerialize(transactionBy),
          if (previousAmount != null)
            'previous_amount': supaSerialize(previousAmount),
+         if (relatedParticipation != null)
+           'related_participation': supaSerialize(relatedParticipation),
        });
 
   /// Award Points Transaction Row
@@ -123,6 +126,15 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
   String get awardedUser => getField<String>(awardedUserField)!;
   set awardedUser(String value) => setField<String>(awardedUserField, value);
 
+  /// Related Participation field name
+  static const String relatedParticipationField = 'related_participation';
+
+  /// Related Participation
+  String? get relatedParticipation =>
+      getField<String>(relatedParticipationField);
+  set relatedParticipation(String? value) =>
+      setField<String>(relatedParticipationField, value);
+
   /// Make a copy of the current [AwardPointsTransactionRow]
   /// overriding the provided fields
   AwardPointsTransactionRow copyWith({
@@ -134,6 +146,7 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
     String? createdBy,
     String? transactionBy,
     double? previousAmount,
+    String? relatedParticipation,
   }) => AwardPointsTransactionRow.fromJson({
     'award_amount': supaSerialize(awardAmount) ?? data['award_amount'],
     'new_amount': supaSerialize(newAmount) ?? data['new_amount'],
@@ -143,8 +156,10 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'transaction_by': supaSerialize(transactionBy) ?? data['transaction_by'],
     'previous_amount': supaSerialize(previousAmount) ?? data['previous_amount'],
+    'related_participation':
+        supaSerialize(relatedParticipation) ?? data['related_participation'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-21 21:59:57.913339
+/// Date: 2026-01-26 14:41:57.999313

@@ -43,6 +43,8 @@ class UserRow extends SupabaseDataRow {
     String? photoBucket,
     String? photoFolderPath,
     String? photoFileName,
+    String? department,
+    bool? isEmployee,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -72,6 +74,8 @@ class UserRow extends SupabaseDataRow {
            'photo_folder_path': supaSerialize(photoFolderPath),
          if (photoFileName != null)
            'photo_file_name': supaSerialize(photoFileName),
+         if (department != null) 'department': supaSerialize(department),
+         if (isEmployee != null) 'is_employee': supaSerialize(isEmployee),
        });
 
   /// User Row
@@ -239,6 +243,20 @@ class UserRow extends SupabaseDataRow {
   set photoFileName(String? value) =>
       setField<String>(photoFileNameField, value);
 
+  /// Department field name
+  static const String departmentField = 'department';
+
+  /// Department
+  String? get department => getField<String>(departmentField);
+  set department(String? value) => setField<String>(departmentField, value);
+
+  /// Is Employee field name
+  static const String isEmployeeField = 'is_employee';
+
+  /// Is Employee
+  bool get isEmployee => getField<bool>(isEmployeeField, defaultValue: true)!;
+  set isEmployee(bool value) => setField<bool>(isEmployeeField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -261,6 +279,8 @@ class UserRow extends SupabaseDataRow {
     String? photoBucket,
     String? photoFolderPath,
     String? photoFileName,
+    String? department,
+    bool? isEmployee,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -289,8 +309,10 @@ class UserRow extends SupabaseDataRow {
     'photo_folder_path':
         supaSerialize(photoFolderPath) ?? data['photo_folder_path'],
     'photo_file_name': supaSerialize(photoFileName) ?? data['photo_file_name'],
+    'department': supaSerialize(department) ?? data['department'],
+    'is_employee': supaSerialize(isEmployee) ?? data['is_employee'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-21 21:59:57.947109
+/// Date: 2026-01-26 14:41:58.034490

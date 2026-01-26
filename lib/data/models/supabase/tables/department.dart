@@ -9,48 +9,50 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Product Subcategory Table
-class ProductSubcategoryTable extends SupabaseTable<ProductSubcategoryRow> {
+/// Department Table
+class DepartmentTable extends SupabaseTable<DepartmentRow> {
   /// Table Name
   @override
-  String get tableName => 'product_subcategory';
+  String get tableName => 'department';
 
-  /// Create a [ProductSubcategoryRow] from the [data] provided
+  /// Create a [DepartmentRow] from the [data] provided
   @override
-  ProductSubcategoryRow createRow(Map<String, dynamic> data) =>
-      ProductSubcategoryRow.fromJson(data);
+  DepartmentRow createRow(Map<String, dynamic> data) =>
+      DepartmentRow.fromJson(data);
 }
 
-/// Product Subcategory Row
-class ProductSubcategoryRow extends SupabaseDataRow {
-  /// Product Subcategory Row
-  ProductSubcategoryRow({
+/// Department Row
+class DepartmentRow extends SupabaseDataRow {
+  /// Department Row
+  DepartmentRow({
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? category,
     String? name,
+    String? company,
+    double? discountRate,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
-         if (category != null) 'category': supaSerialize(category),
          if (name != null) 'name': supaSerialize(name),
+         if (company != null) 'company': supaSerialize(company),
+         if (discountRate != null) 'discount_rate': supaSerialize(discountRate),
        });
 
-  /// Product Subcategory Row
-  const ProductSubcategoryRow._(super.data);
+  /// Department Row
+  const DepartmentRow._(super.data);
 
-  /// Create Product Subcategory Row from a [data] map
-  factory ProductSubcategoryRow.fromJson(Map<String, dynamic> data) =>
-      ProductSubcategoryRow._(data.cleaned);
+  /// Create Department Row from a [data] map
+  factory DepartmentRow.fromJson(Map<String, dynamic> data) =>
+      DepartmentRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => ProductSubcategoryTable();
+  SupabaseTable get table => DepartmentTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -74,13 +76,6 @@ class ProductSubcategoryRow extends SupabaseDataRow {
   String? get createdBy => getField<String>(createdByField);
   set createdBy(String? value) => setField<String>(createdByField, value);
 
-  /// Category field name
-  static const String categoryField = 'category';
-
-  /// Category
-  String? get category => getField<String>(categoryField);
-  set category(String? value) => setField<String>(categoryField, value);
-
   /// Name field name
   static const String nameField = 'name';
 
@@ -88,22 +83,38 @@ class ProductSubcategoryRow extends SupabaseDataRow {
   String? get name => getField<String>(nameField);
   set name(String? value) => setField<String>(nameField, value);
 
-  /// Make a copy of the current [ProductSubcategoryRow]
+  /// Company field name
+  static const String companyField = 'company';
+
+  /// Company
+  String? get company => getField<String>(companyField);
+  set company(String? value) => setField<String>(companyField, value);
+
+  /// Discount Rate field name
+  static const String discountRateField = 'discount_rate';
+
+  /// Discount Rate
+  double? get discountRate => getField<double>(discountRateField);
+  set discountRate(double? value) => setField<double>(discountRateField, value);
+
+  /// Make a copy of the current [DepartmentRow]
   /// overriding the provided fields
-  ProductSubcategoryRow copyWith({
+  DepartmentRow copyWith({
     String? id,
     DateTime? createdAt,
     String? createdBy,
-    String? category,
     String? name,
-  }) => ProductSubcategoryRow.fromJson({
+    String? company,
+    double? discountRate,
+  }) => DepartmentRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
-    'category': supaSerialize(category) ?? data['category'],
     'name': supaSerialize(name) ?? data['name'],
+    'company': supaSerialize(company) ?? data['company'],
+    'discount_rate': supaSerialize(discountRate) ?? data['discount_rate'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-26 14:41:58.025484
+/// Date: 2026-01-26 14:41:58.003704

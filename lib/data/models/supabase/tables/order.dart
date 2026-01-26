@@ -29,6 +29,8 @@ class OrderRow extends SupabaseDataRow {
     String? orderBy,
     String? shippingAddress,
     String? payment,
+    double? awardPointsUsed,
+    String? transactionReference,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -36,6 +38,10 @@ class OrderRow extends SupabaseDataRow {
          if (shippingAddress != null)
            'shipping_address': supaSerialize(shippingAddress),
          if (payment != null) 'payment': supaSerialize(payment),
+         if (awardPointsUsed != null)
+           'award_points_used': supaSerialize(awardPointsUsed),
+         if (transactionReference != null)
+           'transaction_reference': supaSerialize(transactionReference),
        });
 
   /// Order Row
@@ -89,6 +95,23 @@ class OrderRow extends SupabaseDataRow {
   String? get payment => getField<String>(paymentField);
   set payment(String? value) => setField<String>(paymentField, value);
 
+  /// Award Points Used field name
+  static const String awardPointsUsedField = 'award_points_used';
+
+  /// Award Points Used
+  double? get awardPointsUsed => getField<double>(awardPointsUsedField);
+  set awardPointsUsed(double? value) =>
+      setField<double>(awardPointsUsedField, value);
+
+  /// Transaction Reference field name
+  static const String transactionReferenceField = 'transaction_reference';
+
+  /// Transaction Reference
+  String? get transactionReference =>
+      getField<String>(transactionReferenceField);
+  set transactionReference(String? value) =>
+      setField<String>(transactionReferenceField, value);
+
   /// Make a copy of the current [OrderRow]
   /// overriding the provided fields
   OrderRow copyWith({
@@ -97,6 +120,8 @@ class OrderRow extends SupabaseDataRow {
     String? orderBy,
     String? shippingAddress,
     String? payment,
+    double? awardPointsUsed,
+    String? transactionReference,
   }) => OrderRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -104,8 +129,12 @@ class OrderRow extends SupabaseDataRow {
     'shipping_address':
         supaSerialize(shippingAddress) ?? data['shipping_address'],
     'payment': supaSerialize(payment) ?? data['payment'],
+    'award_points_used':
+        supaSerialize(awardPointsUsed) ?? data['award_points_used'],
+    'transaction_reference':
+        supaSerialize(transactionReference) ?? data['transaction_reference'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-21 21:59:57.931211
+/// Date: 2026-01-26 14:41:58.018132

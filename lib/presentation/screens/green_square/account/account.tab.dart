@@ -31,6 +31,9 @@ class _AccountTabState extends State<AccountTab> {
   List<Participation> participations = [];
   bool isLoading = true;
   bool _authInProgress = false;
+  String? companyName;
+  bool? isEmployee;
+  String? departmentName;
 
   @override
   void initState() {
@@ -50,6 +53,36 @@ class _AccountTabState extends State<AccountTab> {
       userName = UserAuthService.instance.displayName;
 
       final client = Supabase.instance.client;
+
+      // Fetch user company, is_employee, department
+      final userRow = await client
+          .from('user')
+          .select('company, is_employee, department')
+          .eq('id', user.id)
+          .single();
+      final companyId = userRow['company'] as String?;
+      isEmployee = userRow['is_employee'] as bool?;
+      final departmentId = userRow['department'] as String?;
+      if (companyId != null) {
+        final companyRow = await client
+            .from('company')
+            .select('name')
+            .eq('id', companyId)
+            .single();
+        companyName = companyRow['name'] as String?;
+      } else {
+        companyName = null;
+      }
+      if (departmentId != null) {
+        final departmentRow = await client
+            .from('department')
+            .select('name')
+            .eq('id', departmentId)
+            .single();
+        departmentName = departmentRow['name'] as String?;
+      } else {
+        departmentName = null;
+      }
 
       // Fetch total mileage from award_points balance
       final pointsRow = await client
@@ -283,6 +316,74 @@ class _AccountTabState extends State<AccountTab> {
     );
   }
 
+  void _handleSelectCompany() {
+    // TODO: implement company selection
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('회사 선택 기능이 곧 추가됩니다.')),
+    );
+  }
+
+  Future<void> _handleRemoveCompany() async {
+    if (userId == null) return;
+    try {
+      await Supabase.instance.client
+          .from('user')
+          .update({'company': null})
+          .eq('id', userId!);
+      setState(() => companyName = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('회사가 제거되었습니다.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('회사 제거 중 오류가 발생했습니다.')),
+      );
+    }
+  }
+
+  void _handleSetIsEmployee(bool value) async {
+    if (userId == null) return;
+    try {
+      await Supabase.instance.client
+          .from('user')
+          .update({'is_employee': value})
+          .eq('id', userId!);
+      setState(() => isEmployee = value);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('관계가 업데이트되었습니다.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('업데이트 중 오류가 발생했습니다.')),
+      );
+    }
+  }
+
+  void _handleSelectDepartment() {
+    // TODO: implement department selection
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('부서 선택 기능이 곧 추가됩니다.')),
+    );
+  }
+
+  Future<void> _handleRemoveDepartment() async {
+    if (userId == null) return;
+    try {
+      await Supabase.instance.client
+          .from('user')
+          .update({'department': null})
+          .eq('id', userId!);
+      setState(() => departmentName = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('부서가 제거되었습니다.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('부서 제거 중 오류가 발생했습니다.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -310,6 +411,14 @@ class _AccountTabState extends State<AccountTab> {
       onWishlist: _openWishlist,
       onMyComments: _handleMyComments,
       onLikedStories: _openLikedStories,
+      companyName: companyName,
+      onSelectCompany: _handleSelectCompany,
+      onRemoveCompany: _handleRemoveCompany,
+      isEmployee: isEmployee,
+      departmentName: departmentName,
+      onSetIsEmployee: _handleSetIsEmployee,
+      onSelectDepartment: _handleSelectDepartment,
+      onRemoveDepartment: _handleRemoveDepartment,
     );
   }
 }
