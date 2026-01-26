@@ -86,7 +86,8 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
             return CachedNetworkImage(
               imageUrl: imagePath,
               fit: BoxFit.cover,
-              placeholder: (context, url) => const CircularProgressIndicator(),
+              placeholder: (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) => const Icon(Icons.error),
             );
           },
