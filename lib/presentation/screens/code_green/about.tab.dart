@@ -53,7 +53,8 @@ class _AboutTabState extends State<AboutTab> {
                 folderPath: assetFolderPath[asset.tree],
               ),
               fit: BoxFit.contain,
-              placeholder: (context, url) => const CircularProgressIndicator(),
+              placeholder: (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
           ),
@@ -69,7 +70,8 @@ class _AboutTabState extends State<AboutTab> {
             ),
             width: double.infinity,
             fit: BoxFit.cover,
-            placeholder: (context, url) => const CircularProgressIndicator(),
+            placeholder: (context, url) =>
+                const Center(child: CircularProgressIndicator()),
             errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
@@ -108,7 +110,8 @@ class _AboutTabState extends State<AboutTab> {
             ),
             width: double.infinity,
             fit: BoxFit.cover,
-            placeholder: (context, url) => const CircularProgressIndicator(),
+            placeholder: (context, url) =>
+                const Center(child: CircularProgressIndicator()),
             errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
@@ -147,7 +150,8 @@ class _AboutTabState extends State<AboutTab> {
             ),
             width: double.infinity,
             fit: BoxFit.cover,
-            placeholder: (context, url) => const CircularProgressIndicator(),
+            placeholder: (context, url) =>
+                const Center(child: CircularProgressIndicator()),
             errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
@@ -204,8 +208,12 @@ class _AboutTabState extends State<AboutTab> {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 40, 24, 32),
             child: Center(
-              child: SvgPicture.asset(
-                'assets/images/about/squareLogo.360eaffc.svg',
+              child: SvgPicture.network(
+                getImageLink(
+                  bucket.asset,
+                  asset.squareLogo,
+                  folderPath: assetFolderPath[asset.squareLogo],
+                ),
                 height: 40,
               ),
             ),
@@ -281,7 +289,8 @@ class _AboutTabState extends State<AboutTab> {
             ),
             width: double.infinity,
             fit: BoxFit.cover,
-            placeholder: (context, url) => const CircularProgressIndicator(),
+            placeholder: (context, url) =>
+                const Center(child: CircularProgressIndicator()),
             errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
@@ -336,8 +345,12 @@ class _AboutTabState extends State<AboutTab> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 0, 0, 18),
-                        child: SvgPicture.asset(
-                          'assets/images/logos/codegreen_logo.svg',
+                        child: SvgPicture.network(
+                          getImageLink(
+                            bucket.asset,
+                            asset.codegreenLogo,
+                            folderPath: assetFolderPath[asset.codegreenLogo],
+                          ),
                           width: 168,
                           height: 50,
                           colorFilter: ColorFilter.mode(
@@ -378,8 +391,12 @@ class _AboutTabState extends State<AboutTab> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 18, 0, 0),
-                        child: SvgPicture.asset(
-                          'assets/images/logos/greensquare_logo.svg',
+                        child: SvgPicture.network(
+                          getImageLink(
+                            bucket.asset,
+                            asset.greensquareLogo,
+                            folderPath: assetFolderPath[asset.greensquareLogo],
+                          ),
                           height: 50,
                           width: 168,
                         ),

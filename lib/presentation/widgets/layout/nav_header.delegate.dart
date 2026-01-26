@@ -283,7 +283,7 @@ class _NavTabButtonState extends State<_NavTabButton> {
           curve: Curves.easeOut,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: widget.selected ? cs.primaryContainer : cs.surface,
+            color: cs.surface,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(widget.label, style: style),
