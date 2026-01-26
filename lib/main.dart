@@ -1,3 +1,4 @@
+import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
@@ -8,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
-import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/firebase_options.dart';
 
 // Re-export App and MyApp for tests referencing symbols from main.dart.
