@@ -40,18 +40,6 @@ dev_dependencies:
 flutter:
   assets:
     - .env
-    - assets/images/carousel/
-    - assets/images/product_grid/
-    - assets/images/material_grid/
-    - assets/images/award_points/
-    - assets/images/banner/
-    - assets/images/login/
-    - assets/images/meetCodegreenAndSquare/
-    - assets/images/backgrounds/trees.png
-    - assets/images/logos/
-    - assets/images/screen/brandstory/
-    - assets/images/screen/coginfo/
-    - assets/images/about/
   fonts:
     - family: EB Garamond
       fonts:

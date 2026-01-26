@@ -1,3 +1,5 @@
+import 'package:esg_mobile/core/constants/asset.dart' as asset_constants;
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
@@ -49,21 +51,26 @@ class _GreenSquareStoriesSectionState extends State<GreenSquareStoriesSection> {
   }
 
   String _resolveStoryImagePath(StoryWithTags item) {
-    final bucket = item.story.thumbnailBucket;
+    final thumbnailBucket = item.story.thumbnailBucket;
     final fileName = item.story.thumbnailFileName;
 
-    if (bucket != null &&
-        bucket.isNotEmpty &&
+    if (thumbnailBucket != null &&
+        thumbnailBucket.isNotEmpty &&
         fileName != null &&
         fileName.isNotEmpty) {
       return getImageLink(
-        bucket,
+        thumbnailBucket,
         fileName,
         folderPath: item.story.thumbnailFolderPath,
       );
     }
 
-    return 'assets/images/product_grid/product_1.png'; // Fallback
+    return getImageLink(
+      bucket.asset,
+      asset_constants.asset.product1,
+      folderPath:
+          asset_constants.assetFolderPath[asset_constants.asset.product1],
+    ); // Fallback
   }
 
   @override

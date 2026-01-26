@@ -1,3 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:flutter/material.dart';
 
 class CodegreenMeetSection extends StatelessWidget {
@@ -17,9 +21,17 @@ class CodegreenMeetSection extends StatelessWidget {
         final width = constraints.maxWidth;
         final isSmall = width < 600;
 
-        final imagePath = isSmall
-            ? 'assets/images/meetCodegreenAndSquare/square_mobile.d86aac5d.jpg'
-            : 'assets/images/meetCodegreenAndSquare/square_window.71156b9b.jpg';
+        final imageUrl = isSmall
+            ? getImageLink(
+                bucket.asset,
+                asset.squareMobile,
+                folderPath: assetFolderPath[asset.squareMobile],
+              )
+            : getImageLink(
+                bucket.asset,
+                asset.squareWindow,
+                folderPath: assetFolderPath[asset.squareWindow],
+              );
 
         // Responsive font sizes
         double headlineFontSize;
@@ -52,10 +64,13 @@ class CodegreenMeetSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Image.asset(
-                imagePath,
+              CachedNetworkImage(
+                imageUrl: imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
+                placeholder: (context, url) =>
+                    const CircularProgressIndicator(),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
               const SizedBox(height: 16),
               Padding(

@@ -1,3 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/constants/asset.dart' as asset_constants;
+import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/underline_value.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -78,9 +82,16 @@ class _GreenSquareStatisticsBannerState
         maxWidth: double.infinity,
         minHeight: 200,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/images/backgrounds/trees.png'),
+          image: CachedNetworkImageProvider(
+            getImageLink(
+              bucket.asset,
+              asset_constants.asset.trees,
+              folderPath:
+                  asset_constants.assetFolderPath[asset_constants.asset.trees],
+            ),
+          ),
           fit: BoxFit.cover,
         ),
       ),

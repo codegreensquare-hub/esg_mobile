@@ -1,5 +1,8 @@
+import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
@@ -275,8 +278,12 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SvgPicture.asset(
-                    'assets/images/award_points/c_milage.svg',
+                  SvgPicture.network(
+                    getImageLink(
+                      bucket.asset,
+                      asset.cMilage,
+                      folderPath: assetFolderPath[asset.cMilage],
+                    ),
                     width: 20,
                     height: 20,
                     semanticsLabel: '마일리지',

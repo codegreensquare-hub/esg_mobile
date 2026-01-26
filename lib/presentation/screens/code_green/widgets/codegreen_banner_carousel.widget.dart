@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -5,11 +7,7 @@ import 'package:flutter/material.dart';
 class CodegreenBannerCarousel extends StatefulWidget {
   const CodegreenBannerCarousel({
     super.key,
-    this.imagePaths = const [
-      'assets/images/banner/banner1_window.089ff4ec.jpg',
-      'assets/images/banner/banner2_window.8e953a16.jpg',
-      'assets/images/banner/banner3_window.3c6c17a8.jpg',
-    ],
+    required this.imagePaths,
     this.autoPlay = true,
     this.autoPlayInterval = const Duration(seconds: 4),
   });
@@ -85,7 +83,12 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
           onPageChanged: (value) => setState(() => _index = value),
           itemBuilder: (context, index) {
             final imagePath = widget.imagePaths[index];
-            return Image.asset(imagePath, fit: BoxFit.cover);
+            return CachedNetworkImage(
+              imageUrl: imagePath,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            );
           },
         );
 

@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/constants/asset.dart' as asset_constants;
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/constants/frame_width.dart';
 import 'package:esg_mobile/core/enums/device.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/widgets/main/fade_carousel.container.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class CodeGreenHeroBanner extends StatefulWidget {
   const CodeGreenHeroBanner({
@@ -20,34 +23,37 @@ class CodeGreenHeroBanner extends StatefulWidget {
 }
 
 class _CodeGreenHeroBannerState extends State<CodeGreenHeroBanner> {
-  List<String> _carouselAssets = const [];
+  late final List<String> _carouselAssets;
 
   @override
   void initState() {
     super.initState();
-    _loadCarouselAssets();
-  }
-
-  Future<void> _loadCarouselAssets() async {
-    const potentialAssets = [
-      'assets/images/carousel/carousel_1.jpg',
-      'assets/images/carousel/carousel_2.jpg',
-      'assets/images/carousel/carousel_4.jpg',
-      'assets/images/carousel/carousel_5.jpg',
+    _carouselAssets = [
+      getImageLink(
+        bucket.asset,
+        asset_constants.asset.carousel1,
+        folderPath:
+            asset_constants.assetFolderPath[asset_constants.asset.carousel1],
+      ),
+      getImageLink(
+        bucket.asset,
+        asset_constants.asset.carousel2,
+        folderPath:
+            asset_constants.assetFolderPath[asset_constants.asset.carousel2],
+      ),
+      getImageLink(
+        bucket.asset,
+        asset_constants.asset.carousel3,
+        folderPath:
+            asset_constants.assetFolderPath[asset_constants.asset.carousel3],
+      ),
+      getImageLink(
+        bucket.asset,
+        asset_constants.asset.carousel4,
+        folderPath:
+            asset_constants.assetFolderPath[asset_constants.asset.carousel4],
+      ),
     ];
-
-    final verifiedAssets = <String>[];
-    for (final asset in potentialAssets) {
-      try {
-        await rootBundle.load(asset);
-        verifiedAssets.add(asset);
-      } catch (_) {
-        // Skip missing asset
-      }
-    }
-
-    if (!mounted) return;
-    setState(() => _carouselAssets = verifiedAssets);
   }
 
   @override
@@ -57,7 +63,7 @@ class _CodeGreenHeroBannerState extends State<CodeGreenHeroBanner> {
     final double carouselHeight = isSmall ? 445 : math.min(width / 3, 700);
     final theme = Theme.of(context);
 
-    return FadeCarouselContainer.assets(
+    return FadeCarouselContainer.network(
       _carouselAssets,
       height: carouselHeight,
       switchInterval: const Duration(seconds: 5),

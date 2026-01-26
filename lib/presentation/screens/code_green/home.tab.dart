@@ -1,3 +1,5 @@
+import 'package:esg_mobile/core/constants/asset.dart' as asset_constants;
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/constants/frame_width.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/core/theme/util.dart';
@@ -82,15 +84,15 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   String _resolveProductImagePath(ProductWithOtherDetails item) {
-    final bucket = item.product.mainImageBucket;
+    final mainImageBucket = item.product.mainImageBucket;
     final fileName = item.product.mainImageFileName;
 
-    if (bucket != null &&
-        bucket.isNotEmpty &&
+    if (mainImageBucket != null &&
+        mainImageBucket.isNotEmpty &&
         fileName != null &&
         fileName.isNotEmpty) {
       return getImageLink(
-        bucket,
+        mainImageBucket,
         fileName,
         folderPath: item.product.mainImageFolderPath,
       );
@@ -113,7 +115,12 @@ class _HomeTabState extends State<HomeTab> {
       );
     }
 
-    return 'assets/images/product_grid/product_1.png';
+    return getImageLink(
+      bucket.asset,
+      asset_constants.asset.product1,
+      folderPath:
+          asset_constants.assetFolderPath[asset_constants.asset.product1],
+    );
   }
 
   @override
@@ -164,7 +171,28 @@ class _HomeTabState extends State<HomeTab> {
             onTapBiodegradable: widget.onTapBiodegradableMaterial,
           ),
           const SizedBox(height: 80),
-          const CodegreenBannerCarousel(),
+          CodegreenBannerCarousel(
+            imagePaths: [
+              getImageLink(
+                bucket.asset,
+                asset_constants.asset.banner1Window,
+                folderPath: asset_constants
+                    .assetFolderPath[asset_constants.asset.banner1Window],
+              ),
+              getImageLink(
+                bucket.asset,
+                asset_constants.asset.banner2Window,
+                folderPath: asset_constants
+                    .assetFolderPath[asset_constants.asset.banner2Window],
+              ),
+              getImageLink(
+                bucket.asset,
+                asset_constants.asset.banner3Window,
+                folderPath: asset_constants
+                    .assetFolderPath[asset_constants.asset.banner3Window],
+              ),
+            ],
+          ),
           const SizedBox(height: 80),
           CodegreenMeetSection(
             onTapVisit: widget.onTapGreenSquare,

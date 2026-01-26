@@ -1,5 +1,8 @@
+import 'package:esg_mobile/core/constants/asset.dart' as asset_constants;
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/constants/frame_width.dart';
 import 'package:esg_mobile/core/theme/util.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/widgets/home/material_card.widget.dart';
 import 'package:flutter/material.dart';
 
@@ -65,21 +68,36 @@ class CodegreenMaterialSection extends StatelessWidget {
 
                 final items = [
                   (
-                    'assets/images/material_grid/material_grid_1.png',
+                    getImageLink(
+                      bucket.asset,
+                      asset_constants.asset.materialGrid1,
+                      folderPath: asset_constants
+                          .assetFolderPath[asset_constants.asset.materialGrid1],
+                    ),
                     '천연',
                     'nature-oriented',
                     '천연 제품 보러가기',
                     onTapNature,
                   ),
                   (
-                    'assets/images/material_grid/material_grid_2.png',
+                    getImageLink(
+                      bucket.asset,
+                      asset_constants.asset.materialGrid2,
+                      folderPath: asset_constants
+                          .assetFolderPath[asset_constants.asset.materialGrid2],
+                    ),
                     '비건',
                     'Vegan',
                     '비건 제품 보러가기',
                     onTapVegan,
                   ),
                   (
-                    'assets/images/material_grid/material_grid_3.png',
+                    getImageLink(
+                      bucket.asset,
+                      asset_constants.asset.materialGrid3,
+                      folderPath: asset_constants
+                          .assetFolderPath[asset_constants.asset.materialGrid3],
+                    ),
                     '생분해',
                     'biodegradable',
                     '생분해 제품 보러가기',

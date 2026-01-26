@@ -1,4 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/constants/frame_width.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -77,10 +81,14 @@ class _CodeGreenLoginScreenState extends State<CodeGreenLoginScreen> {
                   child: Container(
                     width: double.infinity,
                     height: 160,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage(
-                          'assets/images/login/login2.0e2030c6.jpg',
+                        image: CachedNetworkImageProvider(
+                          getImageLink(
+                            bucket.asset,
+                            asset.login2,
+                            folderPath: assetFolderPath[asset.login2],
+                          ),
                         ),
                         fit: BoxFit.cover,
                       ),

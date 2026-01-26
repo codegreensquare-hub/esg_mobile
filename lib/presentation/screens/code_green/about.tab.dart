@@ -1,13 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_statistics_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class AboutTab extends StatefulWidget {
   static const tab = 'about';
-  
+
   final VoidCallback? onTapCodeGreenProducts;
   final VoidCallback? onTapGreenSquare;
-  
+
   const AboutTab({
     super.key,
     this.onTapCodeGreenProducts,
@@ -42,19 +46,31 @@ class _AboutTabState extends State<AboutTab> {
           // Tree image
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Image.asset(
-              'assets/images/about/tree.016ff885.png',
+            child: CachedNetworkImage(
+              imageUrl: getImageLink(
+                bucket.asset,
+                asset.tree,
+                folderPath: assetFolderPath[asset.tree],
+              ),
               fit: BoxFit.contain,
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
           ),
 
           const SizedBox(height: 80),
 
           // Section 1: 친환경 소비가 즐겁고 기쁜 곳
-          Image.asset(
-            'assets/images/about/about_1.7a6b64fe.jpg',
+          CachedNetworkImage(
+            imageUrl: getImageLink(
+              bucket.asset,
+              asset.about1,
+              folderPath: assetFolderPath[asset.about1],
+            ),
             width: double.infinity,
             fit: BoxFit.cover,
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
           Padding(
@@ -84,10 +100,16 @@ class _AboutTabState extends State<AboutTab> {
           const SizedBox(height: 64),
 
           // Section 2: 친환경이지만 예쁘고 좋은 코드 그린
-          Image.asset(
-            'assets/images/about/about_2.a32a1d4b.jpg',
+          CachedNetworkImage(
+            imageUrl: getImageLink(
+              bucket.asset,
+              asset.about2,
+              folderPath: assetFolderPath[asset.about2],
+            ),
             width: double.infinity,
             fit: BoxFit.cover,
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
           Padding(
@@ -117,10 +139,16 @@ class _AboutTabState extends State<AboutTab> {
           const SizedBox(height: 64),
 
           // Section 3: 연구하고, 사색하는 친환경 브랜드
-          Image.asset(
-            'assets/images/about/about_3.085c0f2e.jpg',
+          CachedNetworkImage(
+            imageUrl: getImageLink(
+              bucket.asset,
+              asset.about3,
+              folderPath: assetFolderPath[asset.about3],
+            ),
             width: double.infinity,
             fit: BoxFit.cover,
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
           Padding(
@@ -245,10 +273,16 @@ class _AboutTabState extends State<AboutTab> {
           const SizedBox(height: 80),
 
           // Section 6: History
-          Image.asset(
-            'assets/images/about/about_4.5918b406.jpg',
+          CachedNetworkImage(
+            imageUrl: getImageLink(
+              bucket.asset,
+              asset.about4,
+              folderPath: assetFolderPath[asset.about4],
+            ),
             width: double.infinity,
             fit: BoxFit.cover,
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
 
           Padding(

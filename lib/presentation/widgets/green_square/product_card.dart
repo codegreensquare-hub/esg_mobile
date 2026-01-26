@@ -233,23 +233,17 @@ class _ProductCardState extends State<ProductCard> {
                                             _selectedImageUrl = nextUrl;
                                           });
                                         },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 4,
-                                          ),
-                                          child: Container(
-                                            width: 12,
-                                            height: 12,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: color,
-                                              border: Border.all(
-                                                color: isSelected
-                                                    ? cs.primary
-                                                    : cs.outlineVariant,
-                                                width: isSelected ? 2 : 1,
-                                              ),
+                                        child: Container(
+                                          width: 12,
+                                          height: 12,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: color,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? cs.primary
+                                                  : cs.outlineVariant,
+                                              width: isSelected ? 2 : 1,
                                             ),
                                           ),
                                         ),

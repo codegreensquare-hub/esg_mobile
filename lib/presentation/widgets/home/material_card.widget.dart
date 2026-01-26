@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class MaterialCard extends StatelessWidget {
@@ -24,7 +25,7 @@ class MaterialCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(imagePath),
+            image: CachedNetworkImageProvider(imagePath),
             fit: BoxFit.cover,
           ),
         ),
