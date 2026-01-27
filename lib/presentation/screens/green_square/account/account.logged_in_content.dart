@@ -47,6 +47,187 @@ class AccountLoggedInContent extends StatelessWidget {
   final VoidCallback onSelectDepartment;
   final VoidCallback onRemoveDepartment;
 
+  void _showRelationshipDialog(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('회사 및 관계 설정'),
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '회사',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () async {
+                                if (companyName == null) {
+                                  onSelectCompany();
+                                  Navigator.of(context).pop();
+                                } else {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('회사 변경'),
+                                      content: const Text('회사를 변경하시겠습니까?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          child: const Text('취소'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text('변경'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true) {
+                                    onSelectCompany();
+                                    Navigator.of(context).pop();
+                                  }
+                                }
+                              },
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 48),
+                              ),
+                              child: Text(companyName ?? '회사 없음'),
+                            ),
+                          ),
+                          if (companyName != null) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('회사 제거'),
+                                    content: const Text('회사를 제거하시겠습니까?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: const Text('취소'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: const Text('제거'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  onRemoveCompany();
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (companyName != null) ...[
+                        const SizedBox(height: 24),
+                        Text(
+                          '관계',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  onSetIsEmployee(true);
+                                  Navigator.of(context).pop();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: isEmployee == true
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : null,
+                                ),
+                                child: const Text('직원'),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  onSetIsEmployee(false);
+                                  Navigator.of(context).pop();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: isEmployee == false
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : null,
+                                ),
+                                child: const Text('직원 가족'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: onSelectDepartment,
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(double.infinity, 48),
+                                ),
+                                child: Text(departmentName ?? '부서 선택'),
+                              ),
+                            ),
+                            if (departmentName != null) ...[
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: onRemoveDepartment,
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -68,10 +249,13 @@ class AccountLoggedInContent extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      userName,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    child: InkWell(
+                      onTap: () => _showRelationshipDialog(context),
+                      child: Text(
+                        userName,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -91,135 +275,7 @@ class AccountLoggedInContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        if (companyName == null) {
-                          onSelectCompany();
-                        } else {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('회사 변경'),
-                              content: const Text('회사를 변경하시겠습니까?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(false),
-                                  child: const Text('취소'),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
-                                  child: const Text('변경'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirm == true) {
-                            onSelectCompany();
-                          }
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                      ),
-                      child: Text(companyName ?? '회사 없음'),
-                    ),
-                  ),
-                  if (companyName != null) ...[
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('회사 제거'),
-                            content: const Text('회사를 제거하시겠습니까?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: const Text('취소'),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: const Text('제거'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true) {
-                          onRemoveCompany();
-                        }
-                      },
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ],
-              ),
               const SizedBox(height: 24),
-              if (companyName != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '관계',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => onSetIsEmployee(true),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: isEmployee == true
-                              ? cs.primaryContainer
-                              : null,
-                        ),
-                        child: const Text('직원'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => onSetIsEmployee(false),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: isEmployee == false
-                              ? cs.primaryContainer
-                              : null,
-                        ),
-                        child: const Text('직원 가족'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: onSelectDepartment,
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                        ),
-                        child: Text(departmentName ?? '부서 선택'),
-                      ),
-                    ),
-                    if (departmentName != null) ...[
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: onRemoveDepartment,
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
               const SizedBox(height: 24),
               OutlinedButton(
                 onPressed: onManageShipping,
