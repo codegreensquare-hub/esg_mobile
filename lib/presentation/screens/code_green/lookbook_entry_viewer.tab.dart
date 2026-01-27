@@ -2,12 +2,15 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/code_green/widgets/lookbook_product_marker.widget.dart';
+import 'package:esg_mobile/presentation/screens/code_green/product_detail_tab.screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 typedef LookbookPlacement = ({String id, String productId, double x, double y});
@@ -69,13 +72,10 @@ class LookbookEntryViewerTab extends StatefulWidget {
 }
 
 class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
-  final PageController _pageController = PageController();
-
   final Map<String, Size> _intrinsicSizesByImageUrl = {};
   final Set<String> _failedIntrinsicSizeUrls = {};
 
   Future<void>? _loadFuture;
-  String? _currentImageUrl;
 
   ImageStream? _imageStream;
   ImageStreamListener? _imageStreamListener;
@@ -111,7 +111,6 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
       _failedIntrinsicSizeUrls.clear();
       _entries = const [];
       _productsById = const {};
-      _currentImageUrl = null;
       _loadFuture = widget.lookbookId == null ? null : _fetchAll();
     }
   }
@@ -119,7 +118,6 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
   @override
   void dispose() {
     _detachImageListener();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -336,12 +334,10 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
     setState(() {
       _entries = entryData;
       _productsById = productsById;
-      _currentImageUrl = entryData.isNotEmpty ? entryData.first.imageUrl : null;
     });
 
-    final firstUrl = _currentImageUrl;
-    if (firstUrl != null) {
-      _requestIntrinsicSizeFor(firstUrl);
+    for (final entry in entryData) {
+      _requestIntrinsicSizeFor(entry.imageUrl);
     }
   }
 
@@ -394,93 +390,75 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
             final availableWidth = constraints.maxWidth;
             final contentWidth = availableWidth > 800 ? 800.0 : availableWidth;
 
-            final currentUrl = _currentImageUrl ?? _entries.first.imageUrl;
-            final currentSize = _intrinsicSizesByImageUrl[currentUrl];
-
-            if (currentSize == null) {
-              if (_failedIntrinsicSizeUrls.contains(currentUrl)) {
-                return Center(
-                  child: Text(
-                    'Failed to load image',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                );
-              }
-
-              _requestIntrinsicSizeFor(currentUrl);
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final height =
-                contentWidth * (currentSize.height / currentSize.width);
-
             return Container(
+              width: double.infinity,
               color: theme.colorScheme.surfaceContainerLowest,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if ((widget.lookbookTitle ?? '').trim().isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                      child: Text(
-                        widget.lookbookTitle!.trim(),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if ((widget.lookbookTitle ?? '').trim().isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(16, 60, 16, 8),
+                        child: Text(
+                          widget.lookbookTitle!.trim().toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                    ),
-                  Center(
-                    child: SizedBox(
-                      width: contentWidth,
-                      height: height,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: _entries.length,
-                        onPageChanged: (index) {
-                          final url = _entries[index].imageUrl;
-                          setState(() {
-                            _currentImageUrl = url;
-                          });
-                          _requestIntrinsicSizeFor(url);
-                        },
-                        itemBuilder: (context, index) {
-                          final entry = _entries[index];
-                          final imageUrl = entry.imageUrl;
-                          final imageSize = _intrinsicSizesByImageUrl[imageUrl];
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      primary: false,
+                      itemCount: _entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = _entries[index];
+                        final imageUrl = entry.imageUrl;
+                        final imageSize = _intrinsicSizesByImageUrl[imageUrl];
 
-                          if (imageSize == null) {
-                            if (_failedIntrinsicSizeUrls.contains(imageUrl)) {
-                              return Center(
+                        if (imageSize == null) {
+                          if (_failedIntrinsicSizeUrls.contains(imageUrl)) {
+                            return SizedBox(
+                              width: contentWidth,
+                              height: 200,
+                              child: Center(
                                 child: Text(
                                   'Failed to load image',
                                   style: theme.textTheme.bodyLarge?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
                                 ),
-                              );
-                            }
-
-                            _requestIntrinsicSizeFor(imageUrl);
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                              ),
                             );
                           }
 
-                          final containerSize = Size(contentWidth, height);
-                          final fittedRect = _fittedRectForContain(
-                            containerSize: containerSize,
-                            imageSize: imageSize,
-                          );
-
-                          const markerRadius = 6.0;
-                          const markerHaloRadius = 16.0;
-
+                          _requestIntrinsicSizeFor(imageUrl);
                           return SizedBox(
                             width: contentWidth,
-                            height: height,
+                            height: 200,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+
+                        final height =
+                            contentWidth * (imageSize.height / imageSize.width);
+                        final containerSize = Size(contentWidth, height);
+                        final fittedRect = _fittedRectForContain(
+                          containerSize: containerSize,
+                          imageSize: imageSize,
+                        );
+
+                        const markerRadius = 6.0;
+                        const markerHaloRadius = 16.0;
+
+                        return SizedBox(
+                          width: contentWidth,
+                          height: height,
+                          child: ExcludeSemantics(
                             child: Stack(
                               children: [
                                 Positioned.fill(
@@ -558,17 +536,351 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
                                 }),
                               ],
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                ],
+                    // Products grid
+                    Builder(
+                      builder: (context) {
+                        final products = _productsById.values
+                            .where((p) => p.product != null)
+                            .map((p) => p.product!)
+                            .toList(growable: false);
+                        if (products.isEmpty) return const SizedBox.shrink();
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                              child: Text(
+                                'Products in this Lookbook',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            MasonryGridView.count(
+                              crossAxisCount: 2,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              primary: false,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                final product = products[index];
+                                return LookbookProductCard(
+                                  product: product,
+                                  onTap: widget.onOpenProduct,
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },
         );
       },
+    );
+  }
+}
+
+class LookbookProductCard extends StatefulWidget {
+  const LookbookProductCard({super.key, required this.product, this.onTap});
+
+  final ProductWithOtherDetails product;
+  final ValueChanged<ProductWithOtherDetails>? onTap;
+
+  @override
+  State<LookbookProductCard> createState() => _LookbookProductCardState();
+}
+
+class _LookbookProductCardState extends State<LookbookProductCard> {
+  List<ProductOptionColorRow> _colorValues = const [];
+  String? _selectedImageUrl;
+  String? _selectedColorHex;
+  final Set<String> _preloadedImageUrls = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadColors();
+  }
+
+  @override
+  void didUpdateWidget(covariant LookbookProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.product.id != widget.product.product.id) {
+      _colorValues = const [];
+      _selectedImageUrl = null;
+      _selectedColorHex = null;
+      _loadColors();
+    }
+  }
+
+  Future<void> _loadColors() async {
+    final pid = widget.product.product.id.trim();
+    if (pid.isEmpty) {
+      return;
+    }
+
+    final colors = await CartService.instance.fetchColorOptionValues(
+      productId: pid,
+    );
+    if (!mounted) return;
+
+    setState(() => _colorValues = colors);
+
+    final data = widget.product.product;
+    final baseImageUrl =
+        data.mainImageBucket != null && data.mainImageFileName != null
+        ? getImageLink(
+            data.mainImageBucket!,
+            data.mainImageFileName!,
+            folderPath: data.mainImageFolderPath,
+          )
+        : null;
+
+    final variantUrls = colors
+        .map(
+          (row) =>
+              row.coloredProductBucket != null &&
+                  row.coloredProductFileName != null
+              ? getImageLink(
+                  row.coloredProductBucket!,
+                  row.coloredProductFileName!,
+                  folderPath: row.coloredProductFolderPath,
+                )
+              : null,
+        )
+        .whereType<String>()
+        .toList(growable: false);
+
+    final urlsToPreload = <String?>[baseImageUrl, ...variantUrls]
+        .whereType<String>()
+        .where((url) => url.isNotEmpty)
+        .toSet()
+        .difference(_preloadedImageUrls);
+
+    if (urlsToPreload.isEmpty) return;
+    _preloadedImageUrls.addAll(urlsToPreload);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Future.wait(
+        urlsToPreload
+            .map((url) => precacheImage(NetworkImage(url), context))
+            .toList(growable: false),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final product = widget.product;
+    final data = product.product;
+    final price = data.regularPrice;
+    final imageUrl =
+        data.mainImageBucket != null && data.mainImageFileName != null
+        ? getImageLink(
+            data.mainImageBucket!,
+            data.mainImageFileName!,
+            folderPath: data.mainImageFolderPath,
+          )
+        : null;
+
+    final resolvedImageUrl = _selectedImageUrl ?? imageUrl;
+
+    return InkWell(
+      onTap: () {
+        final handler = widget.onTap;
+        if (handler != null) {
+          handler(product);
+          return;
+        }
+
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CodeGreenProductDetailTabScreen(
+              productWithDetails: product,
+            ),
+          ),
+        );
+      },
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        color: cs.surface,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  resolvedImageUrl != null
+                      ? Image.network(
+                          resolvedImageUrl,
+                          fit: BoxFit.cover,
+                          gaplessPlayback: true,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              color: cs.surfaceContainerHighest,
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator.adaptive(),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: cs.surfaceContainerHighest,
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.image_not_supported),
+                              ),
+                        )
+                      : Container(
+                          color: cs.surfaceContainerHighest,
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.image),
+                        ),
+                  if (_colorValues.isNotEmpty)
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: _colorValues
+                              .where(
+                                (row) => (row.value ?? '').trim().length == 6,
+                              )
+                              .map((row) {
+                                final hex = (row.value ?? '').trim();
+                                final isSelected =
+                                    _selectedColorHex?.toLowerCase() ==
+                                    hex.toLowerCase();
+
+                                final color = Color(
+                                  int.parse('FF$hex', radix: 16),
+                                );
+
+                                return InkWell(
+                                  onTap: () {
+                                    final bucket = row.coloredProductBucket;
+                                    final fileName = row.coloredProductFileName;
+                                    final folderPath =
+                                        row.coloredProductFolderPath;
+
+                                    final nextUrl =
+                                        bucket != null && fileName != null
+                                        ? getImageLink(
+                                            bucket,
+                                            fileName,
+                                            folderPath: folderPath,
+                                          )
+                                        : null;
+
+                                    setState(() {
+                                      _selectedColorHex = hex;
+                                      _selectedImageUrl = nextUrl;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    child: Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: color,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? cs.primary
+                                              : cs.outlineVariant,
+                                          width: isSelected ? 2 : 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              })
+                              .toList(growable: false),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    (data.title ?? '').isNotEmpty ? data.title! : 'Product',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (product.categoryName != null &&
+                      product.categoryName!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      product.categoryName!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Text(
+                    '[${product.seller.username ?? 'Unknown Seller'}]',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    price != null ? formatKRW(price) : 'Price on request',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -22,6 +22,8 @@ class StoryCard extends StatelessWidget {
     final hasStoryContent =
         (storyWithTags.story.content?.trim().isNotEmpty ?? false);
 
+    final theme = Theme.of(context);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final mediaQuery = MediaQuery.of(context);
@@ -41,12 +43,21 @@ class StoryCard extends StatelessWidget {
               ),
             ),
           ),
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(25),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -68,28 +79,63 @@ class StoryCard extends StatelessWidget {
                       errorWidget: (context, url, error) => Container(
                         height: imageHeight,
                         width: effectiveWidth,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
+                        color: theme.colorScheme.surfaceContainerHighest,
                         child: const Icon(Icons.image_not_supported),
                       ),
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+
                     children: [
-                      Hero(
-                        tag: 'green-square-story-title-${story.id}',
-                        child: Text(
-                          story.title ?? '',
-                          style: Theme.of(context).textTheme.titleMedium,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 2, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                                child: Hero(
+                                  tag: 'green-square-story-title-${story.id}',
+                                  child: Text(
+                                    story.title ?? '',
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            PopupMenuButton<String>(
+                              icon: Icon(
+                                Icons.more_vert,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              itemBuilder: (context) => [
+                                const PopupMenuItem<String>(
+                                  value: 'block',
+                                  child: Text('신고하기'),
+                                ),
+                                const PopupMenuItem<String>(
+                                  value: 'report',
+                                  child: Text('차단하기'),
+                                ),
+                              ],
+                              onSelected: (value) {
+                                // Handle selection here
+                              },
+                            ),
+                          ],
                         ),
                       ),
                       if (story.subtitle != null && story.subtitle!.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
                           child: Hero(
                             tag: 'green-square-story-subtitle-${story.id}',
                             child: Text(
@@ -100,22 +146,50 @@ class StoryCard extends StatelessWidget {
                         ),
                       if (hasStoryContent) ...[
                         const SizedBox(height: 8),
-                        TextStory(
-                          content: storyWithTags.story.content,
-                          maxLines: 3,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                          child: TextStory(
+                            content: storyWithTags.story.content,
+                            maxLines: 3,
+                          ),
                         ),
                       ],
                       if (storyWithTags.tags.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: storyWithTags.tags
-                              .map(
-                                (tag) => Chip(label: Text('#${tag.tag ?? ''}')),
-                              )
-                              .toList(),
+                        const SizedBox(height: 24),
+
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 24, 0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: storyWithTags.tags
+                                      .map(
+                                        (tag) => Chip(
+                                          label: Text('#${tag.tag ?? ''}'),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                              // Text for date
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 14, 0, 0),
+                                child: Text(
+                                  '${story.createdAt.year}.${story.createdAt.month}.${story.createdAt.day}',
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
+                      const SizedBox(height: 22),
                     ],
                   ),
                 ),

@@ -61,6 +61,7 @@ export 'request_audit_log.dart';
 export 'setting.dart';
 export 'stamp.dart';
 export 'story.dart';
+export 'story_blocked.dart';
 export 'story_comment.dart';
 export 'story_like.dart';
 export 'story_photo.dart';
@@ -73,4 +74,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-26 14:41:58.035944
+/// Date: 2026-01-27 15:18:18.855283

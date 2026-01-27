@@ -21,6 +21,7 @@ import 'package:esg_mobile/presentation/screens/green_square/shopping_mall.tab.d
 import 'package:esg_mobile/presentation/screens/green_square/story/story.tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/story_dialog.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
+import 'package:esg_mobile/presentation/widgets/code_green/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/code_green/code_green_hero_banner.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
@@ -277,7 +278,6 @@ class _MainScreenState extends State<MainScreen> {
                     child: Container(
                       padding: EdgeInsets.zero,
                       key: ValueKey(activeTabId),
-                      constraints: const BoxConstraints(minHeight: 600),
                       color: theme.colorScheme.surface,
                       width: double.infinity,
                       child: _buildTabContent(activeTabId),
@@ -562,7 +562,9 @@ class _MainScreenState extends State<MainScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => CartBottomSheet(items: items),
+      builder: (_) => _selectedMainTab == MainTab.greenSquare
+          ? CartBottomSheet(items: items)
+          : CodeGreenCartBottomSheet(items: items),
     );
   }
 

@@ -5,7 +5,7 @@ import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
-import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
+import 'package:esg_mobile/presentation/widgets/code_green/cart/cart_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -285,7 +285,7 @@ class _CodeGreenProductDetailTabScreenState
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => CartBottomSheet(items: items),
+      builder: (_) => CodeGreenCartBottomSheet(items: items),
     );
   }
 

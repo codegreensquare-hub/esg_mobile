@@ -96,4 +96,4 @@ class PushNotificationTokenRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-26 14:41:58.027080
+/// Date: 2026-01-27 15:18:18.844308

@@ -95,4 +95,4 @@ class ProductWishlistRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-26 14:41:58.026023
+/// Date: 2026-01-27 15:18:18.843

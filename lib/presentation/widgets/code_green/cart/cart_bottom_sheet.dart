@@ -9,8 +9,8 @@ import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/presentation/screens/green_square/checkout.screen.dart';
 
-class CartBottomSheet extends StatefulWidget {
-  const CartBottomSheet({
+class CodeGreenCartBottomSheet extends StatefulWidget {
+  const CodeGreenCartBottomSheet({
     super.key,
     required this.items,
   });
@@ -18,10 +18,10 @@ class CartBottomSheet extends StatefulWidget {
   final List<CartItemWithProduct> items;
 
   @override
-  State<CartBottomSheet> createState() => _CartBottomSheetState();
+  State<CodeGreenCartBottomSheet> createState() => _CodeGreenCartBottomSheetState();
 }
 
-class _CartBottomSheetState extends State<CartBottomSheet> {
+class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {
   late List<CartItemWithProduct> _items;
   final Set<String> _busyCartItemIds = <String>{};
   late final Future<Map<String, String>> _colorHexByIdFuture;
@@ -30,9 +30,9 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
   @override
   void initState() {
     super.initState();
-    // Filter items to only include retailer products
+    // Filter items to only include LGS products
     _items = widget.items
-        .where((item) => item.product.vendor == VendorAdminType.retailer)
+        .where((item) => item.product.vendor == VendorAdminType.lgs)
         .toList(growable: false);
     final colorIds = _items
         .map((e) => (e.cartItem.optionColor ?? '').trim())
@@ -159,7 +159,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    '장바구니 (Green Square)',
+                    '장바구니 (Code Green)',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
