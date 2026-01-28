@@ -32,6 +32,7 @@ class _StoryDialogState extends State<StoryDialog> {
   late List<StoryCommentWithUser> comments = [];
   late int likeCount = 0;
   late bool hasLiked = false;
+  late bool isBlocked = false;
   late List<ProductWithOtherDetails> recommendedProducts = [];
   late List<MissionRow> recommendedMissions = [];
   late List<StoryWithTags> previousStories = [];
@@ -86,6 +87,11 @@ class _StoryDialogState extends State<StoryDialog> {
     final liked = userId == null
         ? false
         : await StoryService.instance.hasUserLiked(storyId, userId!);
+    final blocked = userId == null
+        ? false
+        : (await StoryService.instance.fetchBlockedStoryIds(
+            userId!,
+          )).contains(storyId);
 
     if (!mounted) return;
     setState(() {
@@ -109,6 +115,7 @@ class _StoryDialogState extends State<StoryDialog> {
       comments = fetchedComments;
       likeCount = count;
       hasLiked = liked;
+      isBlocked = blocked;
       recommendedProducts = fetchedProducts;
       recommendedMissions = fetchedMissions;
       isLoadingRecommendations = false;
@@ -491,7 +498,155 @@ class _StoryDialogState extends State<StoryDialog> {
                                   icon: const Icon(Icons.share_outlined),
                                   onPressed: () {},
                                 ),
-                                SizedBox(width: 10),
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert),
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem<String>(
+                                      value: isBlocked ? 'unblock' : 'block',
+                                      child: Text(isBlocked ? '차단 해제' : '차단하기'),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'report',
+                                      child: Text('신고하기'),
+                                    ),
+                                  ],
+                                  onSelected: (value) async {
+                                    if (value == 'block') {
+                                      final userId = this.userId;
+                                      if (userId == null) return;
+
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('스토리 차단'),
+                                          content: const Text(
+                                            '이 스토리를 차단하시겠습니까?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(false),
+                                              child: const Text('취소'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(true),
+                                              child: const Text('차단'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirmed == true) {
+                                        await StoryService.instance.blockStory(
+                                          storyId: widget.story.id,
+                                          userId: userId,
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('스토리가 차단되었습니다.'),
+                                            ),
+                                          );
+                                        }
+                                        setState(() {
+                                          isBlocked = true;
+                                        });
+                                      }
+                                    } else if (value == 'unblock') {
+                                      final userId = this.userId;
+                                      if (userId == null) return;
+
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('스토리 차단 해제'),
+                                          content: const Text(
+                                            '이 스토리의 차단을 해제하시겠습니까?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(false),
+                                              child: const Text('취소'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(true),
+                                              child: const Text('해제'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirmed == true) {
+                                        await StoryService.instance
+                                            .unblockStory(
+                                              storyId: widget.story.id,
+                                              userId: userId,
+                                            );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('스토리 차단이 해제되었습니다.'),
+                                            ),
+                                          );
+                                        }
+                                        setState(() {
+                                          isBlocked = false;
+                                        });
+                                      }
+                                    } else if (value == 'report') {
+                                      final userId = this.userId;
+                                      if (userId == null) return;
+
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('스토리 신고'),
+                                          content: const Text(
+                                            '이 스토리를 신고하시겠습니까?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(false),
+                                              child: const Text('취소'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                context,
+                                              ).pop(true),
+                                              child: const Text('신고'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirmed == true) {
+                                        await StoryService.instance.reportStory(
+                                          storyId: widget.story.id,
+                                          userId: userId,
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('신고가 접수되었습니다.'),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                             Divider(

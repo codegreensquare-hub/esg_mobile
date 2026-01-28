@@ -18,7 +18,8 @@ class CodeGreenCartBottomSheet extends StatefulWidget {
   final List<CartItemWithProduct> items;
 
   @override
-  State<CodeGreenCartBottomSheet> createState() => _CodeGreenCartBottomSheetState();
+  State<CodeGreenCartBottomSheet> createState() =>
+      _CodeGreenCartBottomSheetState();
 }
 
 class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {

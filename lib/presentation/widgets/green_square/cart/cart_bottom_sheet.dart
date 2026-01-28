@@ -159,7 +159,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    '장바구니 (Green Square)',
+                    '장바구니',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

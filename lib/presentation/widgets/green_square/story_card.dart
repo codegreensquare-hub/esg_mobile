@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +13,14 @@ class StoryCard extends StatelessWidget {
     super.key,
     required this.storyWithTags,
     this.borderRadius = 0,
+    this.onBlocked,
+    this.onUnblocked,
   });
 
   final StoryWithTags storyWithTags;
   final double borderRadius;
+  final Future<void> Function()? onBlocked;
+  final Future<void> Function()? onUnblocked;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +29,68 @@ class StoryCard extends StatelessWidget {
         (storyWithTags.story.content?.trim().isNotEmpty ?? false);
 
     final theme = Theme.of(context);
+
+    if (storyWithTags.isBlocked) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(25),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 80, 0, 80),
+          child: Column(
+            children: [
+              const Text('이 게시글은 숨겨졌습니다.'),
+              TextButton(
+                onPressed: () async {
+                  final userId = UserAuthService.instance.currentUser?.id;
+                  if (userId == null) return;
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('스토리 차단 해제'),
+                      content: const Text('이 스토리의 차단을 해제하시겠습니까?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('해제'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    await StoryService.instance.unblockStory(
+                      storyId: story.id,
+                      userId: userId,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('스토리 차단이 해제되었습니다.')),
+                      );
+                    }
+                    await onUnblocked?.call();
+                  }
+                },
+                child: const Text('차단 해제하기'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -119,15 +187,96 @@ class StoryCard extends StatelessWidget {
                               itemBuilder: (context) => [
                                 const PopupMenuItem<String>(
                                   value: 'block',
-                                  child: Text('신고하기'),
+                                  child: Text('차단하기'),
                                 ),
                                 const PopupMenuItem<String>(
                                   value: 'report',
-                                  child: Text('차단하기'),
+                                  child: Text('신고하기'),
                                 ),
                               ],
-                              onSelected: (value) {
-                                // Handle selection here
+                              onSelected: (value) async {
+                                if (value == 'block') {
+                                  // Block story
+                                  final userId =
+                                      UserAuthService.instance.currentUser?.id;
+                                  if (userId == null) return;
+
+                                  final confirmed = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('스토리 차단'),
+                                      content: const Text('이 스토리를 차단하시겠습니까?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          child: const Text('취소'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text('차단'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirmed == true) {
+                                    await StoryService.instance.blockStory(
+                                      storyId: story.id,
+                                      userId: userId,
+                                    );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('스토리가 차단되었습니다.'),
+                                        ),
+                                      );
+                                    }
+                                    await onBlocked?.call();
+                                  }
+                                } else if (value == 'report') {
+                                  // Report story
+                                  final userId =
+                                      UserAuthService.instance.currentUser?.id;
+                                  if (userId == null) return;
+
+                                  final confirmed = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('스토리 신고'),
+                                      content: const Text('이 스토리를 신고하시겠습니까?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          child: const Text('취소'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text('신고'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirmed == true) {
+                                    await StoryService.instance.reportStory(
+                                      storyId: story.id,
+                                      userId: userId,
+                                    );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('신고가 접수되었습니다.'),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                }
                               },
                             ),
                           ],

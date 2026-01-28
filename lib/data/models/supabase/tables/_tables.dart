@@ -57,6 +57,7 @@ export 'product_wishlist.dart';
 export 'push_notification.dart';
 export 'push_notification_token.dart';
 export 'push_notification_trigger.dart';
+export 'report.dart';
 export 'request_audit_log.dart';
 export 'setting.dart';
 export 'stamp.dart';
@@ -74,4 +75,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-27 15:18:18.855283
+/// Date: 2026-01-27 17:17:37.674356

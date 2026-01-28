@@ -288,4 +288,45 @@ class StoryService {
       return [];
     }
   }
+
+  Future<List<String>> fetchBlockedStoryIds(String userId) async {
+    final response = await _client
+        .from(StoryBlockedTable().tableName)
+        .select(StoryBlockedRow.storyField)
+        .eq(StoryBlockedRow.blockerField, userId);
+    return (response as List)
+        .map((e) => e[StoryBlockedRow.storyField] as String)
+        .toList();
+  }
+
+  Future<void> blockStory({
+    required String storyId,
+    required String userId,
+  }) async {
+    await _client.from(StoryBlockedTable().tableName).insert({
+      StoryBlockedRow.storyField: storyId,
+      StoryBlockedRow.blockerField: userId,
+    });
+  }
+
+  Future<void> unblockStory({
+    required String storyId,
+    required String userId,
+  }) async {
+    await _client
+        .from(StoryBlockedTable().tableName)
+        .delete()
+        .eq(StoryBlockedRow.storyField, storyId)
+        .eq(StoryBlockedRow.blockerField, userId);
+  }
+
+  Future<void> reportStory({
+    required String storyId,
+    required String userId,
+  }) async {
+    await _client.from(ReportTable().tableName).insert({
+      ReportRow.reporterField: userId,
+      ReportRow.storyReportedField: storyId,
+    });
+  }
 }

@@ -513,4 +513,4 @@ class MissionRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-27 15:18:18.824660
+/// Date: 2026-01-27 17:17:37.647626

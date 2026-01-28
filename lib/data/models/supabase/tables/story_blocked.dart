@@ -25,12 +25,12 @@ class StoryBlockedTable extends SupabaseTable<StoryBlockedRow> {
 class StoryBlockedRow extends SupabaseDataRow {
   /// Story Blocked Row
   StoryBlockedRow({
-    required String blocker,
     required String story,
+    String? blocker,
     DateTime? createdAt,
   }) : super({
-         'blocker': supaSerialize(blocker),
          'story': supaSerialize(story),
+         if (blocker != null) 'blocker': supaSerialize(blocker),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
        });
 
@@ -52,7 +52,7 @@ class StoryBlockedRow extends SupabaseDataRow {
   static const String blockerField = 'blocker';
 
   /// Blocker
-  String get blocker => getField<String>(blockerField)!;
+  String get blocker => getField<String>(blockerField, defaultValue: 'auth.')!;
   set blocker(String value) => setField<String>(blockerField, value);
 
   /// Story field name
@@ -73,15 +73,15 @@ class StoryBlockedRow extends SupabaseDataRow {
   /// Make a copy of the current [StoryBlockedRow]
   /// overriding the provided fields
   StoryBlockedRow copyWith({
-    String? blocker,
     String? story,
+    String? blocker,
     DateTime? createdAt,
   }) => StoryBlockedRow.fromJson({
-    'blocker': supaSerialize(blocker) ?? data['blocker'],
     'story': supaSerialize(story) ?? data['story'],
+    'blocker': supaSerialize(blocker) ?? data['blocker'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-27 15:18:18.849551
+/// Date: 2026-01-27 17:17:37.669022

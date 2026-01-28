@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/story_card.dart';
@@ -47,11 +48,31 @@ class _StoriesSectionState extends State<StoriesSection> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       setState(() {
         _searchQuery = value;
-        _stories.clear();
-        _offset = 0;
       });
-      _loadStories();
+      _refreshStories();
     });
+  }
+
+  Future<List<StoryWithTags>> _fetchStories() async {
+    final userId = UserAuthService.instance.currentUser?.id;
+    final blockedIds = userId != null
+        ? await StoryService.instance.fetchBlockedStoryIds(userId)
+        : [];
+    final newStories = await StoryService.instance.fetchStories(
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+      limit: _limit,
+      offset: _offset,
+    );
+    final filteredStories = newStories
+        .map(
+          (s) => StoryWithTags(
+            story: s.story,
+            tags: s.tags,
+            isBlocked: blockedIds.contains(s.story.id),
+          ),
+        )
+        .toList();
+    return filteredStories;
   }
 
   Future<void> _loadStories() async {
@@ -59,19 +80,32 @@ class _StoriesSectionState extends State<StoriesSection> {
     if (!mounted) return;
     setState(() => _isLoadingMore = true);
     try {
-      final newStories = await StoryService.instance.fetchStories(
-        search: _searchQuery.isEmpty ? null : _searchQuery,
-        limit: _limit,
-        offset: _offset,
-      );
-
+      final filteredStories = await _fetchStories();
       if (!mounted) return;
-      _stories.addAll(newStories);
-      _offset += newStories.length;
-      if (newStories.length < _limit) {
+      _stories.addAll(filteredStories);
+      _offset += filteredStories.length;
+      if (filteredStories.length < _limit) {
         // No more stories to load
         _hasMore = false;
       }
+      _isLoadingMore = false;
+      setState(() {});
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
+    }
+  }
+
+  Future<void> _refreshStories() async {
+    if (!mounted) return;
+    setState(() => _isLoadingMore = true);
+    _offset = 0;
+    try {
+      final filteredStories = await _fetchStories();
+      if (!mounted) return;
+      _stories.clear();
+      _stories.addAll(filteredStories);
+      _offset = filteredStories.length;
+      _hasMore = filteredStories.length >= _limit;
       _isLoadingMore = false;
       setState(() {});
     } finally {
@@ -124,7 +158,11 @@ class _StoriesSectionState extends State<StoriesSection> {
                   (_) => _loadMore(),
                 );
               }
-              return StoryCard(storyWithTags: story);
+              return StoryCard(
+                storyWithTags: story,
+                onBlocked: _refreshStories,
+                onUnblocked: _refreshStories,
+              );
             },
           ),
         ],
