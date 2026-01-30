@@ -28,6 +28,7 @@ import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.da
 import 'package:esg_mobile/presentation/widgets/layout/footer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/left_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/nav_header.delegate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/green_square_bottom_nav_bar.dart';
@@ -53,11 +54,13 @@ class MainScreen extends StatefulWidget {
   static const String route = '/';
   final ScrollController? controller;
   final MainTab initialTab;
+  final GoRouterState? state;
 
   const MainScreen({
     super.key,
     this.controller,
     this.initialTab = MainTab.greenSquare,
+    this.state,
   });
 
   @override
@@ -75,6 +78,7 @@ class _MainScreenState extends State<MainScreen> {
   late final CurationShopTabController _curationShopController;
   late final OriginalShopTabController _originalShopController;
   late final CodeGreenProductDetailTabController _productDetailController;
+  String? _productIdToOpen;
   int _codeGreenLastNonProductTabIndex = 0;
 
   String? _selectedLookbookId;
@@ -99,6 +103,41 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     debugPrint('MainScreen initialized with initialTab: ${widget.initialTab}');
     _selectedMainTab = widget.initialTab;
+    if (_selectedMainTab == MainTab.codeGreen && widget.state != null) {
+      final path = widget.state!.uri.path;
+      switch (path) {
+        case '/codegreen/original':
+          _selectedIndex = 1;
+          break;
+        case '/codegreen/curation':
+          _selectedIndex = 2;
+          break;
+        case '/codegreen/about':
+          _selectedIndex = 3;
+          break;
+        case '/codegreen/lookbook':
+          _selectedIndex = 4;
+          break;
+        case '/codegreen/event':
+          _selectedIndex = 6;
+          break;
+        default:
+          _selectedIndex = 0;
+      }
+    } else if (_selectedMainTab == MainTab.greenSquare &&
+        widget.state != null) {
+      final path = widget.state!.uri.path;
+      if (path == '/greensquare/store') {
+        _greenIndex = 1;
+        _productIdToOpen = widget.state!.uri.queryParameters['product'];
+      } else if (path == '/greensquare/missions') {
+        _greenIndex = 2;
+      } else if (path == '/greensquare/account') {
+        _greenIndex = 3;
+      } else {
+        _greenIndex = 0;
+      }
+    }
     _curationShopController = CurationShopTabController();
     _originalShopController = OriginalShopTabController();
     _productDetailController = CodeGreenProductDetailTabController();
@@ -185,10 +224,12 @@ class _MainScreenState extends State<MainScreen> {
               onSelect: (index) {
                 if (index != _selectedIndex) {
                   setState(() => _selectedIndex = index);
+                  _updateUrlForCodeGreenTab(index);
                 }
               },
               onTapGreenSquare: () {
                 setState(() => _selectedMainTab = MainTab.greenSquare);
+                _updateUrl(MainTab.greenSquare);
               },
               onTapLogin: _openCodeGreenLogin,
               onSelectSubTab: _handleCodeGreenSubTab,
@@ -202,7 +243,10 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: isGreenSquare
           ? GreenSquareBottomNavBar(
               selectedIndex: _greenIndex,
-              onItemSelected: (index) => setState(() => _greenIndex = index),
+              onItemSelected: (index) {
+                setState(() => _greenIndex = index);
+                _updateUrlForGreenSquareTab(index);
+              },
               onGreenButtonPressed: _onTapKnock,
             )
           : null,
@@ -248,13 +292,16 @@ class _MainScreenState extends State<MainScreen> {
                     onTabSelected: (index, _) {
                       if (index != _selectedIndex) {
                         setState(() => _selectedIndex = index);
+                        _updateUrlForCodeGreenTab(index);
                       }
                     },
                     onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
                     onTapLogin: _openCodeGreenLogin,
                     onTapCart: _showCartBottomSheet,
-                    onTapGreenSquare: () =>
-                        setState(() => _selectedMainTab = MainTab.greenSquare),
+                    onTapGreenSquare: () {
+                      setState(() => _selectedMainTab = MainTab.greenSquare);
+                      _updateUrl(MainTab.greenSquare);
+                    },
                     onSelectSubTab: _handleCodeGreenSubTab,
                   ),
                 ),
@@ -812,12 +859,47 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _updateUrlForGreenSquareTab(int index) {
+    if (kIsWeb) {
+      String path = '/greensquare';
+      if (index == 1) {
+        path = '/greensquare/store';
+      } else if (index == 2) {
+        path = '/greensquare/missions';
+      } else if (index == 3) {
+        path = '/greensquare/account';
+      }
+      js.context['history'].callMethod('pushState', [null, '', path]);
+    }
+  }
+
+  void _updateUrlForCodeGreenTab(int index) {
+    if (kIsWeb) {
+      String path = '/codegreen';
+      if (index == 1) {
+        path = '/codegreen/original';
+      } else if (index == 2) {
+        path = '/codegreen/curation';
+      } else if (index == 3) {
+        path = '/codegreen/about';
+      } else if (index == 4) {
+        path = '/codegreen/lookbook';
+      } else if (index == 6) {
+        path = '/codegreen/event';
+      }
+      js.context['history'].callMethod('pushState', [null, '', path]);
+    }
+  }
+
   Widget _buildGreenSquareContent(int index) {
     switch (index) {
       case 0:
         return StoryTab(onTapStory: _openGreenSquareStory);
       case 1:
-        return ShoppingMallTab(onBadgeUpdate: _updateBadgeCounts);
+        return ShoppingMallTab(
+          onBadgeUpdate: _updateBadgeCounts,
+          productIdToOpen: _productIdToOpen,
+        );
       case 2:
         return MissionParticipationTab();
       case 3:

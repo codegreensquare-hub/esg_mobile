@@ -38,19 +38,67 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/codegreen',
       builder: (BuildContext context, GoRouterState state) {
-        return MainScreen(initialTab: MainTab.codeGreen);
+        return MainScreen(initialTab: MainTab.codeGreen, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/codegreen/original',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.codeGreen, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/codegreen/curation',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.codeGreen, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/codegreen/about',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.codeGreen, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/codegreen/lookbook',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.codeGreen, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/codegreen/event',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.codeGreen, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/greensquare/store',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.greenSquare, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/greensquare/missions',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.greenSquare, state: state);
+      },
+    ),
+    GoRoute(
+      path: '/greensquare/account',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.greenSquare, state: state);
       },
     ),
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        return MainScreen(initialTab: MainTab.greenSquare);
+        return MainScreen(initialTab: MainTab.greenSquare, state: state);
       },
     ),
     GoRoute(
       path: '/:app',
       builder: (BuildContext context, GoRouterState state) {
-        return MainScreen(initialTab: MainTab.greenSquare);
+        return MainScreen(initialTab: MainTab.greenSquare, state: state);
       },
     ),
     GoRoute(

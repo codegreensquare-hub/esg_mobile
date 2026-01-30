@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/core/constants/asset.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
@@ -8,19 +13,20 @@ import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:esg_mobile/web_updater.dart'
+    if (dart.library.js) 'dart:js'
+    as js;
 
 class ShoppingMallTab extends StatefulWidget {
   const ShoppingMallTab({
     super.key,
     this.onBadgeUpdate,
+    this.productIdToOpen,
   });
 
   final VoidCallback? onBadgeUpdate;
+  final String? productIdToOpen;
 
   @override
   State<ShoppingMallTab> createState() => _ShoppingMallTabState();
@@ -43,6 +49,11 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     super.initState();
     _createOrUpdateTabController();
     _loadData();
+    if (widget.productIdToOpen != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadAndNavigateToProduct(widget.productIdToOpen!);
+      });
+    }
   }
 
   void _createOrUpdateTabController() {
@@ -214,6 +225,13 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
   }
 
   void _navigateToProductDetail(ProductWithOtherDetails productWithDetails) {
+    if (kIsWeb && productWithDetails.product.id != null) {
+      js.context['history'].callMethod('pushState', [
+        null,
+        '',
+        '/greensquare/store?product=${productWithDetails.product.id}',
+      ]);
+    }
     Navigator.of(context)
         .push(
           MaterialPageRoute(
@@ -223,6 +241,13 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
           ),
         )
         .then((_) {
+          if (kIsWeb) {
+            js.context['history'].callMethod('pushState', [
+              null,
+              '',
+              '/greensquare/store',
+            ]);
+          }
           _loadProducts();
           _loadCartCount();
           widget.onBadgeUpdate?.call();
@@ -236,6 +261,20 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     final items = await CartService.instance.fetchCartItems(userId!);
     if (mounted) {
       setState(() => cartItemCount = items.length);
+    }
+  }
+
+  Future<void> _loadAndNavigateToProduct(String productId) async {
+    try {
+      final product = await ProductService.instance.fetchProductById(
+        productId,
+        userId: userId,
+      );
+      if (product != null && mounted) {
+        _navigateToProductDetail(product);
+      }
+    } catch (e) {
+      debugPrint('Error loading product for deep link: $e');
     }
   }
 

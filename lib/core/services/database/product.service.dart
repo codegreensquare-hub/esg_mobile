@@ -393,4 +393,55 @@ class ProductService {
       return 0;
     }
   }
+
+  Future<ProductWithOtherDetails?> fetchProductById(
+    String productId, {
+    String? userId,
+  }) async {
+    try {
+      final data = await _client
+          .from(ProductTable().tableName)
+          .select(
+            '*, product_category(name), product_image(*), user:product_by(*)',
+          )
+          .eq('id', productId)
+          .single();
+
+      final product = ProductRow.fromJson(data);
+      final categoryData = data['product_category'] as Map<String, dynamic>?;
+      final categoryName = categoryData?['name'] as String?;
+      final imagesData = data['product_image'] as List<dynamic>? ?? [];
+      final images = imagesData
+          .map((img) => ProductImageRow.fromJson(img as Map<String, dynamic>))
+          .toList();
+
+      // Check wishlist if userId provided
+      bool isInWishlist = false;
+      if (userId != null) {
+        final wishlistResponse = await _client
+            .from(ProductWishlistTable().tableName)
+            .select(ProductWishlistRow.productField)
+            .eq(ProductWishlistRow.wishlistByField, userId)
+            .eq(ProductWishlistRow.productField, productId);
+        isInWishlist = wishlistResponse.isNotEmpty;
+      }
+
+      final sellerData = data['user'] as Map<String, dynamic>?;
+      if (sellerData == null) {
+        throw Exception('Seller data missing for product $productId');
+      }
+      final seller = UserRow.fromJson(sellerData);
+
+      return ProductWithOtherDetails(
+        product: product,
+        seller: seller,
+        categoryName: categoryName,
+        images: images,
+        isInWishlist: isInWishlist,
+      );
+    } catch (e) {
+      debugPrint('Error fetching product by id: $e');
+      return null;
+    }
+  }
 }
