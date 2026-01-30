@@ -15,12 +15,14 @@ class StoryCard extends StatelessWidget {
     this.borderRadius = 0,
     this.onBlocked,
     this.onUnblocked,
+    this.onTap,
   });
 
   final StoryWithTags storyWithTags;
   final double borderRadius;
   final Future<void> Function()? onBlocked;
   final Future<void> Function()? onUnblocked;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -102,15 +104,17 @@ class StoryCard extends StatelessWidget {
         final imageHeight = effectiveWidth * 4 / 5;
 
         return GestureDetector(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => StoryDialog(
-                story: storyWithTags.story,
-                tags: storyWithTags.tags,
+          onTap:
+              onTap ??
+              () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => StoryDialog(
+                    story: storyWithTags.story,
+                    tags: storyWithTags.tags,
+                  ),
+                ),
               ),
-            ),
-          ),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             clipBehavior: Clip.antiAlias,

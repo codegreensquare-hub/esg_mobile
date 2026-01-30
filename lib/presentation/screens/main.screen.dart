@@ -46,6 +46,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
+import '../../web_updater.dart' if (dart.library.js) 'dart:js' as js;
+import 'package:flutter/foundation.dart';
 
 class MainScreen extends StatefulWidget {
   static const String route = '/';
@@ -213,7 +215,10 @@ class _MainScreenState extends State<MainScreen> {
             slivers: [
               CodeGreenTopHeader(
                 initialValue: _selectedMainTab,
-                onChanged: (tab) => setState(() => _selectedMainTab = tab),
+                onChanged: (tab) {
+                  setState(() => _selectedMainTab = tab);
+                  _updateUrl(tab);
+                },
                 actions: [
                   if (_selectedMainTab == MainTab.greenSquare)
                     IconButton(
@@ -515,18 +520,25 @@ class _MainScreenState extends State<MainScreen> {
       _greenIndex = 0; // ensure Green Square "스토리" tab
     });
     _updateBadgeCounts();
+    _updateUrlForStory(storyWithTags.story.id);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (context) => StoryDialog(
-            story: storyWithTags.story,
-            tags: storyWithTags.tags,
-          ),
-        ),
-      );
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => StoryDialog(
+                story: storyWithTags.story,
+                tags: storyWithTags.tags,
+              ),
+            ),
+          )
+          .then((_) {
+            if (mounted) {
+              _updateUrl(MainTab.greenSquare);
+            }
+          });
     });
   }
 
@@ -783,10 +795,27 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _updateUrl(MainTab tab) {
+    if (kIsWeb) {
+      final path = tab == MainTab.codeGreen ? '/codegreen' : '/greensquare';
+      js.context['history'].callMethod('pushState', [null, '', path]);
+    }
+  }
+
+  void _updateUrlForStory(String storyId) {
+    if (kIsWeb) {
+      js.context['history'].callMethod('pushState', [
+        null,
+        '',
+        '/greensquare?story=$storyId',
+      ]);
+    }
+  }
+
   Widget _buildGreenSquareContent(int index) {
     switch (index) {
       case 0:
-        return const StoryTab(); // Story placeholder for now
+        return StoryTab(onTapStory: _openGreenSquareStory);
       case 1:
         return ShoppingMallTab(onBadgeUpdate: _updateBadgeCounts);
       case 2:

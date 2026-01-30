@@ -10,9 +10,11 @@ class StoriesSection extends StatefulWidget {
   const StoriesSection({
     super.key,
     this.scrollController,
+    this.onTapStory,
   });
 
   final ScrollController? scrollController;
+  final void Function(StoryWithTags)? onTapStory;
 
   @override
   State<StoriesSection> createState() => _StoriesSectionState();
@@ -162,6 +164,9 @@ class _StoriesSectionState extends State<StoriesSection> {
                 storyWithTags: story,
                 onBlocked: _refreshStories,
                 onUnblocked: _refreshStories,
+                onTap: widget.onTapStory != null
+                    ? () => widget.onTapStory!(story)
+                    : null,
               );
             },
           ),
