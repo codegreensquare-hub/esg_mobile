@@ -60,6 +60,7 @@ class _AccountLoggedOutContentState extends State<AccountLoggedOutContent> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 64),
               Icon(Icons.lock_outline, size: 64, color: cs.primary),
               const SizedBox(height: 16),
               Text(

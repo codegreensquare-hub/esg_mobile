@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/firebase_options.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 // Re-export App and MyApp for tests referencing symbols from main.dart.
 export 'package:esg_mobile/app/app.dart' show App, MyApp;
@@ -66,6 +67,10 @@ Future<void> main() async {
 
   // Initialize push notifications
   await PushNotificationService.instance.initialize();
+
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
 
   runApp(const App());
 }

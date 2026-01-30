@@ -25,6 +25,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.onTapMenu,
     this.onTapLogin,
     this.onTapCart,
+    this.onTapGreenSquare,
     this.homeTab,
     this.onSelectSubTab,
   });
@@ -40,6 +41,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
   final void Function()? onTapMenu;
   final VoidCallback? onTapLogin;
   final VoidCallback? onTapCart;
+  final VoidCallback? onTapGreenSquare;
   final String? homeTab;
   // Current layout width supplied by parent (e.g. LayoutBuilder). We only
   // rebuild when this crosses a breakpoint (narrow <-> wide) or other props change.
@@ -154,7 +156,11 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                             onSelectSubTab?.call(e.value, subTab),
                       ),
                     ),
-                GreenSquareLogo(),
+                InkWell(
+                  borderRadius: BorderRadius.circular(6),
+                  onTap: onTapGreenSquare,
+                  child: GreenSquareLogo(),
+                ),
                 Spacer(),
                 // Logout
                 NavHeaderButton(
@@ -200,6 +206,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.homeTab != homeTab ||
         oldDelegate.onTapCart != onTapCart ||
         oldDelegate.onTapLogin != onTapLogin ||
+        oldDelegate.onTapGreenSquare != onTapGreenSquare ||
         oldDelegate.onSelectSubTab != onSelectSubTab ||
         prevWide != nextWide;
   }

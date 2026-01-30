@@ -50,8 +50,13 @@ import 'package:esg_mobile/data/entities/story_with_tags.dart';
 class MainScreen extends StatefulWidget {
   static const String route = '/';
   final ScrollController? controller;
+  final MainTab initialTab;
 
-  const MainScreen({super.key, this.controller});
+  const MainScreen({
+    super.key,
+    this.controller,
+    this.initialTab = MainTab.greenSquare,
+  });
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -90,6 +95,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('MainScreen initialized with initialTab: ${widget.initialTab}');
+    _selectedMainTab = widget.initialTab;
     _curationShopController = CurationShopTabController();
     _originalShopController = OriginalShopTabController();
     _productDetailController = CodeGreenProductDetailTabController();
@@ -241,6 +248,8 @@ class _MainScreenState extends State<MainScreen> {
                     onTapMenu: () => _scaffoldKey.currentState?.openDrawer(),
                     onTapLogin: _openCodeGreenLogin,
                     onTapCart: _showCartBottomSheet,
+                    onTapGreenSquare: () =>
+                        setState(() => _selectedMainTab = MainTab.greenSquare),
                     onSelectSubTab: _handleCodeGreenSubTab,
                   ),
                 ),

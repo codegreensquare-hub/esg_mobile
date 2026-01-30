@@ -174,15 +174,24 @@ class _FadeCarouselContainerState extends State<FadeCarouselContainer>
   ImageProvider? _prevImage;
   ImageProvider? _currentImage;
   bool _fading = false;
+  bool _precached = false;
 
   @override
   void initState() {
     super.initState();
     _index = 0;
     _currentImage = widget.images.isNotEmpty ? widget.images[_index] : null;
-    _precacheAll();
     if (widget.images.length > 1) {
       _startTimer();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_precached) {
+      _precacheAll();
+      _precached = true;
     }
   }
 
