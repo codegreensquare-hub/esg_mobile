@@ -48,7 +48,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
-import '../../web_updater.dart' if (dart.library.js) 'dart:js' as js;
+import 'package:esg_mobile/web_updater.dart'
+    if (dart.library.html) 'dart:js'
+    as js;
 import 'package:flutter/foundation.dart';
 
 class MainScreen extends StatefulWidget {

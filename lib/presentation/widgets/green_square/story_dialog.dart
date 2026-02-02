@@ -14,7 +14,9 @@ import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.da
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:js' as js if (dart.library.js) '../../web_updater.dart';
+import 'package:esg_mobile/web_updater.dart'
+    if (dart.library.html) 'dart:js'
+    as js;
 
 class StoryDialog extends StatefulWidget {
   const StoryDialog({

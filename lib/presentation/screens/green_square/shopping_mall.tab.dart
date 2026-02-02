@@ -15,7 +15,7 @@ import 'package:esg_mobile/presentation/screens/green_square/product_detail.scre
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:esg_mobile/web_updater.dart'
-    if (dart.library.js) 'dart:js'
+    if (dart.library.html) 'dart:js'
     as js;
 
 class ShoppingMallTab extends StatefulWidget {
@@ -225,7 +225,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
   }
 
   void _navigateToProductDetail(ProductWithOtherDetails productWithDetails) {
-    if (kIsWeb && productWithDetails.product.id != null) {
+    if (kIsWeb) {
       js.context['history'].callMethod('pushState', [
         null,
         '',

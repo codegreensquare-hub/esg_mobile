@@ -7,7 +7,9 @@ import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:js' as js if (dart.library.js) '../../web_updater.dart';
+import 'package:esg_mobile/web_updater.dart'
+    if (dart.library.html) 'dart:js'
+    as js;
 
 class MissionDetailDialog extends StatefulWidget {
   final MissionRow mission;

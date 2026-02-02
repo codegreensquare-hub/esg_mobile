@@ -16,7 +16,9 @@ import 'package:esg_mobile/presentation/widgets/green_square/product_description
 import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:js' as js if (dart.library.js) '../../web_updater.dart';
+import 'package:esg_mobile/web_updater.dart'
+    if (dart.library.html) 'dart:js'
+    as js;
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({
