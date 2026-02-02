@@ -723,7 +723,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                     );
                                     return;
                                   }
-                                  Navigator.of(context).pop();
                                   await Future.delayed(
                                     const Duration(milliseconds: 100),
                                   );
@@ -794,7 +793,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       );
                       return;
                     }
-                    Navigator.of(context).pop();
                     await Future.delayed(const Duration(milliseconds: 100));
                     final items = await CartService.instance.fetchCartItems(
                       userId!,
