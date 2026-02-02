@@ -360,6 +360,53 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                     _future = _fetchOrders();
                   });
                 },
+                onCancelPressed: (entry) async {
+                  final currentContext = context;
+                  final confirmed = await showDialog<bool>(
+                    context: currentContext,
+                    builder: (context) => AlertDialog(
+                      title: const Text('주문 취소'),
+                      content: const Text('정말로 이 주문을 취소하시겠습니까?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('아니오'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('예'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirmed == true) {
+                    try {
+                      final client = Supabase.instance.client;
+
+                      await client
+                          .from('order')
+                          .delete()
+                          .eq('id', entry.order.id);
+
+                      if (!mounted) return;
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
+                        const SnackBar(content: Text('주문이 취소되었습니다.')),
+                      );
+                      setState(() {
+                        _future = _fetchOrders();
+                      });
+                    } catch (e) {
+                      debugPrint('Error cancelling order: $e');
+                      if (!mounted) return;
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
+                        const SnackBar(content: Text('주문 취소 중 오류가 발생했습니다.')),
+                      );
+                    }
+                  }
+                },
               );
             },
           );

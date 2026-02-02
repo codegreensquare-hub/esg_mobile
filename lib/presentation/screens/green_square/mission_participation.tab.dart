@@ -1,5 +1,7 @@
 import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
+import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
+import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
@@ -9,9 +11,11 @@ class MissionParticipationTab extends StatefulWidget {
   const MissionParticipationTab({
     super.key,
     this.onMissionTap,
+    this.onParticipationSuccess,
   });
 
   final void Function(MissionRow)? onMissionTap;
+  final void Function()? onParticipationSuccess;
 
   @override
   State<MissionParticipationTab> createState() =>
@@ -23,12 +27,14 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
   List<MissionRow> pastMissions = [];
 
   bool showPastMissions = false;
+  int todayParticipationCount = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchCurrentMissions();
     _fetchPastMissions();
+    _fetchTodayParticipationCount();
   }
 
   void _fetchCurrentMissions() async {
@@ -49,6 +55,18 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
     );
     if (!mounted) return;
     setState(() {});
+  }
+
+  void _fetchTodayParticipationCount() async {
+    todayParticipationCount = await MissionParticipationService.instance
+        .getTodayParticipationCount();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  void refreshParticipationCount() {
+    _fetchTodayParticipationCount();
+    widget.onParticipationSuccess?.call();
   }
 
   @override
@@ -78,8 +96,8 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
           constraints: const BoxConstraints(
             maxWidth: 400,
           ),
-          child: const Text(
-            '오늘 미션참여 가능 횟수 3/3',
+          child: Text(
+            '오늘 미션참여 가능 횟수 $todayParticipationCount/$MAX_PARTICIPATION',
             textAlign: TextAlign.center,
           ),
         ),
@@ -103,10 +121,22 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                 onTap:
                     widget.onMissionTap ??
                     (mission) {
+                      if (todayParticipationCount >= MAX_PARTICIPATION) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '오늘 미션 참여 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) =>
-                              MissionDetailDialog(mission: mission),
+                          builder: (context) => MissionDetailDialog(
+                            mission: mission,
+                            onParticipationSuccess: refreshParticipationCount,
+                          ),
                         ),
                       );
                     },
@@ -149,10 +179,22 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                   onTap:
                       widget.onMissionTap ??
                       (mission) {
+                        if (todayParticipationCount >= MAX_PARTICIPATION) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                '오늘 미션 참여 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) =>
-                                MissionDetailDialog(mission: mission),
+                            builder: (context) => MissionDetailDialog(
+                              mission: mission,
+                              onParticipationSuccess: refreshParticipationCount,
+                            ),
                           ),
                         );
                       },

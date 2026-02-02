@@ -43,6 +43,7 @@ class MissionParticipationService {
   Future<void> startParticipationFlow({
     required BuildContext context,
     required MissionRow mission,
+    VoidCallback? onSuccess,
   }) async {
     VoidCallback? dismissLoading;
     try {
@@ -85,6 +86,7 @@ class MissionParticipationService {
         mission,
         photo: uploadedPhoto,
       );
+      onSuccess?.call();
       final completionPhotos = await _fetchCompletionPhotos(mission.id);
 
       dismissLoading();
@@ -232,5 +234,29 @@ class MissionParticipationService {
     return response
         .map((json) => MissionPhotoAnimationCompletionRow.fromJson(json))
         .toList();
+  }
+
+  /// Fetches the count of mission participations submitted by the current user today.
+  Future<int> getTodayParticipationCount() async {
+    final userId = UserAuthService.instance.currentUser?.id;
+    if (userId == null) {
+      return 0;
+    }
+
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final List<dynamic> response = await _client
+        .from(_participationTable.tableName)
+        .select()
+        .eq(MissionParticipationRow.participatedByField, userId)
+        .gte(
+          MissionParticipationRow.createdAtField,
+          startOfDay.toIso8601String(),
+        )
+        .lt(MissionParticipationRow.createdAtField, endOfDay.toIso8601String());
+
+    return response.length;
   }
 }

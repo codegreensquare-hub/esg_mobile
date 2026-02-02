@@ -13,10 +13,12 @@ import 'package:esg_mobile/web_updater.dart'
 
 class MissionDetailDialog extends StatefulWidget {
   final MissionRow mission;
+  final VoidCallback? onParticipationSuccess;
 
   const MissionDetailDialog({
     super.key,
     required this.mission,
+    this.onParticipationSuccess,
   });
 
   @override
@@ -344,6 +346,7 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
                     MissionParticipationService.instance.startParticipationFlow(
                       context: context,
                       mission: widget.mission,
+                      onSuccess: widget.onParticipationSuccess,
                     );
                   },
                   style: FilledButton.styleFrom(

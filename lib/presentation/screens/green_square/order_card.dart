@@ -9,11 +9,13 @@ class OrderCard extends StatelessWidget {
     super.key,
     required this.entry,
     required this.onReviewPressed,
+    this.onCancelPressed,
   });
 
   final OrderEntry entry;
   final Future<void> Function(OrderItemRow item, ProductRow? product)
   onReviewPressed;
+  final Future<void> Function(OrderEntry entry)? onCancelPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +107,7 @@ class OrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Column(
@@ -125,22 +128,58 @@ class OrderCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusBackground,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w700,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusBackground,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        statusText,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (onCancelPressed != null &&
+                        (payment == null || payment.paidAt == null) &&
+                        !entry.items.any(
+                          (item) => item.item.receivedDeliveryAt != null,
+                        )) ...[
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: () async {
+                          await onCancelPressed!(entry);
+                        },
+                        icon: Icon(
+                          Icons.cancel,
+                          size: 16,
+                          color: cs.error,
+                        ),
+                        label: Text(
+                          '주문 취소',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: cs.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
