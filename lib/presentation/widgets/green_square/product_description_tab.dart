@@ -1,6 +1,7 @@
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductDescriptionTab extends StatefulWidget {
@@ -228,19 +229,16 @@ class _ProductDescriptionTabState extends State<ProductDescriptionTab> {
                               final imageUrl = productImages[index];
                               return ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  imageUrl,
+                                child: CachedNetworkImage(
+                                  imageUrl: imageUrl,
                                   fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, progress) {
-                                    if (progress == null) return child;
-                                    return Container(
-                                      color: cs.surfaceContainerHighest,
-                                      alignment: Alignment.center,
-                                      child:
-                                          const CircularProgressIndicator.adaptive(),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) =>
+                                  placeholder: (context, url) => Container(
+                                    color: cs.surfaceContainerHighest,
+                                    alignment: Alignment.center,
+                                    child:
+                                        const CircularProgressIndicator.adaptive(),
+                                  ),
+                                  errorWidget: (context, url, error) =>
                                       Container(
                                         color: cs.surfaceContainerHighest,
                                         alignment: Alignment.center,
@@ -263,31 +261,22 @@ class _ProductDescriptionTabState extends State<ProductDescriptionTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ...urls.map(
-                  (url) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        url,
-                        width: double.infinity,
-                        fit: BoxFit.fitWidth,
-                        alignment: Alignment.topCenter,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return Container(
-                            height: 240,
-                            color: cs.surfaceContainerHighest,
-                            alignment: Alignment.center,
-                            child: const CircularProgressIndicator.adaptive(),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          height: 240,
-                          color: cs.surfaceContainerHighest,
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.image_not_supported),
-                        ),
-                      ),
+                  (url) => CachedNetworkImage(
+                    imageUrl: url,
+                    width: double.infinity,
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topCenter,
+                    placeholder: (context, url) => Container(
+                      height: 240,
+                      color: cs.surfaceContainerHighest,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator.adaptive(),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 240,
+                      color: cs.surfaceContainerHighest,
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.image_not_supported),
                     ),
                   ),
                 ),

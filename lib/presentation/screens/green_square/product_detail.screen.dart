@@ -14,6 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_action_buttons_bar.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
+import 'package:esg_mobile/presentation/widgets/code_green/product_qna_section.widget.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:esg_mobile/web_updater.dart'
@@ -48,6 +49,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   double baseDiscountRate = 0.0;
   double reviewAverage = 0.0;
   int reviewCount = 0;
+  int qnaCount = 0;
   late final TabController _tabController;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _actionButtonsKey = GlobalKey();
@@ -59,7 +61,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     productWithDetails = widget.productWithDetails;
     userId = Supabase.instance.client.auth.currentUser?.id;
     isInWishlist = productWithDetails.isInWishlist;
-    _tabController = TabController(length: 2, vsync: this)
+    _tabController = TabController(length: 3, vsync: this)
       ..addListener(_handleTabChange);
     _scrollController.addListener(_updateStickyActionsVisibility);
     _loadProductOptions();
@@ -201,10 +203,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       final count = await ProductService.instance.getProductReviewCount(
         productWithDetails.product.id,
       );
+      final qnaCountFetched = await ProductService.instance.getProductQnaCount(
+        productWithDetails.product.id,
+      );
       if (!mounted) return;
       setState(() {
         reviewAverage = average;
         reviewCount = count;
+        qnaCount = qnaCountFetched;
       });
     } catch (e) {
       debugPrint('Error loading review stats: $e');
@@ -740,18 +746,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           tabs: [
                             const Tab(text: '제품 설명'),
                             Tab(text: '리뷰 ($reviewCount)'),
+                            Tab(text: 'QnA ($qnaCount)'),
                           ],
                         ),
                         AnimatedSize(
                           duration: const Duration(milliseconds: 200),
                           curve: Curves.easeInOut,
                           alignment: Alignment.topCenter,
-                          child: _tabController.index == 0
-                              ? ProductDescriptionTab(product: product)
-                              : ReviewsTab(
-                                  productId: product.id,
-                                  averageStars: reviewAverage,
-                                ),
+                          child: switch (_tabController.index) {
+                            0 => ProductDescriptionTab(product: product),
+                            1 => ReviewsTab(
+                              productId: product.id,
+                              averageStars: reviewAverage,
+                            ),
+                            _ => ProductQnaSection(productId: product.id),
+                          },
                         ),
                       ],
                     ),

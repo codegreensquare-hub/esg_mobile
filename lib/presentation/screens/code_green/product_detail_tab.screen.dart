@@ -6,6 +6,7 @@ import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
 import 'package:esg_mobile/presentation/widgets/code_green/cart/cart_bottom_sheet.dart';
+import 'package:esg_mobile/presentation/widgets/code_green/product_qna_section.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -782,14 +783,7 @@ class _CodeGreenProductDetailTabScreenState
 
     final qnaContent = Padding(
       padding: const EdgeInsets.all(24),
-      child: Center(
-        child: Text(
-          'QnA is coming soon.',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: cs.onSurfaceVariant,
-          ),
-        ),
-      ),
+      child: ProductQnaSection(productId: product.id),
     );
 
     if (widget.embedded) {

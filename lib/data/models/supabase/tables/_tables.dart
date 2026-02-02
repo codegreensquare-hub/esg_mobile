@@ -50,6 +50,8 @@ export 'product_image_description.dart';
 export 'product_option_color.dart';
 export 'product_option_parameter.dart';
 export 'product_option_value.dart';
+export 'product_question.dart';
+export 'product_question_reply.dart';
 export 'product_review.dart';
 export 'product_review_image.dart';
 export 'product_subcategory.dart';
@@ -75,4 +77,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-01-30 17:50:32.139549
+/// Date: 2026-02-02 10:15:09.807085

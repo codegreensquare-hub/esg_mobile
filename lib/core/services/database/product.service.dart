@@ -394,6 +394,21 @@ class ProductService {
     }
   }
 
+  Future<int> getProductQnaCount(String productId) async {
+    try {
+      final response = await _client
+          .from('product_question')
+          .select('*')
+          .eq('product', productId)
+          .count(CountOption.exact);
+
+      return response.count;
+    } catch (e) {
+      debugPrint('Error fetching product qna count: $e');
+      return 0;
+    }
+  }
+
   Future<ProductWithOtherDetails?> fetchProductById(
     String productId, {
     String? userId,
