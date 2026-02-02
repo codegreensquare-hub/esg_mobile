@@ -15,6 +15,8 @@ import 'package:esg_mobile/presentation/widgets/green_square/product_action_butt
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:js' as js if (dart.library.js) '../../web_updater.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({
@@ -63,6 +65,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     _loadBaseDiscountRate();
     _loadReviewStats();
     _fetchWishlistStatus();
+    if (kIsWeb) {
+      js.context['history'].callMethod('pushState', [
+        null,
+        '',
+        '/greensquare/store?product=${productWithDetails.product.id}',
+      ]);
+    }
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _updateStickyActionsVisibility(),
     );

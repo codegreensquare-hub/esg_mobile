@@ -6,7 +6,12 @@ import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.da
 import 'package:flutter/material.dart';
 
 class MissionParticipationTab extends StatefulWidget {
-  const MissionParticipationTab({super.key});
+  const MissionParticipationTab({
+    super.key,
+    this.onMissionTap,
+  });
+
+  final void Function(MissionRow)? onMissionTap;
 
   @override
   State<MissionParticipationTab> createState() =>
@@ -95,14 +100,16 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
               final mission = currentMissions[index];
               return MissionAvailableListTile(
                 mission: mission,
-                onTap: (mission) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MissionDetailDialog(mission: mission),
-                    ),
-                  );
-                },
+                onTap:
+                    widget.onMissionTap ??
+                    (mission) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MissionDetailDialog(mission: mission),
+                        ),
+                      );
+                    },
               );
             },
           ),
@@ -139,14 +146,16 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                 final mission = pastMissions[index];
                 return MissionAvailableListTile(
                   mission: mission,
-                  onTap: (mission) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            MissionDetailDialog(mission: mission),
-                      ),
-                    );
-                  },
+                  onTap:
+                      widget.onMissionTap ??
+                      (mission) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MissionDetailDialog(mission: mission),
+                          ),
+                        );
+                      },
                 );
               },
             ),

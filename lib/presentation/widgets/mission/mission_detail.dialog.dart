@@ -6,6 +6,8 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:js' as js if (dart.library.js) '../../web_updater.dart';
 
 class MissionDetailDialog extends StatefulWidget {
   final MissionRow mission;
@@ -27,6 +29,13 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      js.context['history'].callMethod('pushState', [
+        null,
+        '',
+        '/greensquare/missions?mission=${widget.mission.id}',
+      ]);
+    }
     _fetchPhotos();
   }
 

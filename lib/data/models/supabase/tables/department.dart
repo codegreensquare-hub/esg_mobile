@@ -117,4 +117,4 @@ class DepartmentRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-01-27 17:17:37.636050
+/// Date: 2026-01-30 17:50:32.101748

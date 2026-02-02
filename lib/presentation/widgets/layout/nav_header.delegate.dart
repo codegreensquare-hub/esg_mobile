@@ -6,6 +6,8 @@ import 'package:esg_mobile/presentation/widgets/logo/code_green.logo.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 
 /// Responsive floating navigation header.
 ///
@@ -28,6 +30,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.onTapGreenSquare,
     this.homeTab,
     this.onSelectSubTab,
+    this.dynamicSubTabs = const {},
   });
 
   final ThemeData theme;
@@ -43,6 +46,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
   final VoidCallback? onTapCart;
   final VoidCallback? onTapGreenSquare;
   final String? homeTab;
+  final Map<String, List<String>> dynamicSubTabs;
   // Current layout width supplied by parent (e.g. LayoutBuilder). We only
   // rebuild when this crosses a breakpoint (narrow <-> wide) or other props change.
   final double currentWidth;
@@ -149,6 +153,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
                         theme: theme,
                         onTap: () => onTabSelected?.call(e.key, e.value),
                         subTabs:
+                            dynamicSubTabs[e.value] ??
                             (codeGreenSubTabs[e.value] as List?)
                                 ?.cast<String>() ??
                             const <String>[],
@@ -208,6 +213,7 @@ class CodeGreenNavHeaderDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.onTapLogin != onTapLogin ||
         oldDelegate.onTapGreenSquare != onTapGreenSquare ||
         oldDelegate.onSelectSubTab != onSelectSubTab ||
+        oldDelegate.dynamicSubTabs != dynamicSubTabs ||
         prevWide != nextWide;
   }
 
@@ -238,8 +244,9 @@ class _NavTabButton extends StatefulWidget {
 }
 
 class _NavTabButtonState extends State<_NavTabButton> {
-  void _showDropdown() {
-    if (widget.subTabs.isEmpty) return;
+  void _showDropdown() async {
+    List<String> items = widget.subTabs;
+    if (items.isEmpty) return;
     final overlayBox =
         Overlay.of(context).context.findRenderObject() as RenderBox?;
     final box = context.findRenderObject() as RenderBox?;
@@ -252,9 +259,9 @@ class _NavTabButtonState extends State<_NavTabButton> {
           left: offset.dx,
           top: offset.dy + box.size.height,
           child: _HoverMenu(
-            items: widget.subTabs,
+            items: items,
             onDismiss: _DropdownOverlay.hide,
-            onSelect: widget.onSelectSubTab,
+            onSelect: (subTab) => widget.onSelectSubTab?.call(subTab),
           ),
         );
       },
@@ -280,7 +287,7 @@ class _NavTabButtonState extends State<_NavTabButton> {
       onExit: (event) {
         // If the pointer leaves the tab button and doesn't enter the menu,
         // close the dropdown shortly after.
-        _DropdownOverlay.scheduleHide(const Duration(milliseconds: 120));
+        _DropdownOverlay.scheduleHide(const Duration(milliseconds: 300));
       },
       child: InkWell(
         borderRadius: BorderRadius.circular(8),

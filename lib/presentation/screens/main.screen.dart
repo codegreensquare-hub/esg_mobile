@@ -3,6 +3,7 @@ import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/services/database/story.service.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/presentation/screens/code_green/about.tab.dart';
 import 'package:esg_mobile/presentation/screens/code_green/curation_shop/curation_shop.tab.dart';
@@ -79,10 +80,13 @@ class _MainScreenState extends State<MainScreen> {
   late final OriginalShopTabController _originalShopController;
   late final CodeGreenProductDetailTabController _productDetailController;
   String? _productIdToOpen;
+  String? _storyIdToOpen;
+  String? _missionIdToOpen;
   int _codeGreenLastNonProductTabIndex = 0;
 
   String? _selectedLookbookId;
   String? _selectedLookbookTitle;
+  List<String> _lookbookTitles = ['All', 'Loading lookbooks...'];
 
   // Badge counts for floating buttons
   int _cartItemCount = 0;
@@ -132,11 +136,23 @@ class _MainScreenState extends State<MainScreen> {
         _productIdToOpen = widget.state!.uri.queryParameters['product'];
       } else if (path == '/greensquare/missions') {
         _greenIndex = 2;
+        _missionIdToOpen = widget.state!.uri.queryParameters['mission'];
       } else if (path == '/greensquare/account') {
         _greenIndex = 3;
       } else {
         _greenIndex = 0;
+        _storyIdToOpen = widget.state!.uri.queryParameters['story'];
       }
+    }
+    if (_storyIdToOpen != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _openStoryById(_storyIdToOpen!),
+      );
+    }
+    if (_missionIdToOpen != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _openMissionById(_missionIdToOpen!),
+      );
     }
     _curationShopController = CurationShopTabController();
     _originalShopController = OriginalShopTabController();
@@ -151,6 +167,7 @@ class _MainScreenState extends State<MainScreen> {
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateBadgeCounts());
+    _fetchLookbookTitles();
   }
 
   @override
@@ -303,6 +320,7 @@ class _MainScreenState extends State<MainScreen> {
                       _updateUrl(MainTab.greenSquare);
                     },
                     onSelectSubTab: _handleCodeGreenSubTab,
+                    dynamicSubTabs: {LookBookTab.tab: _lookbookTitles},
                   ),
                 ),
               if (shouldShowHeroBanner)
@@ -589,6 +607,82 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future<void> _openStoryById(String storyId) async {
+    try {
+      final story = await StoryService.instance.fetchStoryWithTagsById(storyId);
+      if (story != null && mounted) {
+        _openGreenSquareStory(story);
+      }
+    } catch (e) {
+      debugPrint('Error fetching story: $e');
+    }
+  }
+
+  Future<void> _openMissionById(String missionId) async {
+    try {
+      final mission = await MissionService.instance.fetchById(missionId);
+      if (mission != null && mounted) {
+        _openMissionDetail(mission);
+      }
+    } catch (e) {
+      debugPrint('Error fetching mission: $e');
+    }
+  }
+
+  Future<LookbookRow?> _fetchLookbookByTitle(String title) async {
+    try {
+      final response = await Supabase.instance.client
+          .from(LookbookTable().tableName)
+          .select()
+          .eq(LookbookRow.nameField, title)
+          .maybeSingle();
+      if (response != null) {
+        return LookbookRow.fromJson(response);
+      }
+    } catch (e) {
+      debugPrint('Error fetching lookbook by title: $e');
+    }
+    return null;
+  }
+
+  Future<void> _fetchLookbookTitles() async {
+    try {
+      final response = await Supabase.instance.client
+          .from(LookbookTable().tableName)
+          .select(LookbookRow.nameField)
+          .order(LookbookRow.createdAtField, ascending: false);
+      final titles = (response as List)
+          .map((e) => e[LookbookRow.nameField] as String)
+          .toList();
+      final effectiveTitles = titles.isEmpty
+          ? ['All', 'No lookbooks available']
+          : ['All', ...titles];
+      if (mounted) {
+        setState(() => _lookbookTitles = effectiveTitles);
+      }
+    } catch (e) {
+      debugPrint('Error fetching lookbook titles: $e');
+      if (mounted) {
+        setState(() => _lookbookTitles = ['All', 'Error: $e']);
+      }
+    }
+  }
+
+  void _openMissionDetail(MissionRow mission) {
+    _updateUrlForMission(mission.id);
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => MissionDetailDialog(mission: mission),
+          ),
+        )
+        .then((_) {
+          if (mounted) {
+            _updateUrl(MainTab.greenSquare);
+          }
+        });
+  }
+
   void _openCodeGreenLogin() {
     final idx = codeGreenTabs.indexOf(codeGreenLoginTabId);
     if (idx < 0) return;
@@ -599,7 +693,24 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _handleCodeGreenSubTab(String parentTab, String subTab) {
-    if (parentTab == CurationShopTab.tab) {
+    if (parentTab == 'look_book') {
+      if (subTab == 'All') {
+        final idx = codeGreenTabs.indexOf(LookBookTab.tab);
+        if (idx >= 0) {
+          setState(() => _selectedIndex = idx);
+        }
+      } else {
+        _fetchLookbookByTitle(subTab).then((lookbook) {
+          if (lookbook != null && mounted) {
+            setState(() {
+              _selectedLookbookId = lookbook.id;
+              _selectedLookbookTitle = lookbook.name;
+              _selectedIndex = codeGreenTabs.indexOf(lookbookEntryViewerTabId);
+            });
+          }
+        });
+      }
+    } else if (parentTab == OriginalShopTab.tab) {
       _curationShopController.selectById(subTab);
       final idx = codeGreenTabs.indexOf(parentTab);
       if (idx >= 0 && idx != _selectedIndex) {
@@ -859,6 +970,16 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _updateUrlForMission(String missionId) {
+    if (kIsWeb) {
+      js.context['history'].callMethod('pushState', [
+        null,
+        '',
+        '/greensquare/missions?mission=$missionId',
+      ]);
+    }
+  }
+
   void _updateUrlForGreenSquareTab(int index) {
     if (kIsWeb) {
       String path = '/greensquare';
@@ -901,7 +1022,7 @@ class _MainScreenState extends State<MainScreen> {
           productIdToOpen: _productIdToOpen,
         );
       case 2:
-        return MissionParticipationTab();
+        return MissionParticipationTab(onMissionTap: _openMissionDetail);
       case 3:
         return const AccountTab();
       default:

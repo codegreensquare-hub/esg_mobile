@@ -30,6 +30,7 @@ class StampRow extends SupabaseDataRow {
     String? bucket,
     String? fileName,
     String? folderPath,
+    dynamic designData,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -37,6 +38,7 @@ class StampRow extends SupabaseDataRow {
          if (bucket != null) 'bucket': supaSerialize(bucket),
          if (fileName != null) 'file_name': supaSerialize(fileName),
          if (folderPath != null) 'folder_path': supaSerialize(folderPath),
+         if (designData != null) 'design_data': supaSerialize(designData),
        });
 
   /// Stamp Row
@@ -96,6 +98,13 @@ class StampRow extends SupabaseDataRow {
   String? get folderPath => getField<String>(folderPathField);
   set folderPath(String? value) => setField<String>(folderPathField, value);
 
+  /// Design Data field name
+  static const String designDataField = 'design_data';
+
+  /// Design Data
+  dynamic get designData => getField<dynamic>(designDataField);
+  set designData(dynamic value) => setField<dynamic>(designDataField, value);
+
   /// Make a copy of the current [StampRow]
   /// overriding the provided fields
   StampRow copyWith({
@@ -105,6 +114,7 @@ class StampRow extends SupabaseDataRow {
     String? bucket,
     String? fileName,
     String? folderPath,
+    dynamic designData,
   }) => StampRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -112,8 +122,9 @@ class StampRow extends SupabaseDataRow {
     'bucket': supaSerialize(bucket) ?? data['bucket'],
     'file_name': supaSerialize(fileName) ?? data['file_name'],
     'folder_path': supaSerialize(folderPath) ?? data['folder_path'],
+    'design_data': supaSerialize(designData) ?? data['design_data'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-01-27 17:17:37.667787
+/// Date: 2026-01-30 17:50:32.133327

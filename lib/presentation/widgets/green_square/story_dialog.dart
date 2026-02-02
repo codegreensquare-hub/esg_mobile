@@ -13,6 +13,8 @@ import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_t
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:js' as js if (dart.library.js) '../../web_updater.dart';
 
 class StoryDialog extends StatefulWidget {
   const StoryDialog({
@@ -51,6 +53,13 @@ class _StoryDialogState extends State<StoryDialog> {
   void initState() {
     super.initState();
     userId = Supabase.instance.client.auth.currentUser?.id;
+    if (kIsWeb) {
+      js.context['history'].callMethod('pushState', [
+        null,
+        '',
+        '/greensquare?story=${widget.story.id}',
+      ]);
+    }
     _loadData();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

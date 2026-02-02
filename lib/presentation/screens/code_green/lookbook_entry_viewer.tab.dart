@@ -585,6 +585,7 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
                         );
                       },
                     ),
+                    SizedBox(height: 60),
                   ],
                 ),
               ),

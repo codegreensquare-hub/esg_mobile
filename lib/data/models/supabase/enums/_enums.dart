@@ -17,4 +17,4 @@ export 'user_type.dart';
 export 'vendor_admin_type.dart';
 
 /// Tag: v2
-/// Date: 2026-01-27 17:17:37.599743
+/// Date: 2026-01-30 17:50:32.061725
