@@ -9,48 +9,48 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Story Comment Table
-class StoryCommentTable extends SupabaseTable<StoryCommentRow> {
+/// Event Comment Table
+class EventCommentTable extends SupabaseTable<EventCommentRow> {
   /// Table Name
   @override
-  String get tableName => 'story_comment';
+  String get tableName => 'event_comment';
 
-  /// Create a [StoryCommentRow] from the [data] provided
+  /// Create a [EventCommentRow] from the [data] provided
   @override
-  StoryCommentRow createRow(Map<String, dynamic> data) =>
-      StoryCommentRow.fromJson(data);
+  EventCommentRow createRow(Map<String, dynamic> data) =>
+      EventCommentRow.fromJson(data);
 }
 
-/// Story Comment Row
-class StoryCommentRow extends SupabaseDataRow {
-  /// Story Comment Row
-  StoryCommentRow({
+/// Event Comment Row
+class EventCommentRow extends SupabaseDataRow {
+  /// Event Comment Row
+  EventCommentRow({
     String? id,
     DateTime? createdAt,
-    String? story,
-    String? comment,
     String? commentBy,
+    String? comment,
+    String? event,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
-         if (story != null) 'story': supaSerialize(story),
-         if (comment != null) 'comment': supaSerialize(comment),
          if (commentBy != null) 'comment_by': supaSerialize(commentBy),
+         if (comment != null) 'comment': supaSerialize(comment),
+         if (event != null) 'event': supaSerialize(event),
        });
 
-  /// Story Comment Row
-  const StoryCommentRow._(super.data);
+  /// Event Comment Row
+  const EventCommentRow._(super.data);
 
-  /// Create Story Comment Row from a [data] map
-  factory StoryCommentRow.fromJson(Map<String, dynamic> data) =>
-      StoryCommentRow._(data.cleaned);
+  /// Create Event Comment Row from a [data] map
+  factory EventCommentRow.fromJson(Map<String, dynamic> data) =>
+      EventCommentRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => StoryCommentTable();
+  SupabaseTable get table => EventCommentTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -67,12 +67,12 @@ class StoryCommentRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
-  /// Story field name
-  static const String storyField = 'story';
+  /// Comment By field name
+  static const String commentByField = 'comment_by';
 
-  /// Story
-  String? get story => getField<String>(storyField);
-  set story(String? value) => setField<String>(storyField, value);
+  /// Comment By
+  String? get commentBy => getField<String>(commentByField);
+  set commentBy(String? value) => setField<String>(commentByField, value);
 
   /// Comment field name
   static const String commentField = 'comment';
@@ -81,30 +81,29 @@ class StoryCommentRow extends SupabaseDataRow {
   String? get comment => getField<String>(commentField);
   set comment(String? value) => setField<String>(commentField, value);
 
-  /// Comment By field name
-  static const String commentByField = 'comment_by';
+  /// Event field name
+  static const String eventField = 'event';
 
-  /// Comment By
-  String get commentBy =>
-      getField<String>(commentByField, defaultValue: 'auth.')!;
-  set commentBy(String value) => setField<String>(commentByField, value);
+  /// Event
+  String? get event => getField<String>(eventField);
+  set event(String? value) => setField<String>(eventField, value);
 
-  /// Make a copy of the current [StoryCommentRow]
+  /// Make a copy of the current [EventCommentRow]
   /// overriding the provided fields
-  StoryCommentRow copyWith({
+  EventCommentRow copyWith({
     String? id,
     DateTime? createdAt,
-    String? story,
-    String? comment,
     String? commentBy,
-  }) => StoryCommentRow.fromJson({
+    String? comment,
+    String? event,
+  }) => EventCommentRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
-    'story': supaSerialize(story) ?? data['story'],
-    'comment': supaSerialize(comment) ?? data['comment'],
     'comment_by': supaSerialize(commentBy) ?? data['comment_by'],
+    'comment': supaSerialize(comment) ?? data['comment'],
+    'event': supaSerialize(event) ?? data['event'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-02-03 09:35:09.255615
+/// Date: 2026-02-03 09:35:09.223797

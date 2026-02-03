@@ -106,4 +106,4 @@ class InquiryCommentRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-02-02 10:15:09.772653
+/// Date: 2026-02-03 09:35:09.225846

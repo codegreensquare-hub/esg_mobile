@@ -17,6 +17,8 @@ export 'client_admin_notification.dart';
 export 'company.dart';
 export 'cost_change_request.dart';
 export 'department.dart';
+export 'event.dart';
+export 'event_comment.dart';
 export 'faq.dart';
 export 'faq_category.dart';
 export 'inquiry.dart';
@@ -77,4 +79,4 @@ export 'user_organization.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-02-02 10:15:09.807085
+/// Date: 2026-02-03 09:35:09.260214
