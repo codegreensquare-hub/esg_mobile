@@ -43,13 +43,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final baseDiscountRate = item.product.baseDiscountRate ?? 0.0;
     final platformDiscountRate = item.product.platformDiscountRate ?? 0.0;
     final vendorDiscountRate = item.product.vendorDiscountRate ?? 0.0;
+    final baseDiscount = (item.unitPrice * baseDiscountRate / 100).floor();
     return sum +
-        usableAwardPointsAmount(
+        (baseDiscount + (usableAwardPointsAmount(
               regularPrice: item.unitPrice,
               baseDiscountRate: baseDiscountRate,
               platformDiscountRate: platformDiscountRate,
               vendorDiscountRate: vendorDiscountRate,
-            ) *
+            ) ?? 0)) *
             item.quantity;
   });
 
