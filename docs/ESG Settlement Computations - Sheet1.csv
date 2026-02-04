@@ -1,0 +1,28 @@
+,,,,,,,,,,,,,,,,,,,,,,
+Scenarios,"Product Original Price
+(Base Price without the discounts or any deductions)","Base Discount Rate
+(Set by Merchant)",Base Discount,Selling Price Before Points,Platform Discount Rate ,Maximum Amount discounted by Platform Discount Rate,Merchant Discount Rate ,Maximum Amount discounted by Merchant Discount Rate,Maximum Discount Rate,Maximum Additional Discount via Points,"Final Product Sale Price (after points)
+Minimum payable price after points","Allowed percentage exceeded
+
+(Only a checker)",,Used Points by User,Amount discounted by base discount rate,Amount discounted by Platform Rate,Amount discounted by Merchant discount rate,,"Contracted Commission Rate
+(Commission rate of ESG Based on contract with Vendor)","[Base Price] - [Base Discount Amount]
+
+(Original Price × (1 − Base Discount Rate))","Sales commission
+(Amount going to ESG)",Amount settlement to the seller/merchant/vendor
+"Case 1:
+Base Discount Rate = 0%","10,000.00",0.00%,0.00,"10,000.00",10.00%,"1,000.00",10.00%,"1,000.00",20.00%,"2,000.00","8,000.00",0.00%,,"1,000.00",0.00,"1,000.00",0.00,,15.00%,"10,000.00","1,500.00","8,500.00"
+"Case 1:
+Base Discount Rate = 0%","10,000.00",0.00%,0.00,"10,000.00",10.00%,"1,000.00",10.00%,"1,000.00",20.00%,"2,000.00","8,000.00",0.00%,,"2,000.00",0.00,"1,000.00","1,000.00",,15.00%,"10,000.00","1,500.00","7,500.00"
+"Case 1:
+Base Discount Rate = 0%","10,000.00",0.00%,0.00,"10,000.00",10.00%,"1,000.00",10.00%,"1,000.00",20.00%,"2,000.00","8,000.00",0.00%,,"1,500.00",0.00,"1,000.00",500.00,,15.00%,"10,000.00","1,500.00","8,000.00"
+,,,,,,,,,,,,,,,,,,,,,,
+"Case 2:
+Base Discount Rate = 10%","10,000.00",10.00%,"1,000.00","9,000.00",10.00%,900.00,10.00%,900.00,20.00%,800.00,"8,200.00",0.00%,,"1,000.00","1,000.00",0.00,900.00,,15.00%,"9,000.00","1,350.00","6,750.00"
+"Case 2:
+Base Discount Rate = 10%","10,000.00",10.00%,"1,000.00","9,000.00",10.00%,900.00,10.00%,900.00,20.00%,800.00,"8,200.00",0.00%,,"2,000.00","1,000.00",900.00,900.00,,15.00%,"9,000.00","1,350.00","6,750.00"
+"Case 2:
+Base Discount Rate = 10%","10,000.00",10.00%,"1,000.00","9,000.00",10.00%,900.00,10.00%,900.00,20.00%,800.00,"8,200.00",0.00%,,"1,500.00","1,000.00",500.00,900.00,,15.00%,"9,000.00","1,350.00","6,750.00"
+"Case 2:
+Base Discount Rate = 10%","10,000.00",10.00%,"1,000.00","9,000.00",10.00%,900.00,10.00%,900.00,20.00%,800.00,"8,200.00",0.00%,,500.00,500.00,0.00,500.00,,15.00%,"9,000.00","1,350.00","7,150.00"
+"Case 2:
+Base Discount Rate = 10%","10,000.00",10.00%,"1,000.00","9,000.00",10.00%,900.00,10.00%,900.00,20.00%,800.00,"8,200.00",0.00%,,200.00,200.00,0.00,200.00,,15.00%,"9,000.00","1,350.00","7,450.00"

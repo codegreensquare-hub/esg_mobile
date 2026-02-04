@@ -130,8 +130,9 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
 
         return SafeArea(
           child: DraggableScrollableSheet(
-            initialChildSize: 0.6,
-            maxChildSize: 0.9,
+            initialChildSize: 1,
+            maxChildSize: 1,
+            minChildSize: 1,
             expand: false,
             builder: (context, controller) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -271,11 +272,17 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                 item.product.platformDiscountRate ?? 0.0;
                             final vendorDiscountRate =
                                 item.product.vendorDiscountRate ?? 0.0;
-                            final totalDiscountRate =
-                                baseDiscountRate +
-                                platformDiscountRate +
-                                vendorDiscountRate;
-                            final baseDiscount = (item.unitPrice * baseDiscountRate / 100).floor();
+                            final baseDiscount =
+                                (item.unitPrice * baseDiscountRate / 100)
+                                    .floor();
+                            final usablePointsPerItem =
+                                baseDiscount +
+                                usableAwardPointsAmount(
+                                  regularPrice: item.unitPrice,
+                                  baseDiscountRate: baseDiscountRate,
+                                  platformDiscountRate: platformDiscountRate,
+                                  vendorDiscountRate: vendorDiscountRate,
+                                );
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
@@ -402,7 +409,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '사용 가능 포인트: ${formatter.format(baseDiscount + (usableAwardPointsAmount(regularPrice: item.unitPrice, baseDiscountRate: baseDiscountRate, platformDiscountRate: platformDiscountRate, vendorDiscountRate: vendorDiscountRate) ?? 0))}',
+                                            '사용 가능 포인트: ${formatter.format(usablePointsPerItem * item.quantity.toInt())}',
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: cs.secondary,

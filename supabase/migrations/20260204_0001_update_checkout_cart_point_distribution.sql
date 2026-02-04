@@ -1,4 +1,4 @@
--- Update checkout_cart function to handle award points distribution
+-- Update checkout_cart function to distribute award points across order items
 CREATE OR REPLACE FUNCTION public.checkout_cart(p_shipping_address uuid, p_award_points numeric DEFAULT 0)
  RETURNS uuid
  LANGUAGE plpgsql
@@ -146,10 +146,3 @@ $function$
 
 -- Grant execute permission to authenticated users
 GRANT EXECUTE ON FUNCTION public.checkout_cart(uuid, numeric) TO authenticated;
-
--- Patch existing order_items to set price from product
-UPDATE order_item
-SET price = product.regular_price
-FROM product
-WHERE order_item.product = product.id
-  AND order_item.price IS NULL;

@@ -45,12 +45,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final vendorDiscountRate = item.product.vendorDiscountRate ?? 0.0;
     final baseDiscount = (item.unitPrice * baseDiscountRate / 100).floor();
     return sum +
-        (baseDiscount + (usableAwardPointsAmount(
-              regularPrice: item.unitPrice,
-              baseDiscountRate: baseDiscountRate,
-              platformDiscountRate: platformDiscountRate,
-              vendorDiscountRate: vendorDiscountRate,
-            ) ?? 0)) *
+        (baseDiscount +
+                (usableAwardPointsAmount(
+                      regularPrice: item.unitPrice,
+                      baseDiscountRate: baseDiscountRate,
+                      platformDiscountRate: platformDiscountRate,
+                      vendorDiscountRate: vendorDiscountRate,
+                    ) ??
+                    0)) *
             item.quantity;
   });
 
@@ -509,11 +511,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             item.product.platformDiscountRate ?? 0.0;
                         final vendorDiscountRate =
                             item.product.vendorDiscountRate ?? 0.0;
-                        final totalDiscountRate =
-                            baseDiscountRate +
-                            platformDiscountRate +
-                            vendorDiscountRate;
-                        final baseDiscount = (item.unitPrice * baseDiscountRate / 100).floor();
+
+                        final baseDiscount =
+                            (item.unitPrice * baseDiscountRate / 100).floor();
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: Padding(
