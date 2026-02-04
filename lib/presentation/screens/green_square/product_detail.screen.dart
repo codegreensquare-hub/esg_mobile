@@ -548,13 +548,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       color: cs.onSurfaceVariant,
                                     ),
                                     children: [
-                                      const TextSpan(text: '보유 마일리지 '),
+                                      const TextSpan(text: '보유 마일리지  '),
                                       WidgetSpan(
-                                        child: const MileageIcon(),
+                                        child: const MileageIcon(
+                                          size: 15,
+                                        ),
                                         alignment: PlaceholderAlignment.middle,
                                       ),
                                       TextSpan(
-                                        text: ' ${formatKRW((baseDiscount + (usableAwardPoints ?? 0)).toInt())}',
+                                        text:
+                                            ' ${formatKRW((baseDiscount + (usableAwardPoints ?? 0)).toInt())}',
                                       ),
                                     ],
                                   ),

@@ -275,6 +275,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                 baseDiscountRate +
                                 platformDiscountRate +
                                 vendorDiscountRate;
+                            final baseDiscount = (item.unitPrice * baseDiscountRate / 100).floor();
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
@@ -401,7 +402,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '사용 가능 포인트: ${formatter.format(usableAwardPointsAmount(regularPrice: item.unitPrice, baseDiscountRate: baseDiscountRate, platformDiscountRate: platformDiscountRate, vendorDiscountRate: vendorDiscountRate))}',
+                                            '사용 가능 포인트: ${formatter.format(baseDiscount + (usableAwardPointsAmount(regularPrice: item.unitPrice, baseDiscountRate: baseDiscountRate, platformDiscountRate: platformDiscountRate, vendorDiscountRate: vendorDiscountRate) ?? 0))}',
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: cs.secondary,
