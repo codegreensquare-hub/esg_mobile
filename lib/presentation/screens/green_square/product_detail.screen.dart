@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_action_buttons_bar.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_description_tab.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/reviews_tab.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/mileage_icon.widget.dart';
 import 'package:esg_mobile/presentation/widgets/code_green/product_qna_section.widget.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:flutter/foundation.dart';
@@ -468,7 +469,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                 ),
                               ),
                               if (regularPrice != null &&
-                                  usableAwardPoints != null)
+                                  usableAwardPoints != null &&
+                                  kDebugMode)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Column(
@@ -540,11 +542,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
                               if (userId != null &&
                                   currentAwardPoints.toInt() > 0) ...[
-                                Text(
-                                  '보유 마일리지 (c) ${formatKRW((baseDiscount + (usableAwardPoints ?? 0)).toInt())}',
-
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurfaceVariant,
+                                RichText(
+                                  text: TextSpan(
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                    children: [
+                                      const TextSpan(text: '보유 마일리지 '),
+                                      WidgetSpan(
+                                        child: const MileageIcon(),
+                                        alignment: PlaceholderAlignment.middle,
+                                      ),
+                                      TextSpan(
+                                        text: ' ${formatKRW((baseDiscount + (usableAwardPoints ?? 0)).toInt())}',
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 8),

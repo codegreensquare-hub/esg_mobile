@@ -13,6 +13,7 @@ import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/mileage_icon.widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:esg_mobile/web_updater.dart'
     if (dart.library.html) 'dart:js'
@@ -317,16 +318,7 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SvgPicture.network(
-                    getImageLink(
-                      bucket.asset,
-                      asset.cMilage,
-                      folderPath: assetFolderPath[asset.cMilage],
-                    ),
-                    width: 20,
-                    height: 20,
-                    semanticsLabel: '마일리지',
-                  ),
+                  const MileageIcon(),
                   const SizedBox(width: 8),
                   Text(
                     mileageText,
