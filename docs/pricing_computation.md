@@ -25,7 +25,7 @@ All pricing calculations are based on the following fields from the `product` ta
 - **Type**: Database field
 - **Description**: Percentage discount applied by the merchant
 
-### 3. Base Discount
+### 3. Base Discount Amount
 
 - **Computation**: `(Base Discount Rate / 100) × Product Original Price`
 - **Type**: Computed value
@@ -33,7 +33,7 @@ All pricing calculations are based on the following fields from the `product` ta
 
 ### 4. Selling Price Before Points
 
-- **Computation**: `Product Original Price - Base Discount`
+- **Computation**: `Product Original Price - Base Discount Amount`
 - **Type**: Computed value
 - **Description**: Price after base discount but before additional point-based discounts
 
@@ -43,57 +43,47 @@ All pricing calculations are based on the following fields from the `product` ta
 - **Type**: Database field
 - **Description**: Percentage discount applied by the platform
 
-### 6. Maximum Amount Discounted by Platform Discount Rate
-
-- **Computation**: `Selling Price Before Points × (Platform Discount Rate / 100)`
-- **Type**: Computed value
-- **Description**: Maximum discount amount that can be applied using platform discount rate
-
-### 7. Merchant Discount Rate
+### 6. Vendor Discount Rate
 
 - **Source**: Directly from `vendor_discount_rate` field
 - **Type**: Database field
 - **Description**: Percentage discount applied by the vendor/merchant
 
-### 8. Maximum Amount Discounted by Merchant Discount Rate
+### 7. Maximum Discount Rate (Combined Platform + Vendor)
 
-- **Computation**: `Selling Price Before Points × (Merchant Discount Rate / 100)`
+- **Computation**: `Platform Discount Rate + Vendor Discount Rate`
 - **Type**: Computed value
-- **Description**: Maximum discount amount that can be applied using merchant discount rate
+- **Description**: Combined discount rate from platform and vendor that can be applied via points
 
-### 9. Maximum Discount Rate
+### 8. Maximum Additional Discount via Points
 
-- **Computation**: `Platform Discount Rate + Merchant Discount Rate`
-- **Type**: Computed value
-- **Description**: Combined discount rate from platform and merchant
-
-### 10. Maximum Additional Discount via Points
-
-- **Computation**: `Selling Price Before Points × (Maximum Discount Rate / 100)`
-  - Where Maximum Discount Rate = Platform Discount Rate + Merchant Discount Rate
+- **Computation**: `Selling Price Before Points × (Maximum Discount Rate / 100) - Base Discount Amount`
 - **Type**: Computed value
 - **Description**: Maximum amount that can be discounted using points (usable award points)
-- **Note**: This represents the discount from platform and merchant rates applied to the price after base discount
+- **Note**: This ensures points can only discount the additional amount beyond the base discount
 
-### 11. Final Product Sale Price (after points) - Minimum payable price after points
+### 9. Maximum Discount Benefit (Total Savings)
 
-- **Computation**: `Product Original Price - Base Discount - Maximum Additional Discount via Points`
+- **Computation**: `Base Discount Amount + Maximum Additional Discount via Points`
 - **Type**: Computed value
-- **Description**: The minimum price a customer must pay after applying all available discounts and points
+- **Description**: Total maximum discount amount available (base discount + points discount)
 
-## Notes
+### 10. Final Product Sale Price (Minimum payable price after all discounts)
 
-- All monetary values are in Korean Won (₩)
-- Discount rates are stored as percentages (e.g., 10 for 10%)
-- Computations use floor rounding for point-based discounts to ensure integer values
-- The final sale price represents the minimum amount payable when maximum points are used
-- Platform discount rate has validation constraints based on contracted commission rates
-- Combined platform and merchant discount rates cannot exceed 100%
-- **Implementation Note**: The form calculations (create/edit) and table display use slightly different approaches. The form applies discounts sequentially (base first, then platform/merchant), while the table uses a combined discount calculation. The documentation above reflects the intended sequential logic.
+- **Computation**: `Product Original Price - Maximum Discount Benefit`
+- **Type**: Computed value
+- **Description**: The minimum price a customer must pay after applying all available discounts and maximum points
+
+## Implementation Notes
+
+- **Combined Discount Logic**: Unlike sequential discounts, the admin system applies all discounts together to determine the final price. The base discount is applied first, then points can cover the remaining discountable amount.
+- **Points Usage**: Users can use points up to the Maximum Discount Benefit amount, which includes both base discount and additional point-based discounts.
+- **Validation**: Combined platform and vendor discount rates cannot exceed 100%. Platform discount rates have additional validation based on contracted commission rates.
 
 ## Code Reference
 
 The computation logic is implemented in:
 
-- `app/routes/vendor-admin/dashboard/product-management/create/create-page.tsx` (for form calculations)
-- `app/routes/vendor-admin/dashboard/product-management/product-management-page.tsx` (for table display)
+- Mobile app: `lib/core/utils/product_pricing.dart` (usableAwardPointsAmount, minimumPriceAmount functions)
+- Admin system: `app/routes/vendor-admin/dashboard/product-management/create/create-page.tsx` (combined discount calculations)
+- Admin system: `app/routes/vendor-admin/dashboard/product-management/product-management-page.tsx` (table display with combined discounts)
