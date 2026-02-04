@@ -41,8 +41,10 @@ class ProductRow extends SupabaseDataRow {
     String? company,
     String? id,
     bool? isCuration,
-    double? additionalDiscountRate,
     bool? isListed,
+    double? baseDiscountRate,
+    double? platformDiscountRate,
+    double? vendorDiscountRate,
   }) : super({
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
@@ -64,9 +66,13 @@ class ProductRow extends SupabaseDataRow {
          if (company != null) 'company': supaSerialize(company),
          if (id != null) 'id': supaSerialize(id),
          if (isCuration != null) 'is_curation': supaSerialize(isCuration),
-         if (additionalDiscountRate != null)
-           'additional_discount_rate': supaSerialize(additionalDiscountRate),
          if (isListed != null) 'is_listed': supaSerialize(isListed),
+         if (baseDiscountRate != null)
+           'base_discount_rate': supaSerialize(baseDiscountRate),
+         if (platformDiscountRate != null)
+           'platform_discount_rate': supaSerialize(platformDiscountRate),
+         if (vendorDiscountRate != null)
+           'vendor_discount_rate': supaSerialize(vendorDiscountRate),
        });
 
   /// Product Row
@@ -216,21 +222,37 @@ class ProductRow extends SupabaseDataRow {
   bool get isCuration => getField<bool>(isCurationField, defaultValue: false)!;
   set isCuration(bool value) => setField<bool>(isCurationField, value);
 
-  /// Additional Discount Rate field name
-  static const String additionalDiscountRateField = 'additional_discount_rate';
-
-  /// Additional Discount Rate
-  double get additionalDiscountRate =>
-      getField<double>(additionalDiscountRateField, defaultValue: 0)!;
-  set additionalDiscountRate(double value) =>
-      setField<double>(additionalDiscountRateField, value);
-
   /// Is Listed field name
   static const String isListedField = 'is_listed';
 
   /// Is Listed
   bool get isListed => getField<bool>(isListedField, defaultValue: false)!;
   set isListed(bool value) => setField<bool>(isListedField, value);
+
+  /// Base Discount Rate field name
+  static const String baseDiscountRateField = 'base_discount_rate';
+
+  /// Base Discount Rate
+  double? get baseDiscountRate => getField<double>(baseDiscountRateField);
+  set baseDiscountRate(double? value) =>
+      setField<double>(baseDiscountRateField, value);
+
+  /// Platform Discount Rate field name
+  static const String platformDiscountRateField = 'platform_discount_rate';
+
+  /// Platform Discount Rate
+  double? get platformDiscountRate =>
+      getField<double>(platformDiscountRateField);
+  set platformDiscountRate(double? value) =>
+      setField<double>(platformDiscountRateField, value);
+
+  /// Vendor Discount Rate field name
+  static const String vendorDiscountRateField = 'vendor_discount_rate';
+
+  /// Vendor Discount Rate
+  double? get vendorDiscountRate => getField<double>(vendorDiscountRateField);
+  set vendorDiscountRate(double? value) =>
+      setField<double>(vendorDiscountRateField, value);
 
   /// Make a copy of the current [ProductRow]
   /// overriding the provided fields
@@ -252,8 +274,10 @@ class ProductRow extends SupabaseDataRow {
     String? company,
     String? id,
     bool? isCuration,
-    double? additionalDiscountRate,
     bool? isListed,
+    double? baseDiscountRate,
+    double? platformDiscountRate,
+    double? vendorDiscountRate,
   }) => ProductRow.fromJson({
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
@@ -275,12 +299,15 @@ class ProductRow extends SupabaseDataRow {
     'company': supaSerialize(company) ?? data['company'],
     'id': supaSerialize(id) ?? data['id'],
     'is_curation': supaSerialize(isCuration) ?? data['is_curation'],
-    'additional_discount_rate':
-        supaSerialize(additionalDiscountRate) ??
-        data['additional_discount_rate'],
     'is_listed': supaSerialize(isListed) ?? data['is_listed'],
+    'base_discount_rate':
+        supaSerialize(baseDiscountRate) ?? data['base_discount_rate'],
+    'platform_discount_rate':
+        supaSerialize(platformDiscountRate) ?? data['platform_discount_rate'],
+    'vendor_discount_rate':
+        supaSerialize(vendorDiscountRate) ?? data['vendor_discount_rate'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-02-03 09:35:09.243713
+/// Date: 2026-02-04 11:46:32.469134

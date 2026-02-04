@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
-import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/services/database/user_shipping_address.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/utils/product_pricing.dart';
@@ -31,7 +30,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _selectedAddressId;
   UserShippingAddressRow? _selectedAddress;
   bool _hasShownForm = false;
-  double _baseDiscountRate = 0.0;
   double _userAwardPoints = 0.0;
   bool _hasSetDefaultAwardPoints = false;
   final TextEditingController _awardPointsController = TextEditingController();
@@ -42,12 +40,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   );
 
   double get _maxUsableAwardPoints => widget.items.fold<double>(0, (sum, item) {
-    final totalDiscountRate =
-        _baseDiscountRate + item.product.additionalDiscountRate;
+    final baseDiscountRate = item.product.baseDiscountRate ?? 0.0;
+    final platformDiscountRate = item.product.platformDiscountRate ?? 0.0;
+    final vendorDiscountRate = item.product.vendorDiscountRate ?? 0.0;
     return sum +
         usableAwardPointsAmount(
               regularPrice: item.unitPrice,
-              totalDiscountRate: totalDiscountRate,
+              baseDiscountRate: baseDiscountRate,
+              platformDiscountRate: platformDiscountRate,
+              vendorDiscountRate: vendorDiscountRate,
             ) *
             item.quantity;
   });
@@ -62,7 +63,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.initState();
     _userId = Supabase.instance.client.auth.currentUser?.id;
     _loadDefaultAddress();
-    _loadBaseDiscountRate();
     _loadUserAwardPoints();
   }
 
@@ -101,12 +101,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _selectedAddress = address;
       _isLoadingAddress = false;
     });
-  }
-
-  Future<void> _loadBaseDiscountRate() async {
-    final rate = await SettingsService.instance.getBaseDiscountRate();
-    if (!mounted) return;
-    setState(() => _baseDiscountRate = rate);
   }
 
   Future<void> _loadUserAwardPoints() async {
@@ -335,9 +329,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // Set default award points value
-    if (!_hasSetDefaultAwardPoints &&
-        _userAwardPoints > 0 &&
-        _baseDiscountRate >= 0) {
+    if (!_hasSetDefaultAwardPoints && _userAwardPoints > 0) {
       final maxAllowed = _userAwardPoints < _maxUsableAwardPoints
           ? _userAwardPoints
           : _maxUsableAwardPoints;
@@ -510,9 +502,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 folderPath: item.product.mainImageFolderPath,
                               )
                             : null;
-                        final double totalDiscountRate =
-                            _baseDiscountRate +
-                            item.product.additionalDiscountRate;
+                        final baseDiscountRate =
+                            item.product.baseDiscountRate ?? 0.0;
+                        final platformDiscountRate =
+                            item.product.platformDiscountRate ?? 0.0;
+                        final vendorDiscountRate =
+                            item.product.vendorDiscountRate ?? 0.0;
+                        final totalDiscountRate =
+                            baseDiscountRate +
+                            platformDiscountRate +
+                            vendorDiscountRate;
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: Padding(
@@ -579,7 +578,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '사용 가능 포인트: ${formatter.format(usableAwardPointsAmount(regularPrice: item.unitPrice, totalDiscountRate: totalDiscountRate) * item.quantity)}',
+                                        '사용 가능 포인트: ${formatter.format(usableAwardPointsAmount(regularPrice: item.unitPrice, baseDiscountRate: baseDiscountRate, platformDiscountRate: platformDiscountRate, vendorDiscountRate: vendorDiscountRate) * item.quantity)}',
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color:

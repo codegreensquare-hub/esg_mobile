@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
-import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/utils/product_pricing.dart';
@@ -28,7 +27,6 @@ class _ProductCardState extends State<ProductCard> {
   List<ProductOptionColorRow> _colorValues = const [];
   String? _selectedImageUrl;
   String? _selectedColorHex;
-  double _baseDiscountRate = 0.0;
   bool _isHeartHovered = false;
   bool _isInWishlist = false;
 
@@ -37,7 +35,6 @@ class _ProductCardState extends State<ProductCard> {
     super.initState();
     _isInWishlist = widget.productWithDetails.isInWishlist;
     _loadColors();
-    _loadBaseDiscountRate();
   }
 
   @override
@@ -62,12 +59,6 @@ class _ProductCardState extends State<ProductCard> {
     setState(() => _colorValues = colors);
   }
 
-  Future<void> _loadBaseDiscountRate() async {
-    final rate = await SettingsService.instance.getBaseDiscountRate();
-    if (!mounted) return;
-    setState(() => _baseDiscountRate = rate);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -75,13 +66,18 @@ class _ProductCardState extends State<ProductCard> {
     final productWithDetails = widget.productWithDetails;
     final product = productWithDetails.product;
     final double? regularPrice = product.regularPrice;
-    final double totalDiscountRate =
-        _baseDiscountRate + product.additionalDiscountRate;
+    final baseDiscountRate = product.baseDiscountRate ?? 0.0;
+    final platformDiscountRate = product.platformDiscountRate ?? 0.0;
+    final vendorDiscountRate = product.vendorDiscountRate ?? 0.0;
+    final totalDiscountRate =
+        baseDiscountRate + platformDiscountRate + vendorDiscountRate;
     final int? discountedPrice = regularPrice == null
         ? null
         : minimumPriceAmount(
             regularPrice: regularPrice,
-            totalDiscountRate: totalDiscountRate,
+            baseDiscountRate: baseDiscountRate,
+            platformDiscountRate: platformDiscountRate,
+            vendorDiscountRate: vendorDiscountRate,
           );
     final hasDiscount =
         regularPrice != null &&

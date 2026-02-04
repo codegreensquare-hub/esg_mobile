@@ -3,7 +3,6 @@ import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
-import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
@@ -82,23 +81,11 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
 
   List<_LookbookEntryData> _entries = const [];
   ProductsById _productsById = const {};
-  double _baseDiscountRate = 0.0;
 
   @override
   void initState() {
     super.initState();
     _loadFuture = _fetchAll();
-    _loadBaseDiscountRate();
-  }
-
-  Future<void> _loadBaseDiscountRate() async {
-    try {
-      final rate = await SettingsService.instance.getBaseDiscountRate();
-      if (!mounted) return;
-      setState(() => _baseDiscountRate = rate);
-    } catch (e) {
-      debugPrint('Error loading base discount rate: $e');
-    }
   }
 
   @override
@@ -492,16 +479,25 @@ class _LookbookEntryViewerTabState extends State<LookbookEntryViewerTab> {
 
                                   final row = openProduct?.product;
                                   final regularPrice = row?.regularPrice;
-                                  final additionalDiscountRate =
-                                      row?.additionalDiscountRate ?? 0.0;
+                                  final baseDiscountRate =
+                                      row?.baseDiscountRate ?? 0.0;
+                                  final platformDiscountRate =
+                                      row?.platformDiscountRate ?? 0.0;
+                                  final vendorDiscountRate =
+                                      row?.vendorDiscountRate ?? 0.0;
                                   final totalDiscountRate =
-                                      _baseDiscountRate +
-                                      additionalDiscountRate;
+                                      baseDiscountRate +
+                                      platformDiscountRate +
+                                      vendorDiscountRate;
                                   final price = regularPrice == null
                                       ? null
                                       : minimumPriceAmount(
                                           regularPrice: regularPrice,
-                                          totalDiscountRate: totalDiscountRate,
+                                          baseDiscountRate: baseDiscountRate,
+                                          platformDiscountRate:
+                                              platformDiscountRate,
+                                          vendorDiscountRate:
+                                              vendorDiscountRate,
                                         );
                                   final priceText = price == null
                                       ? (regularPrice == null

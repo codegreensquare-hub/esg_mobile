@@ -210,4 +210,4 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-02-03 09:35:09.216593
+/// Date: 2026-02-04 11:46:32.437665

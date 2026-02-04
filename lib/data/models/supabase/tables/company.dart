@@ -34,6 +34,7 @@ class CompanyRow extends SupabaseDataRow {
     DateTime? deactivatedAt,
     double? costBudget,
     double? discountRate,
+    double? contractedComissionRate,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -46,6 +47,8 @@ class CompanyRow extends SupabaseDataRow {
            'deactivated_at': supaSerialize(deactivatedAt),
          if (costBudget != null) 'cost_budget': supaSerialize(costBudget),
          if (discountRate != null) 'discount_rate': supaSerialize(discountRate),
+         if (contractedComissionRate != null)
+           'contracted_comission_rate': supaSerialize(contractedComissionRate),
        });
 
   /// Company Row
@@ -140,6 +143,16 @@ class CompanyRow extends SupabaseDataRow {
   double? get discountRate => getField<double>(discountRateField);
   set discountRate(double? value) => setField<double>(discountRateField, value);
 
+  /// Contracted Comission Rate field name
+  static const String contractedComissionRateField =
+      'contracted_comission_rate';
+
+  /// Contracted Comission Rate
+  double? get contractedComissionRate =>
+      getField<double>(contractedComissionRateField);
+  set contractedComissionRate(double? value) =>
+      setField<double>(contractedComissionRateField, value);
+
   /// Make a copy of the current [CompanyRow]
   /// overriding the provided fields
   CompanyRow copyWith({
@@ -153,6 +166,7 @@ class CompanyRow extends SupabaseDataRow {
     DateTime? deactivatedAt,
     double? costBudget,
     double? discountRate,
+    double? contractedComissionRate,
   }) => CompanyRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -164,8 +178,11 @@ class CompanyRow extends SupabaseDataRow {
     'deactivated_at': supaSerialize(deactivatedAt) ?? data['deactivated_at'],
     'cost_budget': supaSerialize(costBudget) ?? data['cost_budget'],
     'discount_rate': supaSerialize(discountRate) ?? data['discount_rate'],
+    'contracted_comission_rate':
+        supaSerialize(contractedComissionRate) ??
+        data['contracted_comission_rate'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-02-03 09:35:09.220842
+/// Date: 2026-02-04 11:46:32.442073

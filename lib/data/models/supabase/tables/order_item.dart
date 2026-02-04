@@ -35,6 +35,8 @@ class OrderItemRow extends SupabaseDataRow {
     DateTime? preparingForDeliveryAt,
     DateTime? cancelledAt,
     double? price,
+    double? pointsDiscountByCompany,
+    double? pointsDiscountByGreensquare,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -49,6 +51,12 @@ class OrderItemRow extends SupabaseDataRow {
            'preparing_for_delivery_at': supaSerialize(preparingForDeliveryAt),
          if (cancelledAt != null) 'cancelled_at': supaSerialize(cancelledAt),
          if (price != null) 'price': supaSerialize(price),
+         if (pointsDiscountByCompany != null)
+           'points_discount_by_company': supaSerialize(pointsDiscountByCompany),
+         if (pointsDiscountByGreensquare != null)
+           'points_discount_by_greensquare': supaSerialize(
+             pointsDiscountByGreensquare,
+           ),
        });
 
   /// Order Item Row
@@ -142,6 +150,26 @@ class OrderItemRow extends SupabaseDataRow {
   double? get price => getField<double>(priceField);
   set price(double? value) => setField<double>(priceField, value);
 
+  /// Points Discount By Company field name
+  static const String pointsDiscountByCompanyField =
+      'points_discount_by_company';
+
+  /// Points Discount By Company
+  double get pointsDiscountByCompany =>
+      getField<double>(pointsDiscountByCompanyField, defaultValue: 0)!;
+  set pointsDiscountByCompany(double value) =>
+      setField<double>(pointsDiscountByCompanyField, value);
+
+  /// Points Discount By Greensquare field name
+  static const String pointsDiscountByGreensquareField =
+      'points_discount_by_greensquare';
+
+  /// Points Discount By Greensquare
+  double get pointsDiscountByGreensquare =>
+      getField<double>(pointsDiscountByGreensquareField, defaultValue: 0)!;
+  set pointsDiscountByGreensquare(double value) =>
+      setField<double>(pointsDiscountByGreensquareField, value);
+
   /// Make a copy of the current [OrderItemRow]
   /// overriding the provided fields
   OrderItemRow copyWith({
@@ -155,6 +183,8 @@ class OrderItemRow extends SupabaseDataRow {
     DateTime? preparingForDeliveryAt,
     DateTime? cancelledAt,
     double? price,
+    double? pointsDiscountByCompany,
+    double? pointsDiscountByGreensquare,
   }) => OrderItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -170,8 +200,14 @@ class OrderItemRow extends SupabaseDataRow {
         data['preparing_for_delivery_at'],
     'cancelled_at': supaSerialize(cancelledAt) ?? data['cancelled_at'],
     'price': supaSerialize(price) ?? data['price'],
+    'points_discount_by_company':
+        supaSerialize(pointsDiscountByCompany) ??
+        data['points_discount_by_company'],
+    'points_discount_by_greensquare':
+        supaSerialize(pointsDiscountByGreensquare) ??
+        data['points_discount_by_greensquare'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-02-03 09:35:09.239919
+/// Date: 2026-02-04 11:46:32.463911

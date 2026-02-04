@@ -1,7 +1,6 @@
 import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
-import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/utils/product_pricing.dart';
@@ -46,7 +45,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   final Map<String, String> selectedOptionValues = {};
   String? selectedVariantImageUrl;
   double currentAwardPoints = 0.0;
-  double baseDiscountRate = 0.0;
   double reviewAverage = 0.0;
   int reviewCount = 0;
   int qnaCount = 0;
@@ -66,7 +64,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     _scrollController.addListener(_updateStickyActionsVisibility);
     _loadProductOptions();
     _loadAwardPoints();
-    _loadBaseDiscountRate();
     _loadReviewStats();
     _fetchWishlistStatus();
     if (kIsWeb) {
@@ -182,16 +179,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     } catch (e) {
       debugPrint('Error loading award points: $e');
       currentAwardPoints = 0.0;
-    }
-  }
-
-  Future<void> _loadBaseDiscountRate() async {
-    try {
-      final rate = await SettingsService.instance.getBaseDiscountRate();
-      if (!mounted) return;
-      setState(() => baseDiscountRate = rate);
-    } catch (e) {
-      debugPrint('Error loading base discount rate: $e');
     }
   }
 
@@ -330,19 +317,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         : null;
     final resolvedImageUrl = selectedVariantImageUrl ?? imageUrl;
     final double? regularPrice = product.regularPrice;
-    final double additionalDiscountRate = product.additionalDiscountRate;
-    final double totalDiscountRate = baseDiscountRate + additionalDiscountRate;
+    final baseDiscountRate = product.baseDiscountRate ?? 0.0;
+    final platformDiscountRate = product.platformDiscountRate ?? 0.0;
+    final vendorDiscountRate = product.vendorDiscountRate ?? 0.0;
+    final double totalDiscountRate =
+        baseDiscountRate + platformDiscountRate + vendorDiscountRate;
     final int? usableAwardPoints = regularPrice == null
         ? null
         : usableAwardPointsAmount(
             regularPrice: regularPrice,
-            totalDiscountRate: totalDiscountRate,
+            baseDiscountRate: baseDiscountRate,
+            platformDiscountRate: platformDiscountRate,
+            vendorDiscountRate: vendorDiscountRate,
           );
     final int? discountedPrice = regularPrice == null
         ? null
         : minimumPriceAmount(
             regularPrice: regularPrice,
-            totalDiscountRate: totalDiscountRate,
+            baseDiscountRate: baseDiscountRate,
+            platformDiscountRate: platformDiscountRate,
+            vendorDiscountRate: vendorDiscountRate,
           );
     final hasDiscount =
         regularPrice != null &&
@@ -352,6 +346,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     final int? discountPercentage = hasDiscount
         ? (((regularPrice - discountedPrice) / regularPrice) * 100).round()
         : null;
+    final int baseDiscount = regularPrice == null
+        ? 0
+        : (regularPrice * baseDiscountRate / 100).floor();
 
     String formatRate(double rate) {
       if (rate.isNaN || rate.isInfinite) return '0%';
@@ -478,22 +475,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      // Base Discount calculation
                                       Text(
-                                        '적립금 사용 가능 금액: ${formatKRW(usableAwardPoints)}',
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '총 할인율: ${formatRate(baseDiscountRate)} + ${formatRate(additionalDiscountRate)} = ${formatRate(totalDiscountRate)}',
+                                        '기본 할인: ${formatKRW(regularPrice.floor())} × ${formatRate(product.baseDiscountRate ?? 0.0)} = ${formatKRW((regularPrice * (product.baseDiscountRate ?? 0.0) / 100).floor())}',
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
                                               color: cs.onSurfaceVariant,
                                             ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: 2),
+                                      // Selling Price Before Points
                                       Text(
-                                        '최소 결제 금액: ${formatKRW(regularPrice.floor())} - ${formatKRW(usableAwardPoints)} = ${formatKRW(discountedPrice ?? 0)}',
+                                        '포인트 적용 전 가격: ${formatKRW(regularPrice.floor())} - ${formatKRW((regularPrice * (product.baseDiscountRate ?? 0.0) / 100).floor())} = ${formatKRW((regularPrice - (regularPrice * (product.baseDiscountRate ?? 0.0) / 100)).floor())}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      // Maximum Discount Rate
+                                      Text(
+                                        '최대 추가 할인율: ${formatRate(product.platformDiscountRate ?? 0.0)} + ${formatRate(product.vendorDiscountRate ?? 0.0)} = ${formatRate((product.platformDiscountRate ?? 0.0) + (product.vendorDiscountRate ?? 0.0))}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      // Maximum Additional Discount via Points
+                                      Text(
+                                        '적립금 최대 사용 금액: (${formatKRW((regularPrice - (regularPrice * (product.baseDiscountRate ?? 0.0) / 100)).floor())}) × ${formatRate((product.platformDiscountRate ?? 0.0) + (product.vendorDiscountRate ?? 0.0))} - ${formatKRW((regularPrice * (product.baseDiscountRate ?? 0.0) / 100).floor())} = ${formatKRW(usableAwardPoints)}',
                                         style: theme.textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      // Final Price
+                                      Text(
+                                        '최종 결제 금액: ${formatKRW(regularPrice.floor())} - ${formatKRW((regularPrice * (product.baseDiscountRate ?? 0.0) / 100).floor())} - ${formatKRW(usableAwardPoints)} = ${formatKRW(discountedPrice ?? 0)}',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -520,7 +541,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               if (userId != null &&
                                   currentAwardPoints.toInt() > 0) ...[
                                 Text(
-                                  '보유 마일리지 (c) ${formatKRW(currentAwardPoints.toInt())}',
+                                  '보유 마일리지 (c) ${formatKRW((baseDiscount + (usableAwardPoints ?? 0)).toInt())}',
+
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: cs.onSurfaceVariant,
                                   ),

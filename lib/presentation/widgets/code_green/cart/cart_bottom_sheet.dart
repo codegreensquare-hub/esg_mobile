@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:esg_mobile/core/services/database/cart.service.dart';
-import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
@@ -26,7 +25,6 @@ class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {
   late List<CartItemWithProduct> _items;
   final Set<String> _busyCartItemIds = <String>{};
   late final Future<Map<String, String>> _colorHexByIdFuture;
-  double _baseDiscountRate = 0.0;
 
   @override
   void initState() {
@@ -40,7 +38,6 @@ class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {
         .where((e) => e.isNotEmpty && e.length != 6)
         .toSet();
     _colorHexByIdFuture = CartService.instance.fetchColorHexByIds(colorIds);
-    _loadBaseDiscountRate();
   }
 
   double get _totalPoints => _items.fold<double>(
@@ -119,12 +116,6 @@ class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {
         setState(() => _busyCartItemIds.remove(cartItemId));
       }
     }
-  }
-
-  Future<void> _loadBaseDiscountRate() async {
-    final rate = await SettingsService.instance.getBaseDiscountRate();
-    if (!mounted) return;
-    setState(() => _baseDiscountRate = rate);
   }
 
   @override
@@ -275,9 +266,16 @@ class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {
                               ...optionChips,
                             ];
 
-                            final double totalDiscountRate =
-                                _baseDiscountRate +
-                                item.product.additionalDiscountRate;
+                            final baseDiscountRate =
+                                item.product.baseDiscountRate ?? 0.0;
+                            final platformDiscountRate =
+                                item.product.platformDiscountRate ?? 0.0;
+                            final vendorDiscountRate =
+                                item.product.vendorDiscountRate ?? 0.0;
+                            final totalDiscountRate =
+                                baseDiscountRate +
+                                platformDiscountRate +
+                                vendorDiscountRate;
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
@@ -404,7 +402,7 @@ class _CodeGreenCartBottomSheetState extends State<CodeGreenCartBottomSheet> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '사용 가능 포인트: ${formatter.format(usableAwardPointsAmount(regularPrice: item.unitPrice, totalDiscountRate: totalDiscountRate))}',
+                                            '사용 가능 포인트: ${formatter.format(usableAwardPointsAmount(regularPrice: item.unitPrice, baseDiscountRate: baseDiscountRate, platformDiscountRate: platformDiscountRate, vendorDiscountRate: vendorDiscountRate))}',
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: cs.secondary,
