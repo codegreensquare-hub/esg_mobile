@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_participation.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_photo_animation_completion.dart';
@@ -47,6 +48,19 @@ class MissionParticipationService {
   }) async {
     VoidCallback? dismissLoading;
     try {
+      final count = await getTodayParticipationCount();
+
+      if (count >= MAX_PARTICIPATION && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '오늘 미션 참여 한도에 도달했습니다. 내일 다시 시도해 주세요.',
+            ),
+          ),
+        );
+        return;
+      }
+
       final source = await _chooseImageSource(context);
       if (source == null || !context.mounted) {
         return;

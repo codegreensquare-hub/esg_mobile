@@ -121,16 +121,6 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                 onTap:
                     widget.onMissionTap ??
                     (mission) {
-                      if (todayParticipationCount >= MAX_PARTICIPATION) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              '오늘 미션 참여 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요.',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => MissionDetailDialog(
@@ -179,16 +169,6 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                   onTap:
                       widget.onMissionTap ??
                       (mission) {
-                        if (todayParticipationCount >= MAX_PARTICIPATION) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                '오늘 미션 참여 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요.',
-                              ),
-                            ),
-                          );
-                          return;
-                        }
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => MissionDetailDialog(
