@@ -1,1 +1,1 @@
-const int MAX_PARTICIPATION = 2;
+const int MAX_PARTICIPATION = 10;
