@@ -1,3 +1,4 @@
+import 'package:esg_mobile/core/enums/device.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
@@ -366,6 +367,60 @@ class _AccountTabState extends State<AccountTab> {
     );
   }
 
+  void _handleViewBenefitsByLevel() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        final maxWidth = Device.largeMobile.breakpoint;
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '등급별 혜택',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '현재 등급 기능을 개발 중입니다. 😊\n'
+                    '곧 더 좋은 서비스로 찾아뵙겠습니다. 감사합니다. 🍀',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _handleRemoveDepartment() async {
     if (userId == null) return;
     try {
@@ -419,6 +474,7 @@ class _AccountTabState extends State<AccountTab> {
       onSetIsEmployee: _handleSetIsEmployee,
       onSelectDepartment: _handleSelectDepartment,
       onRemoveDepartment: _handleRemoveDepartment,
+      onViewBenefitsByLevel: _handleViewBenefitsByLevel,
     );
   }
 }

@@ -27,6 +27,7 @@ class AccountLoggedInContent extends StatelessWidget {
     required this.onSetIsEmployee,
     required this.onSelectDepartment,
     required this.onRemoveDepartment,
+    required this.onViewBenefitsByLevel,
   });
 
   final String userName;
@@ -46,6 +47,7 @@ class AccountLoggedInContent extends StatelessWidget {
   final void Function(bool) onSetIsEmployee;
   final VoidCallback onSelectDepartment;
   final VoidCallback onRemoveDepartment;
+  final VoidCallback onViewBenefitsByLevel;
 
   void _showRelationshipDialog(BuildContext context) {
     showGeneralDialog(
@@ -267,30 +269,29 @@ class AccountLoggedInContent extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                'Level 1',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: cs.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Text(
+                    'Level 1',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: onViewBenefitsByLevel,
+                    child: const Text('레벨별 혜택 보기'),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
-              const SizedBox(height: 24),
-              const SizedBox(height: 24),
-              OutlinedButton(
-                onPressed: onManageShipping,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-                child: const Text('배송지 관리'),
-              ),
               const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(6),
-
                   border: Border.all(color: cs.outlineVariant, width: 0.5),
                 ),
 
