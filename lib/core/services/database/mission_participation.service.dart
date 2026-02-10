@@ -67,9 +67,14 @@ class MissionParticipationService {
         return;
       }
 
+      final Uint8List bytes = await file.readAsBytes();
+      if (!context.mounted) {
+        return;
+      }
+
       final bool? confirmed = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
-          builder: (_) => MissionPhotoPreviewScreen(imagePath: file.path),
+          builder: (_) => MissionPhotoPreviewScreen(imageBytes: bytes),
         ),
       );
 
@@ -79,7 +84,7 @@ class MissionParticipationService {
 
       dismissLoading = _showLoadingDialog(context);
       final uploadedPhoto = await _uploadPhoto(
-        file: file,
+        bytes: bytes,
         mission: mission,
       );
       await _createParticipation(
@@ -193,7 +198,7 @@ class MissionParticipationService {
   }
 
   Future<({String bucket, String folderPath, String fileName})> _uploadPhoto({
-    required XFile file,
+    required Uint8List bytes,
     required MissionRow mission,
   }) async {
     final userId = UserAuthService.instance.currentUser?.id;
@@ -201,7 +206,6 @@ class MissionParticipationService {
       throw const MissionParticipationException('로그인이 필요한 기능입니다.');
     }
 
-    final Uint8List bytes = await file.readAsBytes();
     final folderPath = 'missions/${mission.id}/$userId';
     final fileName =
         'participation_${DateTime.now().millisecondsSinceEpoch}.jpg';
