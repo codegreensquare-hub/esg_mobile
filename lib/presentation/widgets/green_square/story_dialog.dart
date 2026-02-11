@@ -1230,11 +1230,23 @@ class _RecommendedProductListTile extends StatelessWidget {
                   ),
                   if (discountPercentage != null) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      '친환경 소비자라면, $discountPercentage%↓',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.secondary,
-                        fontWeight: FontWeight.w600,
+                    Text.rich(
+                      TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        children: [
+                          const TextSpan(text: '친환경 소비자라면, '),
+                          TextSpan(
+                            text: '$discountPercentage%',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const TextSpan(text: '↓'),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 2),
