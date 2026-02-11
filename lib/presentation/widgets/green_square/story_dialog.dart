@@ -1119,9 +1119,6 @@ class _RecommendedStoryGridTile extends StatelessWidget {
   }
 }
 
-/// Set to true to always show the discount block with dummy values for UI check.
-const _kUseDummyDiscountForUi = true;
-
 class _RecommendedProductListTile extends StatelessWidget {
   const _RecommendedProductListTile({
     required this.productWithDetails,
@@ -1156,20 +1153,6 @@ class _RecommendedProductListTile extends StatelessWidget {
     final int? discountPercentage = hasDiscount
         ? (((regularPrice - discountedPrice) / regularPrice) * 100).round()
         : null;
-
-    // For UI check: use dummy discount values when flag is on
-    final bool showDiscountBlock =
-        _kUseDummyDiscountForUi || discountPercentage != null;
-    final int displayDiscountPercentage = _kUseDummyDiscountForUi
-        ? 17
-        : (discountPercentage ?? 0);
-    final int displayDiscountedPrice = _kUseDummyDiscountForUi
-        ? 63900
-        : (discountedPrice ?? 0);
-    final int displayRegularPrice =
-        _kUseDummyDiscountForUi && regularPrice == null
-        ? 76900
-        : (regularPrice ?? 0).round();
 
     final imageUrl =
         product.mainImageBucket != null && product.mainImageFileName != null
@@ -1239,16 +1222,16 @@ class _RecommendedProductListTile extends StatelessWidget {
                   ],
                   const SizedBox(height: 8),
                   Text(
-                    formatKRW(displayRegularPrice),
+                    formatKRW(regularPrice ?? 0),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (showDiscountBlock) ...[
+                  if (discountPercentage != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '친환경 소비자라면, $displayDiscountPercentage%↓',
+                      '친환경 소비자라면, $discountPercentage%↓',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.secondary,
                         fontWeight: FontWeight.w600,
@@ -1256,7 +1239,7 @@ class _RecommendedProductListTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      formatKRW(displayDiscountedPrice),
+                      formatKRW(discountedPrice!),
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: cs.secondary,
                         fontWeight: FontWeight.w800,
