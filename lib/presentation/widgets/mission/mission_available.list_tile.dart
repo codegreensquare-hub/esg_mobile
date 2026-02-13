@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/database/mission_event_tracking.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MissionAvailableListTile extends StatefulWidget {
   const MissionAvailableListTile({
@@ -36,6 +39,8 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final imageUrl =
         widget.mission.thumbnailBucket != null &&
             widget.mission.thumbnailFilename != null
@@ -45,6 +50,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
             folderPath: widget.mission.thumbnailFolderPath,
           )
         : null;
+    final points = widget.mission.awardPoints;
 
     return GestureDetector(
       onTap: widget.onTap != null
@@ -110,35 +116,58 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Hero(
-                    tag: 'green-square-mission-title-${widget.mission.id}',
-                    child: Text(
-                      widget.mission.title ?? 'No Title',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Hero(
+                          tag:
+                              'green-square-mission-title-${widget.mission.id}',
+                          child: Text(
+                            widget.mission.title ?? 'No Title',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.network(
+                            getImageLink(
+                              bucket.asset,
+                              asset.cMilage,
+                              folderPath: assetFolderPath[asset.cMilage],
+                            ),
+                            width: 16,
+                            height: 16,
+                            semanticsLabel: '포인트',
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$points',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: cs.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Hero(
                     tag: 'green-square-mission-text-${widget.mission.id}',
                     child: Text(
                       widget.mission.text ?? 'No Description',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.star, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.mission.awardPoints} points',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
                   ),
                 ],
               ),

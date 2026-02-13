@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_participation.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_photo_animation_completion.dart';
@@ -47,6 +48,19 @@ class MissionParticipationService {
   }) async {
     VoidCallback? dismissLoading;
     try {
+      final count = await getTodayParticipationCount();
+
+      if (count >= MAX_PARTICIPATION && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '오늘 미션 참여 한도에 도달했습니다. 내일 다시 시도해 주세요.',
+            ),
+          ),
+        );
+        return;
+      }
+
       final source = await _chooseImageSource(context);
       if (source == null || !context.mounted) {
         return;
@@ -67,9 +81,14 @@ class MissionParticipationService {
         return;
       }
 
+      final Uint8List bytes = await file.readAsBytes();
+      if (!context.mounted) {
+        return;
+      }
+
       final bool? confirmed = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
-          builder: (_) => MissionPhotoPreviewScreen(imagePath: file.path),
+          builder: (_) => MissionPhotoPreviewScreen(imageBytes: bytes),
         ),
       );
 
@@ -79,7 +98,7 @@ class MissionParticipationService {
 
       dismissLoading = _showLoadingDialog(context);
       final uploadedPhoto = await _uploadPhoto(
-        file: file,
+        bytes: bytes,
         mission: mission,
       );
       await _createParticipation(
@@ -193,7 +212,7 @@ class MissionParticipationService {
   }
 
   Future<({String bucket, String folderPath, String fileName})> _uploadPhoto({
-    required XFile file,
+    required Uint8List bytes,
     required MissionRow mission,
   }) async {
     final userId = UserAuthService.instance.currentUser?.id;
@@ -201,7 +220,6 @@ class MissionParticipationService {
       throw const MissionParticipationException('로그인이 필요한 기능입니다.');
     }
 
-    final Uint8List bytes = await file.readAsBytes();
     final folderPath = 'missions/${mission.id}/$userId';
     final fileName =
         'participation_${DateTime.now().millisecondsSinceEpoch}.jpg';

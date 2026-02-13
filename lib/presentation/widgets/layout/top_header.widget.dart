@@ -42,7 +42,7 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SliverAppBar(
-      pinned: false,
+      pinned: _selectedTab == MainTab.greenSquare ? true : false,
       floating: false,
       snap: false,
       automaticallyImplyLeading: false,

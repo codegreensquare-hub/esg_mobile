@@ -13,6 +13,9 @@
 !.env.example
 assets/env/config.env
 
+# Docs (local / generated)
+docs/development.md
+
 
 
 # Flutter repo-specific

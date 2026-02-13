@@ -1,6 +1,7 @@
 import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
+import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
@@ -52,6 +53,7 @@ class _CodeGreenProductDetailTabScreenState
   bool _isAddingToCart = false;
   CartItemWithProduct? _matchingCartItem;
   bool _isCheckingCartState = false;
+  int _qnaCount = 0;
 
   @override
   void initState() {
@@ -59,6 +61,19 @@ class _CodeGreenProductDetailTabScreenState
     _pageController = PageController();
     _userId = Supabase.instance.client.auth.currentUser?.id;
     _loadColors();
+    _loadQnaCount();
+  }
+
+  Future<void> _loadQnaCount() async {
+    try {
+      final count = await ProductService.instance.getProductQnaCount(
+        widget.productWithDetails.product.id,
+      );
+      if (!mounted) return;
+      setState(() => _qnaCount = count);
+    } catch (e) {
+      debugPrint('Error loading QnA count: $e');
+    }
   }
 
   @override
@@ -73,6 +88,7 @@ class _CodeGreenProductDetailTabScreenState
       _selectedOptions = const {};
       _matchingCartItem = null;
       _loadColors();
+      _loadQnaCount();
     }
   }
 
@@ -727,7 +743,7 @@ class _CodeGreenProductDetailTabScreenState
       tabs: [
         const Tab(text: 'Detail'),
         Tab(text: 'Review(${widget.reviewCount})'),
-        Tab(text: 'QnA(${widget.qnaCount})'),
+        Tab(text: 'QnA($_qnaCount)'),
       ],
     );
 

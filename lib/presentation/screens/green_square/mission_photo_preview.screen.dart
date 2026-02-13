@@ -1,14 +1,14 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 class MissionPhotoPreviewScreen extends StatelessWidget {
   const MissionPhotoPreviewScreen({
     super.key,
-    required this.imagePath,
+    required this.imageBytes,
   });
 
-  final String imagePath;
+  final Uint8List imageBytes;
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +27,8 @@ class MissionPhotoPreviewScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.file(
-                  File(imagePath),
+                child: Image.memory(
+                  imageBytes,
                   fit: BoxFit.contain,
                   width: double.infinity,
                 ),

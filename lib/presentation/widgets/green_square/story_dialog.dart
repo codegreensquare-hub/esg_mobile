@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/database/settings.service.dart';
 import 'package:esg_mobile/core/services/database/story.service.dart';
+import 'package:esg_mobile/core/utils/format_number_into_krw.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
@@ -50,6 +53,7 @@ class _StoryDialogState extends State<StoryDialog> {
   bool _showTopAppBar = false;
   double _photoHeightThreshold = 0;
   String? userId;
+  double _baseDiscountRate = 0.0;
 
   @override
   void initState() {
@@ -120,6 +124,7 @@ class _StoryDialogState extends State<StoryDialog> {
 
     final fetchedPreviousStories = await StoryService.instance
         .fetchPreviousStories(widget.story);
+    final baseRate = await SettingsService.instance.getBaseDiscountRate();
 
     if (!mounted) return;
     setState(() {
@@ -132,6 +137,7 @@ class _StoryDialogState extends State<StoryDialog> {
       isLoadingRecommendations = false;
       previousStories = fetchedPreviousStories;
       isLoadingPreviousStories = false;
+      _baseDiscountRate = baseRate;
     });
   }
 
@@ -839,13 +845,31 @@ class _StoryDialogState extends State<StoryDialog> {
                               ),
                             ),
                           ),
-                          ...recommendedProducts.map(
-                            (productWithDetails) => _RecommendedProductListTile(
-                              productWithDetails: productWithDetails,
-                              onTap: () => _navigateToProductDetail(
-                                productWithDetails,
-                              ),
-                            ),
+                          ...recommendedProducts.asMap().entries.expand(
+                            (entry) {
+                              final index = entry.key;
+                              final productWithDetails = entry.value;
+                              return [
+                                if (index > 0)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: cs.outlineVariant,
+                                    ),
+                                  ),
+                                _RecommendedProductListTile(
+                                  productWithDetails: productWithDetails,
+                                  baseDiscountRate: _baseDiscountRate,
+                                  onTap: () => _navigateToProductDetail(
+                                    productWithDetails,
+                                  ),
+                                ),
+                              ];
+                            },
                           ),
                           const SizedBox(height: 8),
                         ],
@@ -1098,10 +1122,12 @@ class _RecommendedStoryGridTile extends StatelessWidget {
 class _RecommendedProductListTile extends StatelessWidget {
   const _RecommendedProductListTile({
     required this.productWithDetails,
+    required this.baseDiscountRate,
     required this.onTap,
   });
 
   final ProductWithOtherDetails productWithDetails;
+  final double baseDiscountRate;
   final VoidCallback onTap;
 
   @override
@@ -1109,6 +1135,24 @@ class _RecommendedProductListTile extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final product = productWithDetails.product;
+
+    final double? regularPrice = product.regularPrice;
+    final double totalDiscountRate =
+        baseDiscountRate + product.additionalDiscountRate;
+    final int? discountedPrice = regularPrice == null
+        ? null
+        : minimumPriceAmount(
+            regularPrice: regularPrice,
+            totalDiscountRate: totalDiscountRate,
+          );
+    final hasDiscount =
+        regularPrice != null &&
+        discountedPrice != null &&
+        regularPrice > 0 &&
+        discountedPrice < regularPrice;
+    final int? discountPercentage = hasDiscount
+        ? (((regularPrice - discountedPrice) / regularPrice) * 100).round()
+        : null;
 
     final imageUrl =
         product.mainImageBucket != null && product.mainImageFileName != null
@@ -1119,54 +1163,106 @@ class _RecommendedProductListTile extends StatelessWidget {
           )
         : null;
 
-    return ListTile(
+    return InkWell(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          width: 56,
-          height: 56,
-          child: imageUrl == null
-              ? Container(
-                  color: cs.surfaceContainerHighest,
-                  child: Icon(
-                    Icons.image_outlined,
-                    color: cs.onSurfaceVariant,
-                  ),
-                )
-              : CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.cover,
-                  errorWidget: (context, url, error) => Container(
-                    color: cs.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.image_not_supported_outlined,
-                      color: cs.onSurfaceVariant,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 72,
+              height: 72,
+              child: ClipRect(
+                child: imageUrl == null
+                    ? Container(
+                        color: cs.surfaceContainerHighest,
+                        child: Icon(
+                          Icons.image_outlined,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Container(
+                          color: cs.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    product.title ?? '제품명 없음',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                  if (product.name != null && product.name!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      product.name ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Text(
+                    formatKRW(regularPrice ?? 0),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (discountPercentage != null) ...[
+                    const SizedBox(height: 4),
+                    Text.rich(
+                      TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        children: [
+                          const TextSpan(text: '친환경 소비자라면, '),
+                          TextSpan(
+                            text: '$discountPercentage%',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const TextSpan(text: '↓'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      formatKRW(discountedPrice!),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: cs.secondary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
-      ),
-      title: Text(
-        product.title ?? '제품명 없음',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        product.name ?? '',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: cs.onSurfaceVariant,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: cs.onSurfaceVariant,
       ),
     );
   }
