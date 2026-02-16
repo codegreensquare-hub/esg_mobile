@@ -71,8 +71,6 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     return Column(
       children: [
         SizedBox(height: 48),
@@ -87,18 +85,20 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
             textAlign: TextAlign.center,
           ),
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          constraints: const BoxConstraints(
-            maxWidth: 400,
-          ),
-          child: Text(
-            '오늘 미션참여 가능 횟수 $todayParticipationCount/$MAX_PARTICIPATION',
-            textAlign: TextAlign.center,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            decoration: BoxDecoration(
+              color: const Color(0xffe0dfde),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '오늘 미션참여 가능 횟수 $todayParticipationCount/$MAX_PARTICIPATION',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ),
         // Current Missions
