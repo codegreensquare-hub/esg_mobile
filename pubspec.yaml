@@ -40,6 +40,8 @@ dev_dependencies:
 flutter:
   assets:
     - .env
+    - assets/images/
+    - assets/images/screen/coginfo/
   fonts:
     - family: EB Garamond
       fonts:

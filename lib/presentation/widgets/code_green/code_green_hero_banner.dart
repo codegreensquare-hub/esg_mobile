@@ -104,9 +104,7 @@ class _CodeGreenHeroBannerState extends State<CodeGreenHeroBanner> {
               ),
               const SizedBox(height: 52),
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Navigate to About Us page/route
-                },
+                onPressed: widget.onAboutUsPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,

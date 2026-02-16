@@ -327,7 +327,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               if (shouldShowHeroBanner)
                 SliverToBoxAdapter(
-                  child: CodeGreenHeroBanner(),
+                  child: CodeGreenHeroBanner(onAboutUsPressed: _openAboutTab),
                 ),
               if (_selectedMainTab == MainTab.greenSquare)
                 SliverToBoxAdapter(
@@ -569,6 +569,27 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedMainTab = MainTab.codeGreen;
       _selectedIndex = idx;
+    });
+  }
+
+  void _openAboutTab() {
+    final idx = codeGreenTabs.indexOf(AboutTab.tab);
+    if (idx < 0) return;
+    setState(() {
+      _selectedMainTab = MainTab.codeGreen;
+      _selectedIndex = idx;
+    });
+    if (kIsWeb) {
+      _updateUrlForCodeGreenTab(idx);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOut,
+      );
     });
   }
 
