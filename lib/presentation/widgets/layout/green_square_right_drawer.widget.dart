@@ -40,10 +40,15 @@ class GreenSquareRightDrawer extends StatelessWidget {
             const Divider(height: 1),
             Expanded(
               child: ListView.separated(
-                itemCount: destinations.length + 1,
+                itemCount: UserAuthService.instance.isLoggedIn
+                    ? destinations.length + 1
+                    : destinations.length,
                 separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
-                  if (index == destinations.length) {
+                  final showLogout =
+                      UserAuthService.instance.isLoggedIn &&
+                      index == destinations.length;
+                  if (showLogout) {
                     return ListTile(
                       title: Align(
                         alignment: Alignment.centerRight,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:esg_mobile/data/models/supabase/enums/user_type.dart';
 import 'package:esg_mobile/data/models/supabase/tables/user.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:flutter/foundation.dart';
@@ -48,6 +49,21 @@ class UserAuthService extends ChangeNotifier {
   /// True when the current session exists but email is not verified yet.
   bool get requiresEmailVerification =>
       isLoggedIn && (_userRow?.emailVerified == false);
+
+  /// User types that can post QnA replies (admin only).
+  static const _qnaReplyAdminTypes = {
+    UserType.platform_admin,
+    UserType.client_admin,
+    UserType.integrated_admin,
+    UserType.vendor_admin,
+    UserType.super_client_admin,
+    UserType.super_integrated_admin,
+  };
+
+  /// True when the current user is an admin type that can post QnA replies.
+  /// Returns false when [userRow] is null (e.g. not yet loaded).
+  bool get isQnaReplyAdmin =>
+      _userRow != null && _qnaReplyAdminTypes.contains(_userRow!.type);
 
   /// Derives a friendly display name prioritizing database username.
   String get displayName =>
