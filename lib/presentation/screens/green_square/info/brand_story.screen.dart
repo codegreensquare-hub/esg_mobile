@@ -1,3 +1,4 @@
+import 'package:esg_mobile/core/constants/asset.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/underlined_title.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
@@ -71,7 +72,7 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
-                  'assets/images/screen/brandstory/story1-80d32f3a7d9dce9a42f66b1a06d06663.jpg',
+                  'assets/${assetFolderPath[asset.story1]}/${asset.story1}',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -97,7 +98,7 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
-                  'assets/images/screen/brandstory/story2-a6a89397ad564a6f3630678a0b555027.jpg',
+                  'assets/${assetFolderPath[asset.story2]}/${asset.story2}',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -123,7 +124,7 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
-                  'assets/images/screen/brandstory/story3-3a0c9336566cb75d810b8da5ea4fd786.jpg',
+                  'assets/${assetFolderPath[asset.story3]}/${asset.story3}',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -147,7 +148,7 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
             const SizedBox(height: 42),
             ClipRRect(
               child: Image.asset(
-                'assets/images/screen/brandstory/story4-171b7b4c689b2e1883ace77cbceb3640.jpg',
+                'assets/${assetFolderPath[asset.story4]}/${asset.story4}',
                 fit: BoxFit.cover,
               ),
             ),

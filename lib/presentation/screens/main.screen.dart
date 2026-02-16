@@ -860,46 +860,17 @@ class _MainScreenState extends State<MainScreen> {
             );
           }
 
-          return SizedBox(
-            height: MediaQuery.of(ctx).size.height * 0.7,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    const SizedBox(width: 48, height: 48),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          '콕 미션 참여하기',
-                          style: Theme.of(ctx).textTheme.titleMedium,
-                        ),
-                      ),
-                    ),
-                    closeButton,
-                  ],
+          return _MissionListSheetContent(
+            missions: missions,
+            onClose: () => Navigator.of(ctx).pop(),
+            onTapMission: (mission) {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MissionDetailDialog(mission: mission),
                 ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                    itemCount: missions.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (_, index) => MissionAvailableListTile(
-                      mission: missions[index],
-                      onTap: (mission) {
-                        Navigator.of(ctx).pop();
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                MissionDetailDialog(mission: mission),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           );
         },
       );
@@ -1097,5 +1068,113 @@ class _MainScreenState extends State<MainScreen> {
       default:
         return const SizedBox.shrink();
     }
+  }
+}
+
+class _MissionListSheetContent extends StatefulWidget {
+  const _MissionListSheetContent({
+    required this.missions,
+    required this.onClose,
+    required this.onTapMission,
+  });
+
+  final List<MissionRow> missions;
+  final VoidCallback onClose;
+  final void Function(MissionRow mission) onTapMission;
+
+  @override
+  State<_MissionListSheetContent> createState() =>
+      _MissionListSheetContentState();
+}
+
+class _MissionListSheetContentState extends State<_MissionListSheetContent> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const SizedBox(width: 48, height: 48),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    '콕 미션 참여하기',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          Center(
+            child: IconButton(
+              icon: const Icon(Icons.arrow_upward),
+              onPressed: () {
+                if (_scrollController.hasClients) {
+                  final position = _scrollController.position;
+                  final target = (position.pixels - position.viewportDimension)
+                      .clamp(0.0, position.maxScrollExtent);
+                  _scrollController.animateTo(
+                    target,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  );
+                }
+              },
+            ),
+          ),
+          Expanded(
+            child: ListView.separated(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              itemCount: widget.missions.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (_, index) => MissionAvailableListTile(
+                mission: widget.missions[index],
+                onTap: widget.onTapMission,
+              ),
+            ),
+          ),
+          Center(
+            child: IconButton(
+              icon: const Icon(Icons.arrow_downward),
+              onPressed: () {
+                if (_scrollController.hasClients &&
+                    _scrollController.position.maxScrollExtent > 0) {
+                  final position = _scrollController.position;
+                  final target = (position.pixels + position.viewportDimension)
+                      .clamp(0.0, position.maxScrollExtent);
+                  _scrollController.animateTo(
+                    target,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

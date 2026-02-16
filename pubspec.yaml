@@ -41,6 +41,7 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/screen/brandstory/
     - assets/images/screen/coginfo/
   fonts:
     - family: EB Garamond
