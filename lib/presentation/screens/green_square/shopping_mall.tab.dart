@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -435,24 +434,28 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
                     } else if (constraints.maxWidth >= 700) {
                       crossAxisCount = 3;
                     }
-                    return MasonryGridView.count(
+                    return GridView.count(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                       crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.48,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        final productWithDetails = products[index];
-                        return ProductCard(
-                          productWithDetails: productWithDetails,
-                          onWishlistToggle: (isInWishlist) =>
-                              _toggleWishlist(productWithDetails, isInWishlist),
-                          onTap: () =>
-                              _navigateToProductDetail(productWithDetails),
-                        );
-                      },
+                      children: products
+                          .map(
+                            (productWithDetails) => ProductCard(
+                              productWithDetails: productWithDetails,
+                              onWishlistToggle: (isInWishlist) =>
+                                  _toggleWishlist(
+                                productWithDetails,
+                                isInWishlist,
+                              ),
+                              onTap: () =>
+                                  _navigateToProductDetail(productWithDetails),
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                 ),

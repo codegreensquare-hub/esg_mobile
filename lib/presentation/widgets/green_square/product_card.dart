@@ -111,14 +111,23 @@ class _ProductCardState extends State<ProductCard> {
         ),
         elevation: 0.1,
         color: cs.surfaceContainerLowest,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Image with Heart Button
-            AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final w = constraints.maxWidth;
+            final cellHeight = constraints.maxHeight;
+            final imageSize = w;
+            final textAreaHeight =
+            (cellHeight - imageSize).clamp(0.0, double.infinity).toDouble();
+            return Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image with Heart Button - fixed square size
+                SizedBox(
+                  width: imageSize,
+                  height: imageSize,
+                  child: Stack(
+                    children: [
                   // Image with Hero
                   Positioned.fill(
                     child: Hero(
@@ -256,85 +265,95 @@ class _ProductCardState extends State<ProductCard> {
                         ),
                       ),
                     ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.title ?? '제품명 없음',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text.rich(
-                    TextSpan(
+                ),
+                SizedBox(
+                  height: textAreaHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (productWithDetails.seller.username != null &&
-                            productWithDetails.seller.username!.isNotEmpty)
-                          TextSpan(
-                            text:
-                                "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
+                        Text(
+                          product.title ?? '제품명 없음',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                        TextSpan(
-                          text: productWithDetails.product.name ?? '',
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 4),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              if (productWithDetails.seller.username != null &&
+                                  productWithDetails.seller.username!.isNotEmpty)
+                                TextSpan(
+                                  text:
+                                      "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
+                                ),
+                              TextSpan(
+                                text: productWithDetails.product.name ?? '',
+                              ),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (product.description != null &&
+                            product.description!.isNotEmpty)
+                          Expanded(
+                            child: Text(
+                              product.description!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )
+                        else
+                          const Spacer(),
+                        Text(
+                          formatKRW(regularPrice ?? 0),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cs.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (discountPercentage != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '친환경 소비자라면, $discountPercentage%↓',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.secondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            formatKRW(discountedPrice!),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: cs.secondary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: cs.onSurface,
-                    ),
                   ),
-                  const SizedBox(height: 6),
-                  if (product.description != null &&
-                      product.description!.isNotEmpty) ...[
-                    Text(
-                      product.description!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  Text(
-                    formatKRW(regularPrice ?? 0),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (discountPercentage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '친환경 소비자라면, $discountPercentage%↓',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.secondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      formatKRW(discountedPrice!),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: cs.secondary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
