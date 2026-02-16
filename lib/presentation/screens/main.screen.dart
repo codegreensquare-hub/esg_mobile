@@ -823,36 +823,82 @@ class _MainScreenState extends State<MainScreen> {
         showDragHandle: true,
         isScrollControlled: true,
         builder: (ctx) {
+          final closeButton = IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(ctx).pop(),
+          );
+
           if (missions.isEmpty) {
             return SizedBox(
               height: 200,
-              child: Center(
-                child: Text(
-                  '현재 진행 중인 미션이 없습니다.',
-                  style: Theme.of(ctx).textTheme.bodyLarge,
-                ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 48, height: 48),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '콕 미션 참여하기',
+                            style: Theme.of(ctx).textTheme.titleMedium,
+                          ),
+                        ),
+                      ),
+                      closeButton,
+                    ],
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        '현재 진행 중인 미션이 없습니다.',
+                        style: Theme.of(ctx).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }
 
           return SizedBox(
             height: MediaQuery.of(ctx).size.height * 0.7,
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              itemCount: missions.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (_, index) => MissionAvailableListTile(
-                mission: missions[index],
-                onTap: (mission) {
-                  Navigator.of(ctx).pop();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MissionDetailDialog(mission: mission),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 48, height: 48),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          '콕 미션 참여하기',
+                          style: Theme.of(ctx).textTheme.titleMedium,
+                        ),
+                      ),
                     ),
-                  );
-                },
-              ),
+                    closeButton,
+                  ],
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    itemCount: missions.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (_, index) => MissionAvailableListTile(
+                      mission: missions[index],
+                      onTap: (mission) {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MissionDetailDialog(mission: mission),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },
