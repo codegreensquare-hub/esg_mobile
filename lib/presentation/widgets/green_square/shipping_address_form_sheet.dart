@@ -1,5 +1,6 @@
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ShippingAddressFormResult {
   const ShippingAddressFormResult({
@@ -176,6 +177,9 @@ class _ShippingAddressFormSheetState extends State<ShippingAddressFormSheet> {
                 label: '우편번호',
                 validator: _requiredValidator,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
               ),
               _SheetTextField(
                 controller: _detailAddressController,
@@ -238,6 +242,7 @@ class _SheetTextField extends StatelessWidget {
     this.validator,
     this.keyboardType,
     this.maxLines = 1,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -245,6 +250,7 @@ class _SheetTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
   final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -259,6 +265,7 @@ class _SheetTextField extends StatelessWidget {
         validator: validator,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        inputFormatters: inputFormatters,
       ),
     );
   }

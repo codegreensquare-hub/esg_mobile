@@ -96,12 +96,6 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/:app',
-      builder: (BuildContext context, GoRouterState state) {
-        return MainScreen(initialTab: MainTab.greenSquare, state: state);
-      },
-    ),
-    GoRoute(
       path: LoginScreen.route,
       builder: (BuildContext context, GoRouterState state) {
         return const LoginScreen();
@@ -117,6 +111,12 @@ final GoRouter router = GoRouter(
       path: EmailConfirmationScreen.route,
       builder: (BuildContext context, GoRouterState state) {
         return const EmailConfirmationScreen();
+      },
+    ),
+    GoRoute(
+      path: '/:app',
+      builder: (BuildContext context, GoRouterState state) {
+        return MainScreen(initialTab: MainTab.greenSquare, state: state);
       },
     ),
   ],

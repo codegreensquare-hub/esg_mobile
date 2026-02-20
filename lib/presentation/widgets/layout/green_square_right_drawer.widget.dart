@@ -1,4 +1,5 @@
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareRightDrawer extends StatelessWidget {
@@ -39,9 +40,48 @@ class GreenSquareRightDrawer extends StatelessWidget {
             const Divider(height: 1),
             Expanded(
               child: ListView.separated(
-                itemCount: destinations.length,
+                itemCount: UserAuthService.instance.isLoggedIn
+                    ? destinations.length + 1
+                    : destinations.length,
                 separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
+                  final showLogout =
+                      UserAuthService.instance.isLoggedIn &&
+                      index == destinations.length;
+                  if (showLogout) {
+                    return ListTile(
+                      title: Align(
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.logout,
+                              color: cs.onSurfaceVariant,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '로그아웃',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      onTap: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final navigator = Navigator.of(context);
+                        await UserAuthService.instance.signOut();
+                        if (!context.mounted) return;
+                        navigator.pop();
+                        messenger.showSnackBar(
+                          const SnackBar(content: Text('로그아웃되었습니다.')),
+                        );
+                      },
+                    );
+                  }
                   final destination = destinations[index];
                   final isExternal =
                       destination.target == GreenSquareDrawerTarget.openInApp ||

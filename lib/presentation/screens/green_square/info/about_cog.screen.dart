@@ -1,3 +1,4 @@
+import 'package:esg_mobile/core/constants/asset.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +16,7 @@ class GreenSquareAboutCogScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.asset(
-              'assets/images/screen/coginfo/cogInfo-624cad5fd71fc077b97fc3b30ccd7fb3.png',
+              'assets/${assetFolderPath[asset.cogInfo]}/${asset.cogInfo}',
               fit: BoxFit.cover,
             ),
             Padding(
