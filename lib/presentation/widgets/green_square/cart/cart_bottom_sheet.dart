@@ -130,9 +130,9 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
 
         return SafeArea(
           child: DraggableScrollableSheet(
-            initialChildSize: 1,
-            maxChildSize: 1,
-            minChildSize: 1,
+            initialChildSize: 0.9,
+            maxChildSize: 0.9,
+            minChildSize: 0.9,
             expand: false,
             builder: (context, controller) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

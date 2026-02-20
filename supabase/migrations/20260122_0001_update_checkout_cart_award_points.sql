@@ -99,13 +99,13 @@ begin
       v_max_platform_discount := v_selling_price_before_points * coalesce(v_cart_item.platform_discount_rate, 0) / 100;
       v_max_merchant_discount := v_selling_price_before_points * coalesce(v_cart_item.vendor_discount_rate, 0) / 100;
 
-      v_item_max_discount := v_selling_price_before_points * (coalesce(v_cart_item.platform_discount_rate, 0) + coalesce(v_cart_item.vendor_discount_rate, 0)) / 100 - v_base_discount;
+      v_item_max_discount := v_selling_price_before_points * (coalesce(v_cart_item.platform_discount_rate, 0) + coalesce(v_cart_item.vendor_discount_rate, 0)) / 100;
       v_allocated_points := (greatest(v_item_max_discount, 0) / v_total_max_discount) * p_award_points;
 
       -- Distribute allocated points according to Excel logic
       v_base_discount_used := least(v_allocated_points, v_base_discount);
       v_platform_discount_used := least(v_allocated_points - v_base_discount_used, v_max_platform_discount);
-      v_merchant_discount_used := least(v_allocated_points - v_base_discount_used - v_platform_discount_used, v_max_merchant_discount);
+      v_merchant_discount_used := least(v_allocated_points - v_platform_discount_used, v_max_merchant_discount);
 
       v_points_discount_by_greensquare := v_platform_discount_used;
       v_points_discount_by_company := v_merchant_discount_used;
