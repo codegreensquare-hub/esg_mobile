@@ -47,4 +47,8 @@ do
   fi
 done
 
-flutter build web --wasm "${dart_defines[@]}"
+if [ ${#dart_defines[@]} -gt 0 ]; then
+  flutter build web --wasm "${dart_defines[@]}"
+else
+  flutter build web --wasm
+fi
