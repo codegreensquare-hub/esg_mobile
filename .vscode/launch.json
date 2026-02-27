@@ -16,6 +16,13 @@
       "deviceId": "chrome"
     },
     {
+      "name": "Chrome (wasm)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "toolArgs": ["--wasm"]
+    },
+    {
       "name": "RT7 TITAN 5G (mobile)",
       "request": "launch",
       "type": "dart",
