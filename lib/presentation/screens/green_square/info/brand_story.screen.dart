@@ -1,7 +1,10 @@
 import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/underlined_title.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareBrandStoryScreen extends StatelessWidget {
@@ -71,8 +74,12 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/${assetFolderPath[asset.story1]}/${asset.story1}',
+                child: CachedNetworkImage(
+                  imageUrl: getImageLink(
+                    bucket.asset,
+                    asset.story1,
+                    folderPath: assetFolderPath[asset.story1],
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -97,8 +104,12 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/${assetFolderPath[asset.story2]}/${asset.story2}',
+                child: CachedNetworkImage(
+                  imageUrl: getImageLink(
+                    bucket.asset,
+                    asset.story2,
+                    folderPath: assetFolderPath[asset.story2],
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -123,8 +134,12 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/${assetFolderPath[asset.story3]}/${asset.story3}',
+                child: CachedNetworkImage(
+                  imageUrl: getImageLink(
+                    bucket.asset,
+                    asset.story3,
+                    folderPath: assetFolderPath[asset.story3],
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -147,8 +162,12 @@ class GreenSquareBrandStoryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 42),
             ClipRRect(
-              child: Image.asset(
-                'assets/${assetFolderPath[asset.story4]}/${asset.story4}',
+              child: CachedNetworkImage(
+                imageUrl: getImageLink(
+                  bucket.asset,
+                  asset.story4,
+                  folderPath: assetFolderPath[asset.story4],
+                ),
                 fit: BoxFit.cover,
               ),
             ),

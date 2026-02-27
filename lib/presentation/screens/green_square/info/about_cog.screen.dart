@@ -1,5 +1,8 @@
 import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareAboutCogScreen extends StatelessWidget {
@@ -15,8 +18,12 @@ class GreenSquareAboutCogScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              'assets/${assetFolderPath[asset.cogInfo]}/${asset.cogInfo}',
+            CachedNetworkImage(
+              imageUrl: getImageLink(
+                bucket.asset,
+                asset.cogInfo,
+                folderPath: assetFolderPath[asset.cogInfo],
+              ),
               fit: BoxFit.cover,
             ),
             Padding(

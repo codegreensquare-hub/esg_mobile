@@ -1,4 +1,5 @@
 import 'package:esg_mobile/core/services/database/cart.service.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,13 @@ class _ProductCardState extends State<ProductCard> {
     final isNetworkImage =
         resolvedImagePath.startsWith('http://') ||
         resolvedImagePath.startsWith('https://');
+    final imageUrl = isNetworkImage
+        ? resolvedImagePath
+        : getImageLink(
+            bucket.asset,
+            resolvedImagePath,
+            folderPath: widget.mainImageFolderPath,
+          );
 
     return InkWell(
       onTap: widget.onTap,
@@ -85,27 +93,16 @@ class _ProductCardState extends State<ProductCard> {
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    child: isNetworkImage
-                        ? Image.network(
-                            resolvedImagePath,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.error),
-                              );
-                            },
-                          )
-                        : Image.asset(
-                            resolvedImagePath,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.error),
-                              );
-                            },
-                          ),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.error),
+                        );
+                      },
+                    ),
                   ),
                   if (_colorValues.isNotEmpty)
                     Positioned(
