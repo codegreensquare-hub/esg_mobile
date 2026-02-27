@@ -1137,13 +1137,13 @@ class _RecommendedProductListTile extends StatelessWidget {
     final product = productWithDetails.product;
 
     final double? regularPrice = product.regularPrice;
-    final double totalDiscountRate =
-        baseDiscountRate + product.additionalDiscountRate;
     final int? discountedPrice = regularPrice == null
         ? null
         : minimumPriceAmount(
             regularPrice: regularPrice,
-            totalDiscountRate: totalDiscountRate,
+            baseDiscountRate: baseDiscountRate,
+            platformDiscountRate: product.platformDiscountRate ?? 0.0,
+            vendorDiscountRate: product.vendorDiscountRate ?? 0.0,
           );
     final hasDiscount =
         regularPrice != null &&
