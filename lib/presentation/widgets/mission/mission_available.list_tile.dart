@@ -5,7 +5,10 @@ import 'package:esg_mobile/core/constants/asset.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/database/mission_event_tracking.service.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/data/models/supabase/enums/mission_type.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/widgets/general_mission_card.dart';
+import 'package:esg_mobile/presentation/widgets/mission/banner_mission_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -43,14 +46,16 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     final cs = theme.colorScheme;
     final imageUrl =
         widget.mission.thumbnailBucket != null &&
-            widget.mission.thumbnailFilename != null
-        ? getImageLink(
-            widget.mission.thumbnailBucket!,
-            widget.mission.thumbnailFilename!,
-            folderPath: widget.mission.thumbnailFolderPath,
-          )
-        : null;
+                widget.mission.thumbnailFilename != null
+            ? getImageLink(
+                widget.mission.thumbnailBucket!,
+                widget.mission.thumbnailFilename!,
+                folderPath: widget.mission.thumbnailFolderPath,
+              )
+            : null;
     final points = widget.mission.awardPoints;
+    final isBannerMission =
+        widget.mission.type == MissionType.banner_exposed;
 
     return GestureDetector(
       onTap: widget.onTap != null
@@ -63,118 +68,283 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
               widget.onTap?.call(widget.mission);
             }
           : null,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            if (imageUrl != null)
-              Hero(
-                tag: 'green-square-mission-image-${widget.mission.id}',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey[300],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.error),
-                    ),
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: 80,
-                height: 80,
-                color: Colors.grey[300],
-                child: const Icon(Icons.image_not_supported),
-              ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: isBannerMission
+          ? BannerMissionCard(
+              background: _buildBannerBackground(imageUrl),
+              child: _buildBannerContent(theme, cs, points),
+            )
+          : GeneralMissionCard(
+              child: Row(
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Hero(
-                          tag:
-                              'green-square-mission-title-${widget.mission.id}',
-                          child: Text(
-                            widget.mission.title ?? 'No Title',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.network(
-                            getImageLink(
-                              bucket.asset,
-                              asset.cMilage,
-                              folderPath: assetFolderPath[asset.cMilage],
-                            ),
-                            width: 16,
-                            height: 16,
-                            semanticsLabel: '포인트',
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$points',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: cs.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Hero(
-                    tag: 'green-square-mission-text-${widget.mission.id}',
-                    child: Text(
-                      widget.mission.text ?? 'No Description',
-                      style: theme.textTheme.bodyMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  _buildThumbnail(imageUrl),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextContent(theme, cs, points),
                   ),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildThumbnail(String? imageUrl) {
+    if (imageUrl != null) {
+      return Hero(
+        tag: 'green-square-mission-image-${widget.mission.id}',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: 80,
+              height: 80,
+              color: Colors.grey[300],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (context, url, error) => Container(
+              width: 80,
+              height: 80,
+              color: Colors.grey[300],
+              child: const Icon(Icons.error),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image_not_supported),
+    );
+  }
+
+  Widget _buildTextContent(
+    ThemeData theme,
+    ColorScheme cs,
+    int? points,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Hero(
+                tag: 'green-square-mission-title-${widget.mission.id}',
+                child: Text(
+                  widget.mission.title ?? 'No Title',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.network(
+                  getImageLink(
+                    bucket.asset,
+                    asset.cMilage,
+                    folderPath: assetFolderPath[asset.cMilage],
+                  ),
+                  width: 16,
+                  height: 16,
+                  semanticsLabel: '포인트',
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${points ?? 0}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: cs.primary,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+        const SizedBox(height: 4),
+        Hero(
+          tag: 'green-square-mission-text-${widget.mission.id}',
+          child: Text(
+            widget.mission.text ?? 'No Description',
+            style: theme.textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBannerBackground(String? imageUrl) {
+    if (imageUrl != null) {
+      return Hero(
+        tag: 'green-square-mission-image-${widget.mission.id}',
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    return Container(
+      color: Colors.grey[300],
+    );
+  }
+
+  /// Banner-only content: top-left badge + bottom-left text + bottom-right C circle + points.
+  Widget _buildBannerContent(
+    ThemeData theme,
+    ColorScheme cs,
+    int? points,
+  ) {
+    final badgeText = _bannerBadgeText();
+    return Stack(
+      children: [
+        // Bottom block: title, description, and points row (reduced bottom padding)
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Hero(
+                        tag: 'green-square-mission-title-${widget.mission.id}',
+                        child: Text(
+                          widget.mission.title ?? 'No Title',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Hero(
+                        tag: 'green-square-mission-text-${widget.mission.id}',
+                        child: Text(
+                          widget.mission.text ?? 'No Description',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildBannerPointsIndicator(theme, cs, points),
+              ],
+            ),
+          ),
+        ),
+        // Top-left pill badge from mission data
+        if (badgeText != null && badgeText.isNotEmpty)
+          Positioned(
+            top: 12,
+            left: 12,
+            child: _BannerBadge(label: badgeText),
+          ),
+      ],
+    );
+  }
+
+  /// C logo (circle) + points; aligned with title. Circle uses primary so it's visible on gradient.
+  Widget _buildBannerPointsIndicator(
+    ThemeData theme,
+    ColorScheme cs,
+    int? points,
+  ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: cs.primary,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '${points ?? 0}',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Badge label from mission: participationButtonText, or "기간 한정 미션", or default.
+  String? _bannerBadgeText() {
+    final custom = widget.mission.participationButtonText?.trim();
+    if (custom != null && custom.isNotEmpty) return custom;
+    final start = widget.mission.startActiveDate;
+    final end = widget.mission.lastActiveDate;
+    if (start != null && start.isNotEmpty && end != null && end.isNotEmpty) {
+      return '기간 한정 미션';
+    }
+    return '지금 참여 가능해요';
+  }
+}
+
+/// Pill-shaped badge for banner card (e.g. "지금 참여 가능해요", "기간 한정 미션").
+class _BannerBadge extends StatelessWidget {
+  const _BannerBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: const Color(0xFF2D5016),
+              fontWeight: FontWeight.w600,
+            ) ??
+            const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF2D5016),
+            ),
       ),
     );
   }
 }
+
