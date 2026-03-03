@@ -235,7 +235,7 @@ class _StoryDialogState extends State<StoryDialog> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Container(
-                    color: cs.surface,
+                    color: Colors.white,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -832,7 +832,7 @@ class _StoryDialogState extends State<StoryDialog> {
                   // Recommended Products
                   SliverToBoxAdapter(
                     child: Container(
-                      color: cs.surface,
+                      color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -885,7 +885,7 @@ class _StoryDialogState extends State<StoryDialog> {
                   // Recommended Missions
                   SliverToBoxAdapter(
                     child: Container(
-                      color: cs.surface,
+                      color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -924,7 +924,7 @@ class _StoryDialogState extends State<StoryDialog> {
                 // Other Interesting Stories
                 SliverToBoxAdapter(
                   child: Container(
-                    color: cs.surface,
+                    color: Colors.white,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
