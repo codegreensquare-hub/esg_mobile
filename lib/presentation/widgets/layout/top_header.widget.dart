@@ -9,11 +9,17 @@ class CodeGreenTopHeader extends StatefulWidget {
     this.initialValue = MainTab.greenSquare,
     this.onChanged,
     this.actions,
+    this.leading,
+    this.staticTitle,
   });
 
   final MainTab initialValue;
   final ValueChanged<MainTab>? onChanged;
   final List<Widget>? actions;
+  /// Optional left action (e.g. back button). When set, [staticTitle] can be used for a simple title instead of the tab toggle.
+  final Widget? leading;
+  /// When [leading] is set, show this as the center title instead of the tab toggle (e.g. 'GREEN SQUARE' for sub-pages).
+  final String? staticTitle;
 
   @override
   State<CodeGreenTopHeader> createState() => _CodeGreenTopHeaderState();
@@ -41,6 +47,8 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final useStaticTitle = widget.leading != null && widget.staticTitle != null;
+
     return SliverAppBar(
       pinned: _selectedTab == MainTab.greenSquare ? true : false,
       floating: false,
@@ -49,13 +57,28 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
       automaticallyImplyActions: false,
       backgroundColor: theme.colorScheme.primary,
       actions: widget.actions,
-      leading: widget.actions == null || widget.actions!.isEmpty
-          ? null
-          : const SizedBox.shrink(),
+      leading: widget.leading ??
+          (widget.actions == null || widget.actions!.isEmpty
+              ? null
+              : const SizedBox.shrink()),
       title: Center(
-        child: SizedBox(
-          width: 200,
-          child: AnimatedToggleSwitch<bool>.dual(
+        child: useStaticTitle
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onPrimary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  widget.staticTitle!,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              )
+            : SizedBox(
+                width: 200,
+                child: AnimatedToggleSwitch<bool>.dual(
             current: _switchValue,
             customIconBuilder: (context, local, global) {
               return Padding(
@@ -97,8 +120,8 @@ class _CodeGreenTopHeaderState extends State<CodeGreenTopHeader> {
               widget.onChanged?.call(selectedTab);
             },
           ),
+            ),
         ),
-      ),
     );
   }
 }
