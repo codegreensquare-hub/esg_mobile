@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:esg_mobile/core/constants/asset.dart';
-import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
-import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/enums/_enums.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/mileage_icon.widget.dart';
+import 'package:esg_mobile/presentation/widgets/main/auto_image_banner_carousel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:esg_mobile/web_updater.dart'
     if (dart.library.html) 'dart:js'
@@ -398,6 +395,18 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
                 ),
               ),
             ),
+
+          if (_tabController != null &&
+              _tabController!.length == categories.length + 1) ...[
+            const SizedBox(height: 16),
+            AutoImageBannerCarousel(
+              assetImagePaths: const [
+                'assets/images/about/about_1.7a6b64fe.jpg',
+                'assets/images/about/about_2.a32a1d4b.jpg',
+                'assets/images/about/about_4.5918b406.jpg',
+              ],
+            ),
+          ],
 
           // Products Grid
           if (isLoading)

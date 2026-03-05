@@ -5,6 +5,7 @@ import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
+import 'package:esg_mobile/presentation/widgets/main/auto_image_banner_carousel.dart';
 import 'package:flutter/material.dart';
 
 class MissionParticipationTab extends StatefulWidget {
@@ -73,8 +74,8 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 48),
-        Text('🌿 친환경 미션인증이란? '),
+        const SizedBox(height: 16),
+        const Text('🌿 친환경 미션인증이란?'),
         Container(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
           constraints: const BoxConstraints(
@@ -85,6 +86,15 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
             textAlign: TextAlign.center,
           ),
         ),
+        const SizedBox(height: 16),
+        AutoImageBannerCarousel(
+          assetImagePaths: const [
+            'assets/images/about/about_1.7a6b64fe.jpg',
+            'assets/images/about/about_2.a32a1d4b.jpg',
+            'assets/images/about/about_4.5918b406.jpg',
+          ],
+        ),
+        const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
