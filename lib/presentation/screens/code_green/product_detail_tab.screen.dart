@@ -5,12 +5,11 @@ import 'package:esg_mobile/core/services/database/product.service.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
-import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/login.dialog.dart';
 import 'package:esg_mobile/presentation/widgets/code_green/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/code_green/product_qna_section.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CodeGreenProductDetailTabScreen extends StatefulWidget {
@@ -116,7 +115,11 @@ class _CodeGreenProductDetailTabScreenState
 
     final userId = _userId;
     if (userId == null || userId.trim().isEmpty) {
-      context.push(LoginScreen.route);
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const LoginDialog(),
+      );
       return;
     }
 

@@ -28,6 +28,7 @@ class AccountLoggedInContent extends StatelessWidget {
     required this.onSelectDepartment,
     required this.onRemoveDepartment,
     required this.onViewBenefitsByLevel,
+    required this.onProfileChange,
   });
 
   final String userName;
@@ -48,6 +49,7 @@ class AccountLoggedInContent extends StatelessWidget {
   final VoidCallback onSelectDepartment;
   final VoidCallback onRemoveDepartment;
   final VoidCallback onViewBenefitsByLevel;
+  final VoidCallback onProfileChange;
 
   void _showRelationshipDialog(BuildContext context) {
     showGeneralDialog(
@@ -268,7 +270,20 @@ class AccountLoggedInContent extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 0),
+              InkWell(
+                onTap: onProfileChange,
+                child: Text(
+                  '프로필 변경',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: cs.primary,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                    decorationColor: cs.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 0),
               Row(
                 children: [
                   Text(

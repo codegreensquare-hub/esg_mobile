@@ -9,7 +9,7 @@ import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/entities/story_with_tags.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
-import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/login.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/text.story.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
@@ -190,9 +190,10 @@ class _StoryDialogState extends State<StoryDialog> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // Navigate to login screen
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const LoginDialog(),
               );
             },
             child: const Text('Login'),

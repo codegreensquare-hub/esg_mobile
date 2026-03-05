@@ -1,8 +1,11 @@
 import 'package:esg_mobile/core/enums/navigations.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.dart';
-import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
-import 'package:esg_mobile/presentation/screens/auth/signup.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_type.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_terms.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_form.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/profile_creation.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/profile_select.screen.dart';
 import 'package:esg_mobile/presentation/screens/main.screen.dart';
 import 'package:esg_mobile/app/app.dart';
 import 'package:flutter/material.dart';
@@ -96,21 +99,39 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: LoginScreen.route,
+      path: SignupTypeScreen.route,
       builder: (BuildContext context, GoRouterState state) {
-        return const LoginScreen();
+        return const SignupTypeScreen();
       },
     ),
     GoRoute(
-      path: SignUpScreen.route,
+      path: SignupTermsScreen.route,
       builder: (BuildContext context, GoRouterState state) {
-        return const SignUpScreen();
+        return const SignupTermsScreen();
+      },
+    ),
+    GoRoute(
+      path: SignupFormScreen.route,
+      builder: (BuildContext context, GoRouterState state) {
+        return const SignupFormScreen();
       },
     ),
     GoRoute(
       path: EmailConfirmationScreen.route,
       builder: (BuildContext context, GoRouterState state) {
         return const EmailConfirmationScreen();
+      },
+    ),
+    GoRoute(
+      path: ProfileSelectScreen.route,
+      builder: (BuildContext context, GoRouterState state) {
+        return const ProfileSelectScreen();
+      },
+    ),
+    GoRoute(
+      path: ProfileCreationScreen.route,
+      builder: (BuildContext context, GoRouterState state) {
+        return const ProfileCreationScreen();
       },
     ),
     GoRoute(

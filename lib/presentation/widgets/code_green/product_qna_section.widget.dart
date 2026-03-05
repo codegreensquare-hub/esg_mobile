@@ -1,8 +1,7 @@
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
-import 'package:esg_mobile/presentation/screens/auth/login.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/login.dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -161,7 +160,7 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
 
     final userId = _userId;
     if (userId == null || userId.trim().isEmpty) {
-      context.push(LoginScreen.route);
+      showDialog<void>(context: context, barrierDismissible: false, builder: (context) => const LoginDialog());
       return;
     }
 
@@ -198,7 +197,7 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
 
     final userId = _userId;
     if (userId == null || userId.trim().isEmpty) {
-      context.push(LoginScreen.route);
+      showDialog<void>(context: context, barrierDismissible: false, builder: (context) => const LoginDialog());
       return;
     }
 
@@ -308,7 +307,7 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
                     ),
                   ),
                   FilledButton(
-                    onPressed: () => context.push(LoginScreen.route),
+                    onPressed: () => showDialog<void>(context: context, barrierDismissible: false, builder: (context) => const LoginDialog()),
                     child: const Text('Login'),
                   ),
                 ],

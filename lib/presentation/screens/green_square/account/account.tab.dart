@@ -1,15 +1,16 @@
 import 'package:esg_mobile/core/enums/device.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
-import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/stamp.dart';
 import 'package:esg_mobile/data/entities/participation.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/profile_select.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/my_comments.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
-import 'package:esg_mobile/presentation/screens/auth/signup.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/login.dialog.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_type.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/liked_stories_dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
@@ -31,7 +32,6 @@ class _AccountTabState extends State<AccountTab> {
   List<ActiveMission> activeMissions = [];
   List<Participation> participations = [];
   bool isLoading = true;
-  bool _authInProgress = false;
   String? companyName;
   bool? isEmployee;
   String? departmentName;
@@ -217,34 +217,6 @@ class _AccountTabState extends State<AccountTab> {
     setState(() => isLoading = false);
   }
 
-  Future<void> _handleLogin(String email, String password) async {
-    if (_authInProgress) return;
-    setState(() => _authInProgress = true);
-    try {
-      await UserAuthService.instance.signIn(email, password);
-      // Save push notification token on login
-      await PushNotificationService.instance.saveTokenOnLogin();
-      if (!mounted) return;
-      setState(() => isLoading = true);
-      await _fetchAccountData();
-    } on AuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인 중 문제가 발생했습니다. 다시 시도해주세요.')),
-      );
-      debugPrint('Login error: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _authInProgress = false);
-      }
-    }
-  }
-
   void _openShippingAddressDialog() {
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -264,7 +236,30 @@ class _AccountTabState extends State<AccountTab> {
   }
 
   void _handleSignupTap() {
-    context.push(SignUpScreen.route);
+    context.push(SignupTypeScreen.route);
+  }
+
+  Future<void> _handleEmailLogin() async {
+    final result = await showDialog<LoginDialogResult>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const LoginDialog(),
+    );
+    if (result == true && mounted) {
+      await _fetchAccountData();
+    }
+  }
+
+  void _handleKakaoLogin() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('카카오 로그인은 준비 중입니다.')),
+    );
+  }
+
+  void _handleAppleLogin() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Apple 로그인은 준비 중입니다.')),
+    );
   }
 
   void _handleOrderLookup() {
@@ -451,7 +446,9 @@ class _AccountTabState extends State<AccountTab> {
 
     if (!UserAuthService.instance.isLoggedIn) {
       return AccountLoggedOutContent(
-        onLogin: _handleLogin,
+        onKakaoLogin: _handleKakaoLogin,
+        onAppleLogin: _handleAppleLogin,
+        onEmailLogin: _handleEmailLogin,
         onSignupTap: _handleSignupTap,
       );
     }
@@ -475,6 +472,11 @@ class _AccountTabState extends State<AccountTab> {
       onSelectDepartment: _handleSelectDepartment,
       onRemoveDepartment: _handleRemoveDepartment,
       onViewBenefitsByLevel: _handleViewBenefitsByLevel,
+      onProfileChange: _handleProfileChange,
     );
+  }
+
+  void _handleProfileChange() {
+    context.push(ProfileSelectScreen.route);
   }
 }
