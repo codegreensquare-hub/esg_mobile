@@ -7,6 +7,7 @@ import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_in_content.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/profile_select.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/account.logged_out_content.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/blocked_report_history.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/my_comments.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/login.dialog.dart';
@@ -312,6 +313,22 @@ class _AccountTabState extends State<AccountTab> {
     );
   }
 
+  void _handleBlockedReportHistory() {
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            BlockedReportHistoryScreen(userId: userId!),
+      ),
+    );
+  }
+
   void _handleSelectCompany() {
     // TODO: implement company selection
     ScaffoldMessenger.of(context).showSnackBar(
@@ -367,45 +384,50 @@ class _AccountTabState extends State<AccountTab> {
       context: context,
       builder: (context) {
         final maxWidth = Device.largeMobile.breakpoint;
+        final maxHeight = MediaQuery.of(context).size.height * 0.5;
+        final theme = Theme.of(context);
+        final cs = theme.colorScheme;
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
+            constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          '등급별 혜택',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      Text(
+                        '등급별 혜택',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Noto Sans KR',
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(context).pop(),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    '현재 등급 기능을 개발 중입니다. 😊\n'
-                    '곧 더 좋은 서비스로 찾아뵙겠습니다. 감사합니다. 🍀',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: _BenefitsByLevelContent(colorScheme: cs, textTheme: theme.textTheme),
+                    ),
                   ),
                 ],
               ),
@@ -463,6 +485,7 @@ class _AccountTabState extends State<AccountTab> {
       onWishlist: _openWishlist,
       onMyComments: _handleMyComments,
       onLikedStories: _openLikedStories,
+      onBlockedReportHistory: _handleBlockedReportHistory,
       companyName: companyName,
       onSelectCompany: _handleSelectCompany,
       onRemoveCompany: _handleRemoveCompany,
@@ -478,5 +501,215 @@ class _AccountTabState extends State<AccountTab> {
 
   void _handleProfileChange() {
     context.push(ProfileSelectScreen.route);
+  }
+}
+
+class _BenefitsByLevelContent extends StatelessWidget {
+  const _BenefitsByLevelContent({
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // General info box (light green, square, one line)
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: const BoxDecoration(
+            color: Color(0x4D339C87), // #339C87 at 30% opacity
+            borderRadius: BorderRadius.zero,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '• 등급 적용 기간 : 매월 1일 ~ 매월 말일',
+                style: textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF355148),
+                  fontFamily: 'Noto Sans KR',
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '• 등급 산정 기간 : 직전 6개월',
+                style: textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF355148),
+                  fontFamily: 'Noto Sans KR',
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        _LevelSection(
+          level: 1,
+          conditions: const ['[그린스퀘어] 서비스 가입 시 자동 충족'],
+          benefits: const ['쇼핑몰 1,000원 할인 쿠폰 1매'],
+          textTheme: textTheme,
+        ),
+        _LevelSection(
+          level: 2,
+          conditions: const [
+            '누적 미션 수행 횟수 30회 이상',
+            '누적 적립 마일리지 30,000 이상',
+            '쇼핑몰 이용 횟수 2회 이상',
+            '쇼핑몰 누적 구매 금액 30,000원 이상',
+          ],
+          benefits: const ['쇼핑몰 2,000원 할인 쿠폰 1매'],
+          textTheme: textTheme,
+        ),
+        _LevelSection(
+          level: 3,
+          conditions: const [
+            '누적 미션 수행 횟수 70회 이상',
+            '누적 적립 마일리지 70,000 이상',
+            '쇼핑몰 이용 횟수 5회 이상',
+            '쇼핑몰 누적 구매 금액 100,000원 이상',
+          ],
+          benefits: const [
+            '미션 당 20마일리지 추가 적립',
+            '쇼핑몰 4,000원 할인 쿠폰 2매 (중복 사용 불가)',
+          ],
+          textTheme: textTheme,
+        ),
+        _LevelSection(
+          level: 4,
+          conditions: const [
+            '누적 미션 수행 횟수 120회 이상',
+            '누적 적립 마일리지 240,000 이상',
+            '쇼핑몰 이용 횟수 10회 이상',
+            '쇼핑몰 누적 구매 금액 450,000원 이상',
+          ],
+          benefits: const [
+            '미션 당 30마일리지 추가 적립',
+            '쇼핑몰 5,000원 할인 쿠폰 6매 (중복 사용 불가)',
+          ],
+          textTheme: textTheme,
+        ),
+        _LevelSection(
+          level: 5,
+          conditions: const [
+            '누적 미션 수행 횟수 400회 이상',
+            '누적 적립 마일리지 800,000 이상',
+            '쇼핑몰 이용 횟수 30회 이상',
+            '쇼핑몰 누적 구매 금액 800,000원 이상',
+          ],
+          benefits: const [
+            '미션 당 100마일리지 추가 적립',
+            '쇼핑몰 10,000원 할인 쿠폰 6매 (중복 사용 불가)',
+            '쇼핑몰 무료배송 쿠폰 3매 (할인 쿠폰과 중복 사용 가능)',
+          ],
+          textTheme: textTheme,
+        ),
+        const SizedBox(height: 24),
+        const Divider(height: 1),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: Text(
+                  '유의사항',
+                  style: textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Noto Sans KR',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '• 쇼핑몰은 하나의 주문번호가 1회 이용으로 측정됩니다.\n'
+                '• 모든 등급별 혜택(쇼핑몰 쿠폰 포함)은 해당 등급 적용 기간 내에만 사용 가능합니다.\n'
+                '• 일정 기간 내 반복적인 쇼핑몰 구매 취소 또는 미션 참여 어뷰징이 적발될 경우, 내부 정책에 따라 등급 조정 및 혜택 제공이 제한될 수 있습니다.',
+                style: textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF938F8B),
+                  fontFamily: 'Noto Sans KR',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LevelSection extends StatelessWidget {
+  const _LevelSection({
+    required this.level,
+    required this.conditions,
+    required this.benefits,
+    required this.textTheme,
+  });
+
+  static const _bulletColor = Color(0xFF938F8B);
+
+  final int level;
+  final List<String> conditions;
+  final List<String> benefits;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final bulletStyle = textTheme.bodySmall?.copyWith(
+      color: _bulletColor,
+      fontFamily: 'Noto Sans KR',
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Level $level',
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontFamily: 'EB Garamond',
+              decoration: TextDecoration.underline,
+              decorationColor: textTheme.titleMedium?.color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '충족 조건',
+            style: textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Noto Sans KR',
+            ),
+          ),
+          const SizedBox(height: 4),
+          ...conditions.map((c) => Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 2),
+            child: Text('• $c', style: bulletStyle),
+          )),
+          const SizedBox(height: 8),
+          Text(
+            '혜택',
+            style: textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Noto Sans KR',
+            ),
+          ),
+          const SizedBox(height: 4),
+          ...benefits.map((b) => Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 2),
+            child: Text('• $b', style: bulletStyle),
+          )),
+        ],
+      ),
+    );
   }
 }

@@ -2,27 +2,46 @@ import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_p
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 
-class GreenSquarePartnershipInquiryScreen extends StatefulWidget {
-  const GreenSquarePartnershipInquiryScreen({super.key});
+class GreenSquareEsgCampaignInquiryScreen extends StatefulWidget {
+  const GreenSquareEsgCampaignInquiryScreen({super.key});
 
   @override
-  State<GreenSquarePartnershipInquiryScreen> createState() =>
-      _GreenSquarePartnershipInquiryScreenState();
+  State<GreenSquareEsgCampaignInquiryScreen> createState() =>
+      _GreenSquareEsgCampaignInquiryScreenState();
 }
 
-class _GreenSquarePartnershipInquiryScreenState
-    extends State<GreenSquarePartnershipInquiryScreen> {
-  final _companyEmailController = TextEditingController();
-  final _contactController = TextEditingController();
+class _GreenSquareEsgCampaignInquiryScreenState
+    extends State<GreenSquareEsgCampaignInquiryScreen> {
+  final _emailController = TextEditingController();
+  final _contactNameController = TextEditingController();
+  final _contactPhoneController = TextEditingController();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
   static const int _titleMaxLength = 20;
 
   @override
+  void initState() {
+    super.initState();
+    _contentController.text =
+        '아래 내용을 보내주시면 빠른 확인에 도움이 됩니다.\n\n'
+        '· 기업/기관명:\n'
+        '· 추진 목적(ESG 목표, 홍보, 임직원 참여 등):\n'
+        '· 희망 캠페인 유형\n'
+        '  (예 - 친환경 소비, 탄소 저감, 임직원 참여 프로그램 등):\n'
+        '· 예상 참여 대상\n'
+        '  (예 - 임직원/고객/협력사/지역사회 등):\n'
+        '· 예상 규모 (참여 인원 또는 대상 범위):\n'
+        '· 희망 일정 및 진행 기간:\n'
+        '· 참고하고 싶은 기존 ESG 사례:\n'
+        '· 기타 전달 사항:';
+  }
+
+  @override
   void dispose() {
-    _companyEmailController.dispose();
-    _contactController.dispose();
+    _emailController.dispose();
+    _contactNameController.dispose();
+    _contactPhoneController.dispose();
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();
@@ -59,7 +78,7 @@ class _GreenSquarePartnershipInquiryScreenState
       data: theme.copyWith(appBarTheme: appBarTheme),
       child: GreenSquareInfoPage(
         backgroundColor: const Color(0xFF355149),
-        title: '입점 문의',
+        title: 'ESG 캠페인 문의',
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -79,7 +98,7 @@ class _GreenSquarePartnershipInquiryScreenState
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  '그린 스퀘어는 가치 있는 소비를 위한\n친환경 전문 플랫폼입니다.',
+                  '본 문의는 기업 및 기관 대상의\nESG 캠페인/마케팅 협업 문의 창구입니다.',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
                     fontFamily: 'Noto Sans KR',
@@ -88,16 +107,8 @@ class _GreenSquarePartnershipInquiryScreenState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '지구를 위한 선한 영향력을 위해\n일하는 기업이라면 언제든 환영입니다.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontFamily: 'Noto Sans KR',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '함께 하길 원하실 경우 아래 입점 양식을 작성하여\n제출하기 버튼을 눌러주시기 바랍니다.',
+                  'ESG 캠페인/마케팅 관련 문의가 있으실 경우,\n'
+                  '하단 양식을 작성하여 보내주시기 바랍니다.',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
                     fontFamily: 'Noto Sans KR',
@@ -109,13 +120,13 @@ class _GreenSquarePartnershipInquiryScreenState
                 Text('회신 메일 주소 *', style: labelStyle),
                 const SizedBox(height: 8),
                 TextField(
-                  controller: _companyEmailController,
+                  controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   style: inputTextStyle,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: 'green@gmail.com',
+                    hintText: '메일을 입력해주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -127,17 +138,38 @@ class _GreenSquarePartnershipInquiryScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 회신 연락처
-                Text('회신 연락처 (- 제외 입력)', style: labelStyle),
+                // 담당자 이름 및 직책
+                Text('담당자 이름 및 직책 *', style: labelStyle),
                 const SizedBox(height: 8),
                 TextField(
-                  controller: _contactController,
+                  controller: _contactNameController,
+                  style: inputTextStyle,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: '담당자/직책을 입력해주세요.',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 담당자 연락처
+                Text('담당자 연락처 *', style: labelStyle),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _contactPhoneController,
                   keyboardType: TextInputType.phone,
                   style: inputTextStyle,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: '01012345678',
+                    hintText: '연락처를 입력해주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -170,6 +202,7 @@ class _GreenSquarePartnershipInquiryScreenState
                     counterText: '',
                     filled: true,
                     fillColor: Colors.white,
+                    hintText: '제목을 입력해주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -186,12 +219,11 @@ class _GreenSquarePartnershipInquiryScreenState
                 const SizedBox(height: 8),
                 TextField(
                   controller: _contentController,
-                  maxLines: 6,
+                  maxLines: 12,
                   style: inputTextStyle,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: '내용을 입력해 주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -224,7 +256,7 @@ class _GreenSquarePartnershipInquiryScreenState
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '파일 업로드',
+                          '파일을 업로드해주세요.',
                           style: inputTextStyle,
                         ),
                         const Icon(
@@ -263,8 +295,7 @@ class _GreenSquarePartnershipInquiryScreenState
                 const SizedBox(height: 24),
                 Text(
                   '제안해주신 내용에 대해서는\n'
-                  '가능한 빠른 시일 내 안내 드리도록 하겠습니다.\n'
-                  '(입점이 어려울 경우 별도의 회신이 없을 수 있습니다.)',
+                  '가능한 빠른 시일 내 답변 드리도록 하겠습니다.',
                   style: helperStyle,
                   textAlign: TextAlign.center,
                 ),
@@ -276,3 +307,4 @@ class _GreenSquarePartnershipInquiryScreenState
     );
   }
 }
+

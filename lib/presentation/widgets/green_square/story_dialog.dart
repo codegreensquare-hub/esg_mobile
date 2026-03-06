@@ -21,6 +21,13 @@ import 'package:esg_mobile/web_updater.dart'
     if (dart.library.html) 'dart:js'
     as js;
 
+String _formatDateYyyyMmDd(DateTime date) {
+  final year = date.year.toString().padLeft(4, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '$year.$month.$day';
+}
+
 class StoryDialog extends StatefulWidget {
   const StoryDialog({
     super.key,
@@ -46,6 +53,7 @@ class _StoryDialogState extends State<StoryDialog> {
   bool isLoadingRecommendations = true;
   bool isLoadingPreviousStories = true;
   final TextEditingController _commentController = TextEditingController();
+  final TextEditingController _editCommentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _headerCardKey = GlobalKey();
@@ -54,6 +62,7 @@ class _StoryDialogState extends State<StoryDialog> {
   double _photoHeightThreshold = 0;
   String? userId;
   double _baseDiscountRate = 0.0;
+  String? _editingCommentId;
 
   @override
   void initState() {
@@ -141,6 +150,224 @@ class _StoryDialogState extends State<StoryDialog> {
     });
   }
 
+  Future<bool?> _confirmDeleteComment(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 36, 24, 36),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '댓글을 삭제하시겠습니까?',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFC6C6C6),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('아니요'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFFFF6C3E),
+                    ),
+                    child: const Text('예'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showDeleteCompletedDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 36, 24, 36),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '삭제가 완료되었습니다.',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFC6C6C6),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('확인'),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool?> _confirmReportComment(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '댓글을 신고하시겠습니까?\n신고는 취소할 수 없습니다.',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFC6C6C6),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('아니요'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFFFF6C3E),
+                    ),
+                    child: const Text('예'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool?> _confirmBlockComment(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 36, 24, 36),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '해당 댓글을 차단하시겠습니까?',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFC6C6C6),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('아니요'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFFFF6C3E),
+                    ),
+                    child: const Text('예'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _navigateToProductDetail(ProductWithOtherDetails productWithDetails) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -171,6 +398,7 @@ class _StoryDialogState extends State<StoryDialog> {
   @override
   void dispose() {
     _commentController.dispose();
+    _editCommentController.dispose();
     _commentFocusNode.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -679,6 +907,9 @@ class _StoryDialogState extends State<StoryDialog> {
                               itemCount: comments.length,
                               itemBuilder: (context, index) {
                                 final commentWithUser = comments[index];
+                                final isOwner = userId != null &&
+                                    commentWithUser.comment.commentBy.trim() ==
+                                        userId!.trim();
                                 return Padding(
                                   padding: const EdgeInsets.fromLTRB(
                                     16,
@@ -706,34 +937,272 @@ class _StoryDialogState extends State<StoryDialog> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              commentWithUser
-                                                      .commentBy
-                                                      .username ??
-                                                  commentWithUser
-                                                      .commentBy
-                                                      .email ??
-                                                  'Anonymous',
-                                              style: theme.textTheme.bodyMedium
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.bold,
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    commentWithUser
+                                                            .commentBy
+                                                            .username ??
+                                                        commentWithUser
+                                                            .commentBy
+                                                            .email ??
+                                                        'Anonymous',
+                                                    style: theme
+                                                        .textTheme.bodyMedium
+                                                        ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              commentWithUser.comment.comment ??
-                                                  '',
-                                              style: theme.textTheme.bodyMedium,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              commentWithUser.comment.createdAt
-                                                  .toString(),
-                                              style: theme.textTheme.bodySmall
-                                                  ?.copyWith(
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  _formatDateYyyyMmDd(
+                                                    commentWithUser
+                                                        .comment.createdAt,
+                                                  ),
+                                                  style: theme
+                                                      .textTheme.bodySmall
+                                                      ?.copyWith(
                                                     color: cs.onSurfaceVariant,
                                                   ),
+                                                ),
+                                                const Spacer(),
+                                                if (isOwner) ...[
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        _editingCommentId =
+                                                            commentWithUser
+                                                                .comment.id;
+                                                        _editCommentController
+                                                            .text =
+                                                                commentWithUser
+                                                                        .comment
+                                                                        .comment ??
+                                                                    '';
+                                                      });
+                                                    },
+                                                    style:
+                                                        TextButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize: Size.zero,
+                                                      tapTargetSize:
+                                                          MaterialTapTargetSize
+                                                              .shrinkWrap,
+                                                      foregroundColor:
+                                                          const Color(
+                                                              0xFF4E4E4E),
+                                                      textStyle: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                    child: const Text('수정'),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  TextButton(
+                                                    onPressed: () async {
+                                                      final confirmed =
+                                                          await _confirmDeleteComment(
+                                                        context,
+                                                      );
+                                                      if (confirmed == true) {
+                                                        await StoryService
+                                                            .instance
+                                                            .deleteComment(
+                                                          commentWithUser
+                                                              .comment.id,
+                                                        );
+                                                        if (!mounted) return;
+                                                        setState(() {
+                                                          comments.removeAt(
+                                                            index,
+                                                          );
+                                                        });
+                                                        await _showDeleteCompletedDialog(
+                                                          context,
+                                                        );
+                                                      }
+                                                    },
+                                                    style:
+                                                        TextButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize: Size.zero,
+                                                      tapTargetSize:
+                                                          MaterialTapTargetSize
+                                                              .shrinkWrap,
+                                                      foregroundColor:
+                                                          const Color(
+                                                              0xFF4E4E4E),
+                                                      textStyle: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                    child: const Text('삭제'),
+                                                  ),
+                                                ] else ...[
+                                                  TextButton(
+                                                    onPressed: () async {
+                                                      await _confirmBlockComment(
+                                                        context,
+                                                      );
+                                                    },
+                                                    style:
+                                                        TextButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize: Size.zero,
+                                                      tapTargetSize:
+                                                          MaterialTapTargetSize
+                                                              .shrinkWrap,
+                                                      foregroundColor:
+                                                          const Color(
+                                                              0xFF4E4E4E),
+                                                      textStyle: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                    child: const Text('차단'),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  TextButton(
+                                                    onPressed: () async {
+                                                      await _confirmReportComment(
+                                                        context,
+                                                      );
+                                                    },
+                                                    style:
+                                                        TextButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize: Size.zero,
+                                                      tapTargetSize:
+                                                          MaterialTapTargetSize
+                                                              .shrinkWrap,
+                                                      foregroundColor:
+                                                          const Color(
+                                                              0xFF4E4E4E),
+                                                      textStyle: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                    child: const Text('신고'),
+                                                  ),
+                                                ],
+                                              ],
                                             ),
+                                            const SizedBox(height: 4),
+                                            if (isOwner &&
+                                                commentWithUser.comment.id ==
+                                                    _editingCommentId)
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  TextField(
+                                                    controller:
+                                                        _editCommentController,
+                                                    maxLines: null,
+                                                    style: theme
+                                                        .textTheme.bodyMedium,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      isDense: true,
+                                                      contentPadding:
+                                                          EdgeInsets.symmetric(
+                                                        vertical: 8,
+                                                      ),
+                                                      border:
+                                                          UnderlineInputBorder(),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            _editingCommentId =
+                                                                null;
+                                                            _editCommentController
+                                                                .clear();
+                                                          });
+                                                        },
+                                                        child:
+                                                            const Text('취소'),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      TextButton(
+                                                        onPressed: () async {
+                                                          final updatedText =
+                                                              _editCommentController
+                                                                  .text
+                                                                  .trim();
+                                                          if (updatedText
+                                                              .isEmpty) {
+                                                            return;
+                                                          }
+
+                                                          await StoryService
+                                                              .instance
+                                                              .updateComment(
+                                                            commentWithUser
+                                                                .comment.id,
+                                                            updatedText,
+                                                          );
+                                                          if (!mounted) {
+                                                            return;
+                                                          }
+                                                          setState(() {
+                                                            comments[index] =
+                                                                StoryCommentWithUser(
+                                                              comment:
+                                                                  commentWithUser
+                                                                      .comment
+                                                                      .copyWith(
+                                                                comment:
+                                                                    updatedText,
+                                                              ),
+                                                              commentBy:
+                                                                  commentWithUser
+                                                                      .commentBy,
+                                                            );
+                                                            _editingCommentId =
+                                                                null;
+                                                          });
+                                                        },
+                                                        child:
+                                                            const Text('저장'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              )
+                                            else
+                                              Text(
+                                                commentWithUser
+                                                        .comment.comment ??
+                                                    '',
+                                                style:
+                                                    theme.textTheme.bodyMedium,
+                                              ),
                                           ],
                                         ),
                                       ),

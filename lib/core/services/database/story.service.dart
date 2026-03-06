@@ -155,6 +155,31 @@ class StoryService {
     });
   }
 
+  Future<void> deleteComment(String commentId) async {
+    final trimmed = commentId.trim();
+    if (trimmed.isEmpty) {
+      return;
+    }
+
+    await _client
+        .from(StoryCommentTable().tableName)
+        .delete()
+        .eq(StoryCommentRow.idField, trimmed);
+  }
+
+  Future<void> updateComment(String commentId, String newComment) async {
+    final trimmedId = commentId.trim();
+    final trimmedComment = newComment.trim();
+    if (trimmedId.isEmpty || trimmedComment.isEmpty) {
+      return;
+    }
+
+    await _client
+        .from(StoryCommentTable().tableName)
+        .update({StoryCommentRow.commentField: trimmedComment})
+        .eq(StoryCommentRow.idField, trimmedId);
+  }
+
   Future<List<LikedStory>> fetchLikedStories(String userId) async {
     final response = await _client
         .from(StoryLikeTable().tableName)

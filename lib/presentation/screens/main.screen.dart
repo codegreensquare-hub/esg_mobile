@@ -38,6 +38,9 @@ import 'package:esg_mobile/core/constants/navigation.dart';
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/brand_story.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/partnership_inquiry.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/partnership_request.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/mission_request.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/esg_campaign_inquiry.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/about_cog.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/terms.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/privacy_policy.screen.dart';
@@ -899,6 +902,27 @@ class _MainScreenState extends State<MainScreen> {
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => const GreenSquarePartnershipInquiryScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.partnershipRequest:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquarePartnershipRequestScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.missionRequest:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareMissionRequestScreen(),
+          ),
+        );
+        break;
+      case GreenSquareDrawerTarget.esgCampaignInquiry:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const GreenSquareEsgCampaignInquiryScreen(),
           ),
         );
         break;

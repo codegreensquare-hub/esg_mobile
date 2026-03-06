@@ -2,6 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esg_mobile/core/constants/asset.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/coupon_status.dialog.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/current_mileage.dialog.dart';
+import 'package:esg_mobile/presentation/screens/green_square/account/my_rank_management.dialog.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/user_info.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,6 +23,7 @@ class AccountLoggedInContent extends StatelessWidget {
     required this.onWishlist,
     required this.onMyComments,
     required this.onLikedStories,
+    required this.onBlockedReportHistory,
     required this.companyName,
     required this.onSelectCompany,
     required this.onRemoveCompany,
@@ -41,6 +45,7 @@ class AccountLoggedInContent extends StatelessWidget {
   final VoidCallback onWishlist;
   final VoidCallback onMyComments;
   final VoidCallback onLikedStories;
+  final VoidCallback onBlockedReportHistory;
   final String? companyName;
   final VoidCallback onSelectCompany;
   final VoidCallback onRemoveCompany;
@@ -302,11 +307,19 @@ class AccountLoggedInContent extends StatelessWidget {
               const SizedBox(height: 0),
               Row(
                 children: [
-                  Text(
-                    'Level 1',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.bold,
+                  InkWell(
+                    onTap: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (context) => const MyRankManagementDialog(),
+                      );
+                    },
+                    child: Text(
+                      'Level 1',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -325,49 +338,89 @@ class AccountLoggedInContent extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: cs.outlineVariant, width: 0.5),
                 ),
-
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                child: Row(
                   children: [
-                    Text(
-                      '현재 보유 마일리지',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: cs.outline,
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (context) => CurrentMileageDialog(
+                              mileageText: mileageText,
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '현재 보유 마일리지',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: cs.outline,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SvgPicture.network(
+                                  getImageLink(
+                                    bucket.asset,
+                                    asset.cMilage,
+                                    folderPath: assetFolderPath[asset.cMilage],
+                                  ),
+                                  width: 20,
+                                  height: 20,
+                                  semanticsLabel: '마일리지',
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  mileageText,
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    // Text(
-                    //   '$mileageText P',
-                    //   style: theme.textTheme.headlineSmall?.copyWith(
-                    //     fontWeight: FontWeight.bold,
-                    //     color: cs.primary,
-                    //   ),
-                    // ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.network(
-                          getImageLink(
-                            bucket.asset,
-                            asset.cMilage,
-                            folderPath: assetFolderPath[asset.cMilage],
-                          ),
-                          width: 20,
-                          height: 20,
-                          semanticsLabel: '마일리지',
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (context) => const CouponStatusDialog(),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '보유 쿠폰',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: cs.outline,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '2장',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          mileageText,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: cs.primary,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -378,35 +431,63 @@ class AccountLoggedInContent extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: cs.outlineVariant, width: 0.5),
                 ),
-                padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-                child: Row(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.local_shipping_outlined,
-                        label: '주문배송조회',
-                        onTap: onOrderLookup,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.local_shipping_outlined,
+                            label: '주문배송조회',
+                            onTap: onOrderLookup,
+                          ),
+                        ),
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.favorite_outline,
+                            label: '찜한 상품',
+                            onTap: onWishlist,
+                          ),
+                        ),
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.comment_outlined,
+                            label: '내가 쓴 댓글',
+                            onTap: onMyComments,
+                          ),
+                        ),
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.thumb_up_outlined,
+                            label: '좋아요 한 글',
+                            onTap: onLikedStories,
+                          ),
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.favorite_outline,
-                        label: '찜한 상품',
-                        onTap: onWishlist,
-                      ),
-                    ),
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.comment_outlined,
-                        label: '내가 쓴 댓글',
-                        onTap: onMyComments,
-                      ),
-                    ),
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.thumb_up_outlined,
-                        label: '좋아요 한 글',
-                        onTap: onLikedStories,
+                    const SizedBox(height: 2),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        onTap: onBlockedReportHistory,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            '차단/신고 내역',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: const Color(0xFF4E4E4E),
+                              fontWeight: FontWeight.w400,
+                              decoration: TextDecoration.underline,
+                              decorationColor: const Color(0xFF4E4E4E),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

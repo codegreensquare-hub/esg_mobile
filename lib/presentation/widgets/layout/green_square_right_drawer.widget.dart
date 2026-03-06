@@ -15,8 +15,35 @@ class GreenSquareRightDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    const drawerTextColor = Color(0xFF3B3733);
+    const horizontalPadding = 24.0;
+    const separatorColor = Color(0xFF000000);
+    const separatorVerticalPadding = 6.0;
 
     final destinations = greenSquareDrawerDestinations;
+    final postLogoutDestinations = greenSquareDrawerPostLogoutDestinations;
+    final isLoggedIn = UserAuthService.instance.isLoggedIn;
+
+    ListTile buildTile({
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      return ListTile(
+        dense: true,
+        minVerticalPadding: 4,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+        ),
+        title: Text(
+          label,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: drawerTextColor,
+          ),
+        ),
+        onTap: onTap,
+      );
+    }
 
     return Drawer(
       elevation: 16,
@@ -37,39 +64,20 @@ class GreenSquareRightDrawer extends StatelessWidget {
                 },
               ),
             ),
-            const Divider(height: 1),
             Expanded(
-              child: ListView.separated(
-                itemCount: UserAuthService.instance.isLoggedIn
-                    ? destinations.length + 1
-                    : destinations.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final showLogout =
-                      UserAuthService.instance.isLoggedIn &&
-                      index == destinations.length;
-                  if (showLogout) {
-                    return ListTile(
-                      title: Align(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.logout,
-                              color: cs.onSurfaceVariant,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              '로그아웃',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              child: ListView(
+                children: [
+                  for (final destination in destinations)
+                    buildTile(
+                      label: destination.label,
+                      onTap: () async {
+                        await Navigator.of(context).maybePop();
+                        await onSelect(destination);
+                      },
+                    ),
+                  if (isLoggedIn) ...[
+                    buildTile(
+                      label: '로그아웃',
                       onTap: () async {
                         final messenger = ScaffoldMessenger.of(context);
                         final navigator = Navigator.of(context);
@@ -80,43 +88,29 @@ class GreenSquareRightDrawer extends StatelessWidget {
                           const SnackBar(content: Text('로그아웃되었습니다.')),
                         );
                       },
-                    );
-                  }
-                  final destination = destinations[index];
-                  final isExternal =
-                      destination.target == GreenSquareDrawerTarget.openInApp ||
-                      destination.target ==
-                          GreenSquareDrawerTarget.kakaoContact;
-                  final Color iconColor = isExternal
-                      ? cs.primary
-                      : cs.onSurfaceVariant;
-                  final Color textColor = isExternal
-                      ? cs.primary
-                      : cs.onSurface;
-                  return ListTile(
-                    leading: Icon(
-                      destination.icon,
-                      color: iconColor,
                     ),
-                    title: Text(
-                      destination.label,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: textColor,
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: separatorVerticalPadding,
+                      ),
+                      child: Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: separatorColor,
+                        indent: horizontalPadding,
+                        endIndent: horizontalPadding,
                       ),
                     ),
-                    trailing: isExternal
-                        ? Icon(
-                            Icons.open_in_new,
-                            size: 18,
-                            color: iconColor,
-                          )
-                        : null,
-                    onTap: () async {
-                      await Navigator.of(context).maybePop();
-                      await onSelect(destination);
-                    },
-                  );
-                },
+                  ],
+                  for (final destination in postLogoutDestinations)
+                    buildTile(
+                      label: destination.label,
+                      onTap: () async {
+                        await Navigator.of(context).maybePop();
+                        await onSelect(destination);
+                      },
+                    ),
+                ],
               ),
             ),
           ],

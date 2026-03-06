@@ -2,22 +2,35 @@ import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_p
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 
-class GreenSquarePartnershipInquiryScreen extends StatefulWidget {
-  const GreenSquarePartnershipInquiryScreen({super.key});
+class GreenSquareMissionRequestScreen extends StatefulWidget {
+  const GreenSquareMissionRequestScreen({super.key});
 
   @override
-  State<GreenSquarePartnershipInquiryScreen> createState() =>
-      _GreenSquarePartnershipInquiryScreenState();
+  State<GreenSquareMissionRequestScreen> createState() =>
+      _GreenSquareMissionRequestScreenState();
 }
 
-class _GreenSquarePartnershipInquiryScreenState
-    extends State<GreenSquarePartnershipInquiryScreen> {
+class _GreenSquareMissionRequestScreenState
+    extends State<GreenSquareMissionRequestScreen> {
   final _companyEmailController = TextEditingController();
   final _contactController = TextEditingController();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
   static const int _titleMaxLength = 20;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentController.text =
+        '아래 내용을 보내주시면 빠른 확인에 도움이 됩니다.\n\n'
+        '· 원하는 미션 이름:\n'
+        '· 미션 신청 사유:\n'
+        '· 미션 신청 시기/일정:\n'
+        '· 미션 진행 방식:\n'
+        '· 미션 진행 기간:\n'
+        '· 기타 전달 사항:';
+  }
 
   @override
   void dispose() {
@@ -59,7 +72,7 @@ class _GreenSquarePartnershipInquiryScreenState
       data: theme.copyWith(appBarTheme: appBarTheme),
       child: GreenSquareInfoPage(
         backgroundColor: const Color(0xFF355149),
-        title: '입점 문의',
+        title: '미션 요청',
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -79,7 +92,7 @@ class _GreenSquarePartnershipInquiryScreenState
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  '그린 스퀘어는 가치 있는 소비를 위한\n친환경 전문 플랫폼입니다.',
+                  '원하시는 미션이 있으신가요?\n하단 양식을 작성하여 신청해주세요!',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
                     fontFamily: 'Noto Sans KR',
@@ -89,15 +102,6 @@ class _GreenSquarePartnershipInquiryScreenState
                 const SizedBox(height: 16),
                 Text(
                   '지구를 위한 선한 영향력을 위해\n일하는 기업이라면 언제든 환영입니다.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontFamily: 'Noto Sans KR',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '함께 하길 원하실 경우 아래 입점 양식을 작성하여\n제출하기 버튼을 눌러주시기 바랍니다.',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
                     fontFamily: 'Noto Sans KR',
@@ -170,6 +174,7 @@ class _GreenSquarePartnershipInquiryScreenState
                     counterText: '',
                     filled: true,
                     fillColor: Colors.white,
+                    hintText: '미션을 요청합니다.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -186,12 +191,11 @@ class _GreenSquarePartnershipInquiryScreenState
                 const SizedBox(height: 8),
                 TextField(
                   controller: _contentController,
-                  maxLines: 6,
+                  maxLines: 10,
                   style: inputTextStyle,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: '내용을 입력해 주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -199,39 +203,6 @@ class _GreenSquarePartnershipInquiryScreenState
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 12,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 첨부 파일
-                Text('첨부 파일', style: labelStyle),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: implement file picker
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '파일 업로드',
-                          style: inputTextStyle,
-                        ),
-                        const Icon(
-                          Icons.upload_file,
-                          size: 20,
-                        ),
-                      ],
                     ),
                   ),
                 ),
@@ -264,7 +235,7 @@ class _GreenSquarePartnershipInquiryScreenState
                 Text(
                   '제안해주신 내용에 대해서는\n'
                   '가능한 빠른 시일 내 안내 드리도록 하겠습니다.\n'
-                  '(입점이 어려울 경우 별도의 회신이 없을 수 있습니다.)',
+                  '(반영이 어려운 경우 별도의 회신이 없을 수 있습니다.)',
                   style: helperStyle,
                   textAlign: TextAlign.center,
                 ),
@@ -276,3 +247,4 @@ class _GreenSquarePartnershipInquiryScreenState
     );
   }
 }
+

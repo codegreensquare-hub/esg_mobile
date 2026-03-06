@@ -38,6 +38,9 @@ const greenSquareNavItems = <GreenSquareNavItem>[
 enum GreenSquareDrawerTarget {
   brandStory,
   partnershipInquiry,
+  partnershipRequest,
+  missionRequest,
+  esgCampaignInquiry,
   aboutCog,
   squareTerms,
   privacyPolicy,
@@ -67,11 +70,6 @@ const greenSquareDrawerDestinations = <GreenSquareDrawerDestination>[
     label: '브랜드 스토리',
     icon: Icons.auto_stories_outlined,
     target: GreenSquareDrawerTarget.brandStory,
-  ),
-  GreenSquareDrawerDestination(
-    label: '입점 문의',
-    icon: Icons.store_mall_directory_outlined,
-    target: GreenSquareDrawerTarget.partnershipInquiry,
   ),
   GreenSquareDrawerDestination(
     label: '콕(cog) 에 관하여',
@@ -122,5 +120,28 @@ const greenSquareDrawerDestinations = <GreenSquareDrawerDestination>[
     label: '주문 내역',
     icon: Icons.receipt_long_outlined,
     target: GreenSquareDrawerTarget.myOrders,
+  ),
+];
+
+const greenSquareDrawerPostLogoutDestinations = <GreenSquareDrawerDestination>[
+  GreenSquareDrawerDestination(
+    label: '입점 문의',
+    icon: Icons.store_mall_directory_outlined,
+    target: GreenSquareDrawerTarget.partnershipInquiry,
+  ),
+  GreenSquareDrawerDestination(
+    label: '입점 요청',
+    icon: Icons.domain_add_outlined,
+    target: GreenSquareDrawerTarget.partnershipRequest,
+  ),
+  GreenSquareDrawerDestination(
+    label: '미션 요청',
+    icon: Icons.flag_outlined,
+    target: GreenSquareDrawerTarget.missionRequest,
+  ),
+  GreenSquareDrawerDestination(
+    label: 'ESG 캠페인 문의',
+    icon: Icons.campaign_outlined,
+    target: GreenSquareDrawerTarget.esgCampaignInquiry,
   ),
 ];

@@ -2,16 +2,16 @@ import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_p
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 
-class GreenSquarePartnershipInquiryScreen extends StatefulWidget {
-  const GreenSquarePartnershipInquiryScreen({super.key});
+class GreenSquarePartnershipRequestScreen extends StatefulWidget {
+  const GreenSquarePartnershipRequestScreen({super.key});
 
   @override
-  State<GreenSquarePartnershipInquiryScreen> createState() =>
-      _GreenSquarePartnershipInquiryScreenState();
+  State<GreenSquarePartnershipRequestScreen> createState() =>
+      _GreenSquarePartnershipRequestScreenState();
 }
 
-class _GreenSquarePartnershipInquiryScreenState
-    extends State<GreenSquarePartnershipInquiryScreen> {
+class _GreenSquarePartnershipRequestScreenState
+    extends State<GreenSquarePartnershipRequestScreen> {
   final _companyEmailController = TextEditingController();
   final _contactController = TextEditingController();
   final _titleController = TextEditingController();
@@ -59,7 +59,7 @@ class _GreenSquarePartnershipInquiryScreenState
       data: theme.copyWith(appBarTheme: appBarTheme),
       child: GreenSquareInfoPage(
         backgroundColor: const Color(0xFF355149),
-        title: '입점 문의',
+        title: '입점 요청',
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -79,7 +79,7 @@ class _GreenSquarePartnershipInquiryScreenState
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  '그린 스퀘어는 가치 있는 소비를 위한\n친환경 전문 플랫폼입니다.',
+                  '원하시는 브랜드나 상품이 있나요?\n하단 양식을 작성하여 신청해주세요!',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
                     fontFamily: 'Noto Sans KR',
@@ -95,18 +95,9 @@ class _GreenSquarePartnershipInquiryScreenState
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  '함께 하길 원하실 경우 아래 입점 양식을 작성하여\n제출하기 버튼을 눌러주시기 바랍니다.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontFamily: 'Noto Sans KR',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: 32),
-                // 회신 메일 주소
-                Text('회신 메일 주소 *', style: labelStyle),
+                // 회사 메일 주소
+                Text('회사 메일 주소', style: labelStyle),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _companyEmailController,
@@ -127,8 +118,8 @@ class _GreenSquarePartnershipInquiryScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 회신 연락처
-                Text('회신 연락처 (- 제외 입력)', style: labelStyle),
+                // 회사 연락처
+                Text('회사 연락처 (- 제외 입력)', style: labelStyle),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _contactController,
@@ -153,7 +144,7 @@ class _GreenSquarePartnershipInquiryScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('제목을 입력해 주세요. (20자 이내) *', style: labelStyle),
+                    Text('제목을 입력해 주세요. (20자 이내)', style: labelStyle),
                     Text(
                       '${_titleController.text.characters.length}/$_titleMaxLength',
                       style: helperStyle,
@@ -170,6 +161,7 @@ class _GreenSquarePartnershipInquiryScreenState
                     counterText: '',
                     filled: true,
                     fillColor: Colors.white,
+                    hintText: '입점을 요청합니다.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -181,9 +173,22 @@ class _GreenSquarePartnershipInquiryScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 내용
-                Text('내용을 입력해 주세요. *', style: labelStyle),
+                // 안내 텍스트 + 내용
+                Text(
+                  '아래 내용을 보내주시면 빠른 확인에 도움이 됩니다.',
+                  style: helperStyle,
+                ),
                 const SizedBox(height: 8),
+                Text(
+                  '· 브랜드/회사명\n'
+                  '· 취급 제품 또는 서비스\n'
+                  '· 주요 판매 채널(온라인몰, 오프라인 등)\n'
+                  '· 공식 홈페이지 또는 SNS\n'
+                  '· 입점 희망 이유\n'
+                  '· 기타 전달 사항',
+                  style: helperStyle,
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: _contentController,
                   maxLines: 6,
@@ -276,3 +281,4 @@ class _GreenSquarePartnershipInquiryScreenState
     );
   }
 }
+
