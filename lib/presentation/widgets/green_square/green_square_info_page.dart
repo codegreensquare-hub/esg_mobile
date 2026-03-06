@@ -11,14 +11,22 @@ class GreenSquareInfoPage extends StatelessWidget {
   final String title;
   final Widget body;
   final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Noto Sans KR',
+          ),
+        ),
       ),
-
       body: body,
     );
   }

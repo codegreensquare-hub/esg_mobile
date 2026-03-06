@@ -63,13 +63,15 @@ class _GreenSquareFaqScreenState extends State<GreenSquareFaqScreen> {
             return Center(
               child: Text(
                 '등록된 FAQ가 없습니다.',
-                style: theme.textTheme.bodyLarge,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontFamily: 'Noto Sans KR',
+                ),
               ),
             );
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -77,7 +79,6 @@ class _GreenSquareFaqScreenState extends State<GreenSquareFaqScreen> {
                   FaqCard(
                     question: items[i].question ?? '',
                     answer: items[i].answer ?? '',
-                    showDivider: i < items.length - 1,
                   ),
               ],
             ),
