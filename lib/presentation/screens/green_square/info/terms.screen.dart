@@ -6,10 +6,12 @@ class GreenSquareTermsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return GreenSquareInfoPage(
       title: '스퀘어 이용 약관',
-      body: SingleChildScrollView(
+      backgroundColor: kPolicyPageBackground,
+      bodyBuilder: (context) {
+        final theme = Theme.of(context);
+        return SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -18,14 +20,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '1장 총칙',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제1조(목적)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -37,7 +39,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제2조(용어의 정의)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -79,7 +81,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제3조(약관 등의 명시와 설명 및 개정)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -112,14 +114,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '2장 회사의 서비스',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제4조(서비스의 제공 및 변경)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -152,7 +154,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제5조 (서비스의 중단)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -173,14 +175,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제 3장 서비스 이용계약',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제6조(회원가입)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -230,7 +232,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제7조(회원 탈퇴 및 자격 상실 등)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -294,7 +296,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제8조(회원에 대한 통지)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -315,14 +317,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제4장 계약당사자의 의무',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제21조 (개인정보보호)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -382,7 +384,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제10조(회사의 의무)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -406,7 +408,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제11조(회원의 ID 및 비밀번호에 대한 의무)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -426,7 +428,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제12조(이용자의 의무)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -476,14 +478,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제 5장 구매계약 및 대금 결제',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제13조 (구매신청 및 개인정보 제공 동의 등)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -530,7 +532,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제14조 (계약의 성립)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -565,7 +567,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제15조 (지급방법)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -624,7 +626,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제16조 (수신확인통지·구매신청 변경 및 취소)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -641,7 +643,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제17조 (재화 등의 공급)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -663,7 +665,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제18조 (환급)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -675,7 +677,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제19조 (청약철회 등)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -719,7 +721,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제20조 (청약철회 등의 효과)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -747,14 +749,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제 6장 부가서비스의 이용',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제 21조 (마일리지)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -794,7 +796,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제 22조 (할인쿠폰)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -827,14 +829,14 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제 7장 기타',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               '제23조 (저작권의 귀속 및 이용제한)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -874,7 +876,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제24조 (분쟁해결)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -894,7 +896,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제25조 (재판권 및 준거법)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -910,7 +912,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제26조 광고의 게재',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -926,7 +928,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제27조 책임제한(면책)',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -954,7 +956,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '제28조 긴급조치',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
@@ -974,7 +976,7 @@ class GreenSquareTermsScreen extends StatelessWidget {
             Text(
               '부칙',
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
@@ -994,7 +996,8 @@ class GreenSquareTermsScreen extends StatelessWidget {
             const SizedBox(height: 32),
           ],
         ),
-      ),
+      );
+      },
     );
   }
 }

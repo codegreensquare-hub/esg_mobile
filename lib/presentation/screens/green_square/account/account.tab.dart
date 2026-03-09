@@ -466,36 +466,41 @@ class _AccountTabState extends State<AccountTab> {
       );
     }
 
-    if (!UserAuthService.instance.isLoggedIn) {
-      return AccountLoggedOutContent(
-        onKakaoLogin: _handleKakaoLogin,
-        onAppleLogin: _handleAppleLogin,
-        onEmailLogin: _handleEmailLogin,
-        onSignupTap: _handleSignupTap,
-      );
-    }
+    return ListenableBuilder(
+      listenable: UserAuthService.instance,
+      builder: (context, _) {
+        if (!UserAuthService.instance.isLoggedIn) {
+          return AccountLoggedOutContent(
+            onKakaoLogin: _handleKakaoLogin,
+            onAppleLogin: _handleAppleLogin,
+            onEmailLogin: _handleEmailLogin,
+            onSignupTap: _handleSignupTap,
+          );
+        }
 
-    return AccountLoggedInContent(
-      userName: userName ?? '사용자',
-      totalMileage: totalMileage,
-      activeMissions: activeMissions,
-      participations: participations,
-      onManageShipping: _openShippingAddressDialog,
-      onOrderLookup: _handleOrderLookup,
-      onWishlist: _openWishlist,
-      onMyComments: _handleMyComments,
-      onLikedStories: _openLikedStories,
-      onBlockedReportHistory: _handleBlockedReportHistory,
-      companyName: companyName,
-      onSelectCompany: _handleSelectCompany,
-      onRemoveCompany: _handleRemoveCompany,
-      isEmployee: isEmployee,
-      departmentName: departmentName,
-      onSetIsEmployee: _handleSetIsEmployee,
-      onSelectDepartment: _handleSelectDepartment,
-      onRemoveDepartment: _handleRemoveDepartment,
-      onViewBenefitsByLevel: _handleViewBenefitsByLevel,
-      onProfileChange: _handleProfileChange,
+        return AccountLoggedInContent(
+          userName: userName ?? '사용자',
+          totalMileage: totalMileage,
+          activeMissions: activeMissions,
+          participations: participations,
+          onManageShipping: _openShippingAddressDialog,
+          onOrderLookup: _handleOrderLookup,
+          onWishlist: _openWishlist,
+          onMyComments: _handleMyComments,
+          onLikedStories: _openLikedStories,
+          onBlockedReportHistory: _handleBlockedReportHistory,
+          companyName: companyName,
+          onSelectCompany: _handleSelectCompany,
+          onRemoveCompany: _handleRemoveCompany,
+          isEmployee: isEmployee,
+          departmentName: departmentName,
+          onSetIsEmployee: _handleSetIsEmployee,
+          onSelectDepartment: _handleSelectDepartment,
+          onRemoveDepartment: _handleRemoveDepartment,
+          onViewBenefitsByLevel: _handleViewBenefitsByLevel,
+          onProfileChange: _handleProfileChange,
+        );
+      },
     );
   }
 

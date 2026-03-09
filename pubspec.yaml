@@ -43,6 +43,7 @@ flutter:
     - assets/images/icons/
     - assets/images/carousel/
     - assets/images/about/
+    - assets/images/screen/settings/
   fonts:
     - family: EB Garamond
       fonts:

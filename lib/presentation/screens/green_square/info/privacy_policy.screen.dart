@@ -6,10 +6,12 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return GreenSquareInfoPage(
       title: '개인정보 처리방침',
-      body: SingleChildScrollView(
+      backgroundColor: kPolicyPageBackground,
+      bodyBuilder: (context) {
+        final theme = Theme.of(context);
+        return SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: SafeArea(
           child: Column(
@@ -19,7 +21,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 1장 총칙',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -27,7 +29,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제1조 (목적)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -39,7 +41,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 2조 (개인정보 처리의 원칙)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -51,7 +53,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 3조(본 방침의 공개)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -63,7 +65,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 4조(본 방침의 변경)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -93,7 +95,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제2장 수집하는 개인정보 및 수집· 이용목적',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -101,7 +103,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 5조(개인정보 수집 목적)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -128,7 +130,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 6조(회원가입을 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -165,7 +167,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 7조(본인인증을 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -182,7 +184,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 8조(법정대리인 동의를 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -199,7 +201,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제9조(결제서비스를 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -231,7 +233,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 10조(현금영수증발행을 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -248,7 +250,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 11조(회사서비스제공을 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -315,7 +317,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 12조(서비스 이용 및 부정이용 확인을 위한 정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -337,7 +339,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 13조(민감정보)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -352,7 +354,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제3장 개인정보 수집의 방법',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -360,7 +362,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 14조(개인정보 수집 방법)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -385,7 +387,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제4장 개인정보의 이용',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -393,7 +395,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 15조(개인정보의 이용)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -443,7 +445,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제5장 개인정보의 제3자 제공',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -451,7 +453,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 16조(개인정보 제3자 제공 금지)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -478,7 +480,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 17조(사전동의 등에 따른 개인정보의 제공)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -602,7 +604,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 18조(법령 등에 따른 개인정보의 제공)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -632,7 +634,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제6장 개인정보의 처리 위탁',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -640,7 +642,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 19조(개인정보의 처리 위탁)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -863,7 +865,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제7장 개인정보의 보유 및 이용 기간',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -871,7 +873,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 20조(개인정보의 보유 및 이용기간)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -888,7 +890,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제21조(법령에 따른 개인정보의 보유 및 이용기간)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -948,7 +950,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제8장 개인정보의 파기절차 및 방법',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -956,7 +958,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 22조(개인정보의 파기원칙)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -968,7 +970,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 23조(서비스 미이용자에 대한 개인정보 처리)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1000,7 +1002,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 24조(개인정보파기절차)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1017,7 +1019,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제 25조(개인정보파기방법)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1032,7 +1034,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제9장 영리목적의 광고성 정보 전송 제한',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1040,7 +1042,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제26조(광고정보의 전송 조치)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1075,7 +1077,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제10장 아동의 개인정보보호',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1083,7 +1085,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제27조(아동의 개인정보보호)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1098,7 +1100,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제11장 이용자 및 법정대리인의 권리와 그 행사방법 등',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1106,7 +1108,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제28조(개인정보 수집철회 등)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1123,7 +1125,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제29조(개인정보 정보변경 등)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1140,7 +1142,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제30조(이용자의 의무)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1165,7 +1167,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제12장 개인정보의 기술적·관리적 보호대책',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1173,7 +1175,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제31조(회사의 개인정보 관리)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1185,7 +1187,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제32조(삭제된 정보의 처리)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1197,7 +1199,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제33조(비밀번호의 암호화)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1209,7 +1211,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제34조(해킹 등에 대비한 대책)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1236,7 +1238,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제35조(개인정보 처리 최소화 및 교육)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1248,7 +1250,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제36조(개인정보보호 전담담당부서 운영)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1263,7 +1265,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제13장 개인정보유출등의 통지 및 신고',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1271,7 +1273,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제37조(개인정보 유출등에 대한 조치)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1283,7 +1285,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제38조(개인정보 유출등에 대한 조치의 예외)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1298,7 +1300,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제14장 개인정보 자동수집장치의 설치/운영 및 거부에 관한 사항',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1306,7 +1308,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제39조(이용자의 쿠키설치선택권)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1323,7 +1325,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제40조(쿠키 설치 허용 지정방법)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1343,7 +1345,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제15장 개인정보보호책임자지정',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Divider(),
@@ -1351,7 +1353,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제41조(회사의 개인정보 보호 책임자 지정)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1368,7 +1370,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제42조(이용자의 민원처리)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1380,7 +1382,7 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '제43조(이용자의 기관문의)',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1397,14 +1399,14 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
               Text(
                 '부칙',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 '제1조',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
@@ -1416,7 +1418,8 @@ class GreenSquarePrivacyPolicyScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      );
+      },
     );
   }
 }

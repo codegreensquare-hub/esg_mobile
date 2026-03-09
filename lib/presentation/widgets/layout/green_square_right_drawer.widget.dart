@@ -1,5 +1,8 @@
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/privacy_policy.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/settings.screen.dart';
+import 'package:esg_mobile/presentation/screens/green_square/info/terms.screen.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareRightDrawer extends StatelessWidget {
@@ -115,8 +118,15 @@ class GreenSquareRightDrawer extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             GestureDetector(
-                              onTap: () {
-                                // TODO: navigate to terms
+                              onTap: () async {
+                                await Navigator.of(context).maybePop();
+                                if (!context.mounted) return;
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const GreenSquareTermsScreen(),
+                                  ),
+                                );
                               },
                               child: Text(
                                 '스퀘어 이용 약관',
@@ -137,8 +147,15 @@ class GreenSquareRightDrawer extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {
-                                // TODO: navigate to privacy policy
+                              onTap: () async {
+                                await Navigator.of(context).maybePop();
+                                if (!context.mounted) return;
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const GreenSquarePrivacyPolicyScreen(),
+                                  ),
+                                );
                               },
                               child: Text(
                                 '개인정보 처리 방침',
@@ -158,8 +175,15 @@ class GreenSquareRightDrawer extends StatelessWidget {
                           children: [
                             // Settings
                             GestureDetector(
-                              onTap: () {
-                                // TODO: navigate to settings
+                              onTap: () async {
+                                await Navigator.of(context).maybePop();
+                                if (!context.mounted) return;
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const GreenSquareSettingsScreen(),
+                                  ),
+                                );
                               },
                               child: Row(
                                 children: [
@@ -187,14 +211,25 @@ class GreenSquareRightDrawer extends StatelessWidget {
                                     context,
                                   );
                                   final navigator = Navigator.of(context);
-                                  await UserAuthService.instance.signOut();
-                                  if (!context.mounted) return;
-                                  navigator.pop();
-                                  messenger.showSnackBar(
-                                    const SnackBar(
-                                      content: Text('로그아웃되었습니다.'),
-                                    ),
-                                  );
+                                  try {
+                                    await UserAuthService.instance.signOut();
+                                    if (!context.mounted) return;
+                                    navigator.pop();
+                                    messenger.showSnackBar(
+                                      const SnackBar(
+                                        content: Text('로그아웃되었습니다.'),
+                                      ),
+                                    );
+                                  } catch (_) {
+                                    if (!context.mounted) return;
+                                    messenger.showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          '로그아웃에 실패했습니다. 다시 시도해주세요.',
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: Row(
                                   children: [
