@@ -15,6 +15,7 @@ const _textGreen = Color(0xFF355149);
 
 /// Switch track (background) when on.
 const _switchTrackGreen = Color(0xFF293F39);
+const _confirmActionOrange = Color(0xFFFF5A14);
 
 /// Light beige background for settings body.
 const _backgroundBeige = Color(0xFFF5F2EE);
@@ -29,6 +30,33 @@ class GreenSquareSettingsScreen extends StatefulWidget {
 
 class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
   final _authService = UserAuthService.instance;
+
+  static const _disableConfirmationMessages = {
+    UserSetting.receive_marketing_information_consent: (
+      title: '마케팅 정보 수신을 끄시겠어요?',
+      description: '이벤트, 혜택, 프로모션 안내를 받을 수 없어요.',
+    ),
+    UserSetting.provide_personal_information_to_third_parties_consent: (
+      title: '개인정보 제3자 제공 동의를 끄시겠어요?',
+      description: '일부 기관 협력 미션 참여가 제한될 수 있어요.',
+    ),
+    UserSetting.missions_notification: (
+      title: '미션 푸시를 끄시겠어요?',
+      description: '신규 미션과 마감 임박 미션 안내를 받을 수 없어요.',
+    ),
+    UserSetting.award_points_notification: (
+      title: '마일리지 푸시를 끄시겠어요?',
+      description: '소멸 예정 마일리지 안내를 받을 수 없어요.',
+    ),
+    UserSetting.stories_notification: (
+      title: '스토리 푸시를 끄시겠어요?',
+      description: '신규 스토리와 인기 스토리 알림을 받을 수 없어요.',
+    ),
+    UserSetting.notices: (
+      title: '공지사항 푸시를 끄시겠어요?',
+      description: '주요 공지와 업데이트 안내를 받을 수 없어요.',
+    ),
+  };
 
   late Map<UserSetting, bool> _settings;
   late Future<Map<UserSetting, bool>> _settingsFuture;
@@ -115,6 +143,114 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
         const SnackBar(content: Text('설정을 저장하지 못했습니다.')),
       );
     }
+  }
+
+  Future<void> _handleSettingChanged(UserSetting setting, bool value) async {
+    if (!value) {
+      final confirmed = await _confirmDisable(setting);
+      if (!confirmed) return;
+    }
+
+    await _updateSetting(setting, value);
+  }
+
+  Future<bool> _confirmDisable(UserSetting setting) async {
+    final message = _disableConfirmationMessages[setting];
+    if (message == null) return true;
+
+    final shouldDisable = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                child: Column(
+                  children: [
+                    Text(
+                      message.title,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontFamily: 'Noto Sans KR',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      message.description,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontFamily: 'Noto Sans KR',
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Colors.black.withValues(alpha: 0.12),
+              ),
+              SizedBox(
+                height: 68,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(),
+                        ),
+                        child: Text(
+                          '아니요',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontFamily: 'Noto Sans KR',
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: _confirmActionOrange,
+                          shape: const RoundedRectangleBorder(),
+                        ),
+                        child: Text(
+                          '예',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontFamily: 'Noto Sans KR',
+                            fontWeight: FontWeight.w600,
+                            color: _confirmActionOrange,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return shouldDisable ?? false;
   }
 
   void _handleAuthChanged() {
@@ -215,7 +351,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                                 .receive_marketing_information_consent] ??
                             true,
                         trackColor: _switchTrackGreen,
-                        onChanged: (value) => _updateSetting(
+                        onChanged: (value) => _handleSettingChanged(
                           UserSetting.receive_marketing_information_consent,
                           value,
                         ),
@@ -229,7 +365,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                                 .provide_personal_information_to_third_parties_consent] ??
                             true,
                         trackColor: _switchTrackGreen,
-                        onChanged: (value) => _updateSetting(
+                        onChanged: (value) => _handleSettingChanged(
                           UserSetting
                               .provide_personal_information_to_third_parties_consent,
                           value,
@@ -241,7 +377,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                         value:
                             settings[UserSetting.missions_notification] ?? true,
                         trackColor: _switchTrackGreen,
-                        onChanged: (value) => _updateSetting(
+                        onChanged: (value) => _handleSettingChanged(
                           UserSetting.missions_notification,
                           value,
                         ),
@@ -253,7 +389,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                             settings[UserSetting.award_points_notification] ??
                             true,
                         trackColor: _switchTrackGreen,
-                        onChanged: (value) => _updateSetting(
+                        onChanged: (value) => _handleSettingChanged(
                           UserSetting.award_points_notification,
                           value,
                         ),
@@ -264,7 +400,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                         value:
                             settings[UserSetting.stories_notification] ?? true,
                         trackColor: _switchTrackGreen,
-                        onChanged: (value) => _updateSetting(
+                        onChanged: (value) => _handleSettingChanged(
                           UserSetting.stories_notification,
                           value,
                         ),
@@ -275,7 +411,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                         value: settings[UserSetting.notices] ?? true,
                         trackColor: _switchTrackGreen,
                         onChanged: (value) =>
-                            _updateSetting(UserSetting.notices, value),
+                            _handleSettingChanged(UserSetting.notices, value),
                       ),
                       const SizedBox(height: 32),
                     ],

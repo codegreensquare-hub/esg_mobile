@@ -247,6 +247,7 @@ class GreenSquareRightDrawer extends StatelessWidget {
                           children: [
                             // Settings
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () async {
                                 await Navigator.of(context).maybePop();
                                 if (!context.mounted) return;
