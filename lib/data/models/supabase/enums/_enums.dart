@@ -13,8 +13,9 @@ export 'mission_type.dart';
 export 'product_material.dart';
 export 'product_sale_status.dart';
 export 'product_style.dart';
+export 'user_setting.dart';
 export 'user_type.dart';
 export 'vendor_admin_type.dart';
 
 /// Tag: v2
-/// Date: 2026-02-20 11:42:15.111369
+/// Date: 2026-03-10 15:21:09.806910
