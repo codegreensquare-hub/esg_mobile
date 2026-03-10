@@ -3,6 +3,7 @@ import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/privacy_policy.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/settings.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/terms.screen.dart';
+import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer_tile.widget.dart';
 import 'package:flutter/material.dart';
 
 class GreenSquareRightDrawer extends StatelessWidget {
@@ -18,36 +19,12 @@ class GreenSquareRightDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    const drawerTextColor = Color(0xFF3B3733);
     const bottomTextColor = Color(0xFF878583);
     const horizontalPadding = 24.0;
     const separatorColor = Color(0xFF000000);
     const separatorVerticalPadding = 6.0;
 
-    final destinations = greenSquareDrawerDestinations;
-    final postLogoutDestinations = greenSquareDrawerPostLogoutDestinations;
     final isLoggedIn = UserAuthService.instance.isLoggedIn;
-
-    ListTile buildTile({
-      required String label,
-      required VoidCallback onTap,
-    }) {
-      return ListTile(
-        dense: true,
-        minVerticalPadding: 4,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: horizontalPadding,
-        ),
-        title: Text(
-          label,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: drawerTextColor,
-          ),
-        ),
-        onTap: onTap,
-      );
-    }
 
     return Drawer(
       elevation: 16,
@@ -71,36 +48,131 @@ class GreenSquareRightDrawer extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  for (final destination in destinations)
-                    buildTile(
-                      label: destination.label,
-                      onTap: () async {
-                        await Navigator.of(context).maybePop();
-                        await onSelect(destination);
-                      },
+                  GreenSquareRightDrawerTile(
+                    label: "서비스 스토리",
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(greenSquareDrawerDestinations[0]);
+                    },
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: "콕(Cog)에 관하여",
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(greenSquareDrawerDestinations[1]);
+                    },
+                  ),
+                  // GreenSquareRightDrawerTile(
+                  //   label: greenSquareDrawerDestinations[2].label,
+                  //   onTap: () async {
+                  //     await Navigator.of(context).maybePop();
+                  //     await onSelect(greenSquareDrawerDestinations[2]);
+                  //   },
+                  // ),
+                  // GreenSquareRightDrawerTile(
+                  //   label: greenSquareDrawerDestinations[3].label,
+                  //   onTap: () async {
+                  //     await Navigator.of(context).maybePop();
+                  //     await onSelect(greenSquareDrawerDestinations[3]);
+                  //   },
+                  // ),
+                  GreenSquareRightDrawerTile(
+                    label: "공지사항",
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(greenSquareDrawerDestinations[4]);
+                    },
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerDestinations[5].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(greenSquareDrawerDestinations[5]);
+                    },
+                  ),
+                  // GreenSquareRightDrawerTile(
+                  //   label: greenSquareDrawerDestinations[6].label,
+                  //   onTap: () async {
+                  //     await Navigator.of(context).maybePop();
+                  //     await onSelect(greenSquareDrawerDestinations[6]);
+                  //   },
+                  // ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerDestinations[7].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(greenSquareDrawerDestinations[7]);
+                    },
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerDestinations[8].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(greenSquareDrawerDestinations[8]);
+                    },
+                  ),
+                  // GreenSquareRightDrawerTile(
+                  //   label: greenSquareDrawerDestinations[9].label,
+                  //   onTap: () async {
+                  //     await Navigator.of(context).maybePop();
+                  //     await onSelect(greenSquareDrawerDestinations[9]);
+                  //   },
+                  // ),
+                  // GreenSquareRightDrawerTile(
+                  //   label: greenSquareDrawerDestinations[10].label,
+                  //   onTap: () async {
+                  //     await Navigator.of(context).maybePop();
+                  //     await onSelect(greenSquareDrawerDestinations[10]);
+                  //   },
+                  // ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: separatorVerticalPadding,
                     ),
-                  if (isLoggedIn) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: separatorVerticalPadding,
-                      ),
-                      child: Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: separatorColor,
-                        indent: horizontalPadding,
-                        endIndent: horizontalPadding,
-                      ),
+                    child: Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: separatorColor,
+                      indent: horizontalPadding,
+                      endIndent: horizontalPadding,
                     ),
-                  ],
-                  for (final destination in postLogoutDestinations)
-                    buildTile(
-                      label: destination.label,
-                      onTap: () async {
-                        await Navigator.of(context).maybePop();
-                        await onSelect(destination);
-                      },
-                    ),
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerPostLogoutDestinations[0].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(
+                        greenSquareDrawerPostLogoutDestinations[0],
+                      );
+                    },
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerPostLogoutDestinations[1].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(
+                        greenSquareDrawerPostLogoutDestinations[1],
+                      );
+                    },
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerPostLogoutDestinations[2].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(
+                        greenSquareDrawerPostLogoutDestinations[2],
+                      );
+                    },
+                  ),
+                  GreenSquareRightDrawerTile(
+                    label: greenSquareDrawerPostLogoutDestinations[3].label,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await onSelect(
+                        greenSquareDrawerPostLogoutDestinations[3],
+                      );
+                    },
+                  ),
 
                   // Bottom section — scrolls with the list
                   Padding(
@@ -115,7 +187,7 @@ class GreenSquareRightDrawer extends StatelessWidget {
                       children: [
                         // Terms row — centered
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             GestureDetector(
                               onTap: () async {

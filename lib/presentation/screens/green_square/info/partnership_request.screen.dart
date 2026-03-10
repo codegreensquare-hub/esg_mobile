@@ -15,7 +15,15 @@ class _GreenSquarePartnershipRequestScreenState
   final _companyEmailController = TextEditingController();
   final _contactController = TextEditingController();
   final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  final _contentController = TextEditingController(
+    text:
+        '· 브랜드/회사명: \n'
+        '· 취급 제품 또는 서비스: \n'
+        '· 주요 판매 채널(온라인몰, 오프라인 등): \n'
+        '· 공식 홈페이지 또는 SNS: \n'
+        '· 입점 희망 이유: \n'
+        '· 기타 전달 사항: ',
+  );
 
   static const int _titleMaxLength = 20;
 
@@ -33,12 +41,13 @@ class _GreenSquarePartnershipRequestScreenState
     final theme = Theme.of(context);
 
     final appBarTheme = theme.appBarTheme.copyWith(
-      titleTextStyle: (theme.appBarTheme.titleTextStyle ??
-              theme.textTheme.titleMedium ??
-              const TextStyle())
-          .copyWith(
-        fontFamily: 'Noto Sans KR',
-      ),
+      titleTextStyle:
+          (theme.appBarTheme.titleTextStyle ??
+                  theme.textTheme.titleMedium ??
+                  const TextStyle())
+              .copyWith(
+                fontFamily: 'Noto Sans KR',
+              ),
     );
 
     final labelStyle = theme.textTheme.bodyMedium?.copyWith(
@@ -281,4 +290,3 @@ class _GreenSquarePartnershipRequestScreenState
     );
   }
 }
-

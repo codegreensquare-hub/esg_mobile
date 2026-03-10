@@ -9,15 +9,20 @@ class GreenSquareInfoPage extends StatelessWidget {
     required this.title,
     this.body,
     this.bodyBuilder,
+    this.appbarBackgroundColor = const Color.fromARGB(255, 255, 255, 255),
     this.backgroundColor,
-  }) : assert(body != null || bodyBuilder != null,
-            'Either body or bodyBuilder must be provided');
+  }) : assert(
+         body != null || bodyBuilder != null,
+         'Either body or bodyBuilder must be provided',
+       );
 
   final String title;
   final Widget? body;
+
   /// When set (with [backgroundColor]), content is built with a [Theme]
   /// that uses Noto Sans KR, so [Theme.of(context).textTheme] has the font.
   final Widget Function(BuildContext context)? bodyBuilder;
+  final Color appbarBackgroundColor;
   final Color? backgroundColor;
 
   @override
@@ -46,17 +51,16 @@ class GreenSquareInfoPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: appbarBackgroundColor ?? backgroundColor,
         foregroundColor: useLightStyle ? Colors.black87 : null,
         title: Text(
           title,
-          style: (useLightStyle ? textTheme : theme.textTheme)
-              .titleLarge
+          style: (useLightStyle ? textTheme : theme.textTheme).titleLarge
               ?.copyWith(
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Noto Sans KR',
-            color: useLightStyle ? Colors.black87 : null,
-          ),
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Noto Sans KR',
+                color: useLightStyle ? Colors.black87 : null,
+              ),
         ),
       ),
       body: bodyContent,

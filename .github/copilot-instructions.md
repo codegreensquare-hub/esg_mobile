@@ -32,6 +32,8 @@ In the problems tab of your IDE, ensure that there are no warnings or errors bef
 
 Each Dart file should ideally contain only one Widget class. This promotes better organization and makes it easier to locate and manage widgets within the codebase. If multiple widgets are needed, consider creating separate files for each widget to maintain clarity and modularity.
 
+Do not return a Widget from a helper method. Instead, create a new Widget class in a separate file if you need to reuse a widget across different parts of the application.
+
 ## Cached Network Images
 
 When displaying network images, always use cached network images to improve performance and reduce data usage. This helps in loading images faster and provides a better user experience.
