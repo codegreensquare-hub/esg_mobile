@@ -1,4 +1,8 @@
+import 'package:esg_mobile/core/constants/asset.dart';
+import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// App bar and intro text green.
 const _appBarGreen = Color(0xFF355148);
@@ -11,8 +15,6 @@ const _switchTrackGreen = Color(0xFF293F39);
 
 /// Light beige background for settings body.
 const _backgroundBeige = Color(0xFFF5F2EE);
-
-const _greenSquareLogoAsset = 'assets/images/screen/settings/green_square_logo.png';
 
 class GreenSquareSettingsScreen extends StatefulWidget {
   const GreenSquareSettingsScreen({super.key});
@@ -57,8 +59,13 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
               child: Column(
                 children: [
-                  Image.asset(
-                    _greenSquareLogoAsset,
+                  const SizedBox(height: 32),
+                  SvgPicture.network(
+                    getImageLink(
+                      bucket.asset,
+                      asset.greensquareLogo,
+                      folderPath: assetFolderPath[asset.greensquareLogo],
+                    ),
                     fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 32),
@@ -94,7 +101,7 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
             const SizedBox(height: 24),
             // Settings list
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.fromLTRB(24, 0, 12, 0),
               child: Column(
                 children: [
                   _SettingRow(
@@ -104,7 +111,6 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                     trackColor: _switchTrackGreen,
                     onChanged: (v) => setState(() => _marketing = v),
                   ),
-                  const SizedBox(height: 24),
                   _SettingRow(
                     title: '개인정보 제3자 제공 동의',
                     description:
@@ -113,7 +119,6 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                     trackColor: _switchTrackGreen,
                     onChanged: (v) => setState(() => _thirdPartyPrivacy = v),
                   ),
-                  const SizedBox(height: 24),
                   _SettingRow(
                     title: '미션',
                     description: '신규 미션 생성, 마감 임박 미션 안내 등',
@@ -121,7 +126,6 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                     trackColor: _switchTrackGreen,
                     onChanged: (v) => setState(() => _missions = v),
                   ),
-                  const SizedBox(height: 24),
                   _SettingRow(
                     title: '마일리지',
                     description: '적립 마일리지, 당월 소멸 마일리지 안내 등',
@@ -129,7 +133,6 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                     trackColor: _switchTrackGreen,
                     onChanged: (v) => setState(() => _mileage = v),
                   ),
-                  const SizedBox(height: 24),
                   _SettingRow(
                     title: '스토리',
                     description: '신규 스토리 생성 안내, 인기 스토리 알림 등',
@@ -137,7 +140,6 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                     trackColor: _switchTrackGreen,
                     onChanged: (v) => setState(() => _stories = v),
                   ),
-                  const SizedBox(height: 24),
                   _SettingRow(
                     title: '공지사항',
                     description: '주요 공지사항 안내, 앱 업데이트 안내 등',
@@ -178,54 +180,44 @@ class _SettingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: _textColor,
-                  fontFamily: _fontFamily,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                description,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: _textColor,
-                  height: 1.35,
-                  fontFamily: _fontFamily,
-                ),
-              ),
-            ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) return Colors.white;
+            return Colors.grey;
+          }),
+          trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.selected)) return trackColor;
+            return Colors.grey.withValues(alpha: 0.5);
+          }),
+        ),
+      ),
+      child: SwitchListTile(
+        value: value,
+        onChanged: onChanged,
+        contentPadding: EdgeInsets.fromLTRB(0, 6, 0, 6),
+        title: Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: _textColor,
+            fontFamily: _fontFamily,
           ),
         ),
-        const SizedBox(width: 16),
-        Theme(
-          data: Theme.of(context).copyWith(
-            switchTheme: SwitchThemeData(
-              thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.selected)) return Colors.white;
-                return Colors.grey;
-              }),
-              trackColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.selected)) return trackColor;
-                return Colors.grey.withValues(alpha: 0.5);
-              }),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            description,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w400,
+              color: _textColor,
+              height: 1.35,
+              fontFamily: _fontFamily,
             ),
           ),
-          child: Switch(
-            value: value,
-            onChanged: onChanged,
-          ),
         ),
-      ],
+      ),
     );
   }
 }

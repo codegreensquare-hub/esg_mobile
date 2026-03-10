@@ -1,4 +1,5 @@
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/green_square_attachment_button.widget.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 
@@ -115,7 +116,7 @@ class _GreenSquarePartnershipRequestScreenState
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: 'green@gmail.com',
+                    hintText: '메일 주소를 입력해 주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -137,7 +138,7 @@ class _GreenSquarePartnershipRequestScreenState
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: '01012345678',
+                    hintText: '연락처를 입력해 주세요.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -150,16 +151,7 @@ class _GreenSquarePartnershipRequestScreenState
                 ),
                 const SizedBox(height: 16),
                 // 제목
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('제목을 입력해 주세요. (20자 이내)', style: labelStyle),
-                    Text(
-                      '${_titleController.text.characters.length}/$_titleMaxLength',
-                      style: helperStyle,
-                    ),
-                  ],
-                ),
+                Text('제목을 입력해 주세요. (20자 이내)', style: labelStyle),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _titleController,
@@ -171,6 +163,22 @@ class _GreenSquarePartnershipRequestScreenState
                     filled: true,
                     fillColor: Colors.white,
                     hintText: '입점을 요청합니다.',
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Text(
+                          '(${_titleController.text.characters.length}/$_titleMaxLength)',
+                          style: labelStyle?.copyWith(
+                            color: const Color(0xFF878583),
+                          ),
+                        ),
+                      ),
+                    ),
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 0,
+                      minHeight: 0,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -185,19 +193,9 @@ class _GreenSquarePartnershipRequestScreenState
                 // 안내 텍스트 + 내용
                 Text(
                   '아래 내용을 보내주시면 빠른 확인에 도움이 됩니다.',
-                  style: helperStyle,
+                  style: labelStyle,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '· 브랜드/회사명\n'
-                  '· 취급 제품 또는 서비스\n'
-                  '· 주요 판매 채널(온라인몰, 오프라인 등)\n'
-                  '· 공식 홈페이지 또는 SNS\n'
-                  '· 입점 희망 이유\n'
-                  '· 기타 전달 사항',
-                  style: helperStyle,
-                ),
-                const SizedBox(height: 12),
                 TextField(
                   controller: _contentController,
                   maxLines: 6,
@@ -220,34 +218,8 @@ class _GreenSquarePartnershipRequestScreenState
                 // 첨부 파일
                 Text('첨부 파일', style: labelStyle),
                 const SizedBox(height: 8),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: implement file picker
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '파일 업로드',
-                          style: inputTextStyle,
-                        ),
-                        const Icon(
-                          Icons.upload_file,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
+                GreenSquareAttachmentButton(
+                  textStyle: inputTextStyle,
                 ),
                 const SizedBox(height: 32),
                 // 제출하기 버튼
@@ -281,6 +253,13 @@ class _GreenSquarePartnershipRequestScreenState
                   '(입점이 어려울 경우 별도의 회신이 없을 수 있습니다.)',
                   style: helperStyle,
                   textAlign: TextAlign.center,
+                ),
+                SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  bottom: true,
+                  child: const SizedBox(height: 16),
                 ),
               ],
             ),

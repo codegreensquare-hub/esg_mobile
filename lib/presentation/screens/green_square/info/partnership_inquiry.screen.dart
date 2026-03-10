@@ -1,4 +1,5 @@
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/green_square_attachment_button.widget.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 
@@ -178,7 +179,7 @@ class _GreenSquarePartnershipInquiryScreenState
                         widthFactor: 1,
                         child: Text(
                           '(${_titleController.text.characters.length}/$_titleMaxLength)',
-                          style: helperStyle?.copyWith(
+                          style: labelStyle?.copyWith(
                             color: const Color(0xFF878583),
                           ),
                         ),
@@ -226,37 +227,8 @@ class _GreenSquarePartnershipInquiryScreenState
                 // 첨부 파일
                 Text('첨부 파일', style: labelStyle),
                 const SizedBox(height: 8),
-                SizedBox(
-                  height: 48,
-                  child: Material(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    child: InkWell(
-                      onTap: () {
-                        // TODO: implement file picker
-                      },
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.attach_file,
-                              size: 20,
-                              color: Color(0xFF878583),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '파일을 업로드해 주세요.',
-                              style: inputTextStyle?.copyWith(
-                                color: const Color(0xFF878583),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                GreenSquareAttachmentButton(
+                  textStyle: inputTextStyle,
                 ),
                 const SizedBox(height: 32),
                 // 제출하기 버튼

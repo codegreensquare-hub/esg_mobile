@@ -1,4 +1,5 @@
 import 'package:esg_mobile/presentation/widgets/green_square/green_square_info_page.dart';
+import 'package:esg_mobile/presentation/widgets/green_square/green_square_attachment_button.widget.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 
@@ -46,12 +47,13 @@ class _GreenSquareMissionRequestScreenState
     final theme = Theme.of(context);
 
     final appBarTheme = theme.appBarTheme.copyWith(
-      titleTextStyle: (theme.appBarTheme.titleTextStyle ??
-              theme.textTheme.titleMedium ??
-              const TextStyle())
-          .copyWith(
-        fontFamily: 'Noto Sans KR',
-      ),
+      titleTextStyle:
+          (theme.appBarTheme.titleTextStyle ??
+                  theme.textTheme.titleMedium ??
+                  const TextStyle())
+              .copyWith(
+                fontFamily: 'Noto Sans KR',
+              ),
     );
 
     final labelStyle = theme.textTheme.bodyMedium?.copyWith(
@@ -154,16 +156,7 @@ class _GreenSquareMissionRequestScreenState
                 ),
                 const SizedBox(height: 16),
                 // 제목
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('제목을 입력해 주세요. (20자 이내) *', style: labelStyle),
-                    Text(
-                      '${_titleController.text.characters.length}/$_titleMaxLength',
-                      style: helperStyle,
-                    ),
-                  ],
-                ),
+                Text('제목을 입력해 주세요. (20자 이내) *', style: labelStyle),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _titleController,
@@ -175,6 +168,22 @@ class _GreenSquareMissionRequestScreenState
                     filled: true,
                     fillColor: Colors.white,
                     hintText: '미션을 요청합니다.',
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Text(
+                          '(${_titleController.text.characters.length}/$_titleMaxLength)',
+                          style: labelStyle?.copyWith(
+                            color: const Color(0xFF878583),
+                          ),
+                        ),
+                      ),
+                    ),
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 0,
+                      minHeight: 0,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: BorderSide.none,
@@ -205,6 +214,12 @@ class _GreenSquareMissionRequestScreenState
                       vertical: 12,
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Text('첨부 파일', style: labelStyle),
+                const SizedBox(height: 8),
+                GreenSquareAttachmentButton(
+                  textStyle: inputTextStyle,
                 ),
                 const SizedBox(height: 32),
                 // 제출하기 버튼
@@ -239,6 +254,13 @@ class _GreenSquareMissionRequestScreenState
                   style: helperStyle,
                   textAlign: TextAlign.center,
                 ),
+                SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  bottom: true,
+                  child: const SizedBox(height: 16),
+                ),
               ],
             ),
           ),
@@ -247,4 +269,3 @@ class _GreenSquareMissionRequestScreenState
     );
   }
 }
-
