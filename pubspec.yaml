@@ -46,6 +46,7 @@ flutter:
     - assets/images/icons/
     - assets/images/carousel/
     - assets/images/about/
+    - assets/images/award_points/
     - assets/images/screen/settings/
   fonts:
     - family: EB Garamond

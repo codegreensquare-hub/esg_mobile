@@ -194,12 +194,20 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
         child: CachedNetworkImage(
           imageUrl: imageUrl,
           fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            color: Colors.grey[400],
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+          errorWidget: (context, url, error) => Container(
+            color: Colors.grey[400],
+            child: const Center(child: Icon(Icons.image_not_supported)),
+          ),
         ),
       );
     }
 
     return Container(
-      color: Colors.grey[300],
+      color: Colors.grey[400],
     );
   }
 
@@ -212,11 +220,11 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     final badgeText = _bannerBadgeText();
     return Stack(
       children: [
-        // Bottom block: title, description, and points row (reduced bottom padding)
+        // Bottom block: title, description, and points row
         Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            padding: const EdgeInsets.all(20),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -229,7 +237,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
                         tag: 'green-square-mission-title-${widget.mission.id}',
                         child: Text(
                           widget.mission.title ?? 'No Title',
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -242,8 +250,9 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
                         tag: 'green-square-mission-text-${widget.mission.id}',
                         child: Text(
                           widget.mission.text ?? 'No Description',
-                          style: theme.textTheme.bodyMedium?.copyWith(
+                          style: theme.textTheme.bodyLarge?.copyWith(
                             color: Colors.white.withOpacity(0.9),
+                            fontSize: 15,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -261,30 +270,31 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
         // Top-left pill badge from mission data
         if (badgeText != null && badgeText.isNotEmpty)
           Positioned(
-            top: 12,
-            left: 12,
+            top: 20,
+            left: 20,
             child: _BannerBadge(label: badgeText),
           ),
       ],
     );
   }
 
-  /// C logo (circle) + points; aligned with title. Circle uses primary so it's visible on gradient.
+  /// C logo (reverse) + points; aligned with title. Reverse icon for visibility on gradient.
+  /// Uses local asset to avoid network load and crashes when scrolling.
   Widget _buildBannerPointsIndicator(
     ThemeData theme,
     ColorScheme cs,
     int? points,
   ) {
+    final path =
+        'assets/${assetFolderPath[asset.cMileageReverse]}/${asset.cMileageReverse}';
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        SvgPicture.asset(
+          path,
           width: 16,
           height: 16,
-          decoration: BoxDecoration(
-            color: cs.primary,
-            shape: BoxShape.circle,
-          ),
+          semanticsLabel: '포인트',
         ),
         const SizedBox(width: 4),
         Text(
