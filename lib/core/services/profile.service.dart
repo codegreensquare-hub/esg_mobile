@@ -141,7 +141,11 @@ class ProfileService {
 
     final selectedProfileId = _preferences?.getString(_selectedProfileIdKey);
 
-    await _client.from(_tableName).delete().inFilter('id', selectedIds);
+    await _client
+        .from(_tableName)
+        .update({'deleted_at': DateTime.now().toIso8601String()})
+        .eq('user', userId)
+        .inFilter('id', selectedIds);
 
     if (selectedProfileId != null && selectedIds.contains(selectedProfileId)) {
       await _preferences?.setString(
@@ -196,7 +200,8 @@ class ProfileService {
     final response = await _client
         .from(_tableName)
         .select('id, name, created_at')
-        .eq('user', userId);
+        .eq('user', userId)
+        .isFilter('deleted_at', null);
 
     return _normalizeProfileRows(response.whereType<Map<String, dynamic>>());
   }

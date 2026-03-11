@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:esg_mobile/core/enums/device.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
 import 'package:esg_mobile/core/services/profile.service.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/stamp.dart';
@@ -33,6 +35,8 @@ class AccountTab extends StatefulWidget {
 class _AccountTabState extends State<AccountTab> {
   static const _accountCacheKeyPrefix = 'green_square_account_cache';
 
+  StreamSubscription<void>? _participationSubmittedSubscription;
+
   String? userName;
   String? userId;
   double totalMileage = 0;
@@ -49,6 +53,10 @@ class _AccountTabState extends State<AccountTab> {
   @override
   void initState() {
     super.initState();
+    _participationSubmittedSubscription = MissionParticipationService
+        .instance
+        .participationSubmittedStream
+        .listen((_) => _handleParticipationSubmitted());
     final profileService = ProfileService.instance;
     userName =
         profileService.selectedProfileName ??
@@ -56,6 +64,12 @@ class _AccountTabState extends State<AccountTab> {
     activeProfileCount = profileService.cachedProfiles.length;
     _restoreCachedAccountData();
     _fetchAccountData();
+  }
+
+  @override
+  void dispose() {
+    _participationSubmittedSubscription?.cancel();
+    super.dispose();
   }
 
   String _accountCacheKey(String userId) => '$_accountCacheKeyPrefix:$userId';
@@ -353,6 +367,16 @@ class _AccountTabState extends State<AccountTab> {
     }
 
     await Future.wait([fetchActiveMissions(), fetchParticipations()]);
+  }
+
+  void _handleParticipationSubmitted() {
+    if (!mounted || !UserAuthService.instance.isLoggedIn) return;
+
+    setState(() {
+      isActiveMissionsLoading = true;
+      isParticipationsLoading = true;
+    });
+    _fetchAccountData();
   }
 
   void _openShippingAddressDialog() {

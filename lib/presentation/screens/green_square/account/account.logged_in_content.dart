@@ -335,7 +335,6 @@ class AccountLoggedInContent extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
               const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
@@ -514,11 +513,6 @@ class AccountLoggedInContent extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (isActiveMissionsLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 12),
-                        child: LinearProgressIndicator(),
-                      ),
                     if (activeMissions.isEmpty)
                       const Center(child: Text('현재 진행 중인 미션이 없습니다.'))
                     else
@@ -610,11 +604,6 @@ class AccountLoggedInContent extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (isParticipationsLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 12),
-                        child: LinearProgressIndicator(),
-                      ),
                     if (participations.isEmpty)
                       const Center(child: Text('참여 기록이 없습니다.'))
                     else

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/profile.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_participation.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_photo_animation_completion.dart';
@@ -36,10 +37,16 @@ class MissionParticipationService {
 
   static MissionParticipationService get instance => _instance;
 
+  final StreamController<void> _participationSubmittedController =
+      StreamController<void>.broadcast();
+
   final SupabaseClient _client;
   final ImagePicker _picker;
   final MissionParticipationTable _participationTable;
   final MissionPhotoAnimationCompletionTable _completionTable;
+
+  Stream<void> get participationSubmittedStream =>
+      _participationSubmittedController.stream;
 
   Future<void> startParticipationFlow({
     required BuildContext context,
@@ -105,6 +112,7 @@ class MissionParticipationService {
         mission,
         photo: uploadedPhoto,
       );
+      _participationSubmittedController.add(null);
       onSuccess?.call();
       final completionPhotos = await _fetchCompletionPhotos(mission.id);
 
@@ -198,6 +206,12 @@ class MissionParticipationService {
       throw const MissionParticipationException('로그인이 필요한 기능입니다.');
     }
 
+    final profileService = ProfileService.instance;
+    await profileService.initialize();
+    final profileUsed = profileService.isMainProfileSelected
+        ? null
+        : profileService.selectedProfileId;
+
     await _client
         .from(_participationTable.tableName)
         .insert({
@@ -206,6 +220,7 @@ class MissionParticipationService {
           MissionParticipationRow.photoBucketField: photo.bucket,
           MissionParticipationRow.photoFolderPathField: photo.folderPath,
           MissionParticipationRow.photoFileNameField: photo.fileName,
+          MissionParticipationRow.profileUsedField: profileUsed,
         })
         .select()
         .single();
