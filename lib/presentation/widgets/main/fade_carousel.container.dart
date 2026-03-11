@@ -18,6 +18,7 @@ class FadeCarouselContainer extends StatefulWidget {
     this.fadeDuration = const Duration(milliseconds: 900),
     this.curve = Curves.easeInOut,
     this.onIndexChanged,
+    this.forcedIndex,
     this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
     this.overlayColor,
@@ -45,6 +46,7 @@ class FadeCarouselContainer extends StatefulWidget {
     Duration fadeDuration = const Duration(milliseconds: 900),
     Curve curve = Curves.easeInOut,
     void Function(int index)? onIndexChanged,
+    int? forcedIndex,
     BoxFit fit = BoxFit.cover,
     Alignment alignment = Alignment.center,
     Color? overlayColor,
@@ -68,6 +70,7 @@ class FadeCarouselContainer extends StatefulWidget {
     fadeDuration: fadeDuration,
     curve: curve,
     onIndexChanged: onIndexChanged,
+    forcedIndex: forcedIndex,
     fit: fit,
     alignment: alignment,
     overlayColor: overlayColor,
@@ -95,6 +98,7 @@ class FadeCarouselContainer extends StatefulWidget {
     Duration fadeDuration = const Duration(milliseconds: 900),
     Curve curve = Curves.easeInOut,
     void Function(int index)? onIndexChanged,
+    int? forcedIndex,
     BoxFit fit = BoxFit.cover,
     Alignment alignment = Alignment.center,
     Color? overlayColor,
@@ -120,6 +124,7 @@ class FadeCarouselContainer extends StatefulWidget {
     fadeDuration: fadeDuration,
     curve: curve,
     onIndexChanged: onIndexChanged,
+    forcedIndex: forcedIndex,
     fit: fit,
     alignment: alignment,
     overlayColor: overlayColor,
@@ -145,6 +150,9 @@ class FadeCarouselContainer extends StatefulWidget {
   final Duration fadeDuration;
   final Curve curve;
   final void Function(int index)? onIndexChanged;
+  /// When provided, the carousel will jump to this index (modulo [images.length])
+  /// whenever the value changes and images are available.
+  final int? forcedIndex;
   final BoxFit fit;
   final Alignment alignment;
   final Color? overlayColor; // optional color filter / tint mask
@@ -254,6 +262,35 @@ class _FadeCarouselContainerState extends State<FadeCarouselContainer>
       } else if (widget.images.length > 1) {
         // Interval changed and we now have >1 images but no timer yet (e.g. initial list was empty).
         _startTimer();
+      }
+    }
+
+    // External index change (e.g. from tappable indicators). We must not call
+    // setState synchronously inside didUpdateWidget, so schedule it
+    // post‑frame instead.
+    if (widget.forcedIndex != null &&
+        oldWidget.forcedIndex != widget.forcedIndex &&
+        widget.images.isNotEmpty) {
+      final int newIndex =
+          widget.forcedIndex!.clamp(0, widget.images.length - 1);
+      if (newIndex != _index) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() {
+            _prevImage = _currentImage;
+            _index = newIndex;
+            _currentImage = widget.images[_index];
+            _fading = true;
+          });
+          widget.onIndexChanged?.call(_index);
+          Future.delayed(widget.fadeDuration, () {
+            if (!mounted) return;
+            setState(() => _fading = false);
+          });
+          if (widget.images.length > 1) {
+            _startTimer();
+          }
+        });
       }
     }
   }

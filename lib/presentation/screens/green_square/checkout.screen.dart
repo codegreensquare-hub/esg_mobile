@@ -1,3 +1,4 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -871,12 +872,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      decoration: const BoxDecoration(
-                        color: _sectionDivider,
-                      ),
-                      child: Center(
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          backgroundColor: _sectionDivider,
+                          foregroundColor: cs.onSurface,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
                         child: Text(
                           '상품합계 ${formatter.format(productTotal.toInt())}원 - ${formatter.format(mileageUsed.toInt())}원 = ${formatter.format((productTotal - mileageUsed).toInt())}원',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -1074,53 +1083,47 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   /// Padding between section label and divider (reduced for tighter spacing).
   static const double _sectionLabelBottomPadding = 8;
 
-  /// Pill-shaped "G R E E N | S Q U A R E" title matching [CodeGreenTopHeader] toggle look (GREEN selected).
-  /// Reference: white border, left segment dark green + white text, thin white vertical divider, right segment white + dark text.
+  /// Pill-shaped "G R E E N | S Q U A R E" title — uses the same [AnimatedToggleSwitch]
+  /// as [CodeGreenTopHeader] so the rendering is pixel-identical (static, GREEN selected).
   Widget _buildGreenSquareSwitchTitle(ThemeData theme, ColorScheme cs) {
-    return Container(
-      height: 32,
+    return SizedBox(
       width: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: cs.onPrimary, width: 2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
+      child: IgnorePointer(
+        child: AnimatedToggleSwitch<bool>.dual(
+          current: false,
+          first: false,
+          second: true,
+          customIconBuilder: (context, local, global) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              child: Text(
+                "  G  R  E  E  N  ",
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: cs.onPrimary,
+                  fontSize: 12,
+                ),
+              ),
+            );
+          },
+          textBuilder: (value) {
+            return Text(
+              'S  Q  U  A  R  E',
+              style: theme.textTheme.headlineSmall?.copyWith(
                 color: cs.primary,
-                alignment: Alignment.center,
-                child: Text(
-                  '  G  R  E  E  N  ',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontFamily: _fontFamily,
-                    color: cs.onPrimary,
-                    fontSize: 12,
-                  ),
-                ),
+                fontSize: 12,
               ),
-            ),
-            Container(
-              width: 2,
-              color: cs.onPrimary,
-            ),
-            Expanded(
-              child: Container(
-                color: cs.onPrimary,
-                alignment: Alignment.center,
-                child: Text(
-                  'S  Q  U  A  R  E',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontFamily: _fontFamily,
-                    color: cs.primary,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-          ],
+            );
+          },
+          borderWidth: 2.0,
+          indicatorTransition: ForegroundIndicatorTransition.fading(),
+          style: ToggleStyle(
+            borderRadius: BorderRadius.circular(32.0),
+            borderColor: cs.onPrimary,
+            indicatorColor: cs.primary,
+          ),
+          height: 32,
+          indicatorSize: const Size.fromWidth(2000),
+          onChanged: (_) {},
         ),
       ),
     );

@@ -13,18 +13,14 @@ class CurationSectionAll extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          'All Collections',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            'Browse every curated drop from CodeGreen designers.',
-            style: theme.textTheme.bodyLarge,
+            '소싱이나 협업으로 만든 가방에 \ncode green 의 가치와 솔루션을 추가한 라인입니다.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF979797),
+            ),
             textAlign: TextAlign.center,
           ),
         ),

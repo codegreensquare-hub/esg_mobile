@@ -95,16 +95,27 @@ class _AutoImageBannerCarouselState extends State<AutoImageBannerCarousel> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(imagePaths.length, (index) {
                     final isActive = index == _currentIndex;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: isActive ? 10 : 8,
-                      height: isActive ? 10 : 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isActive
-                            ? const Color(0xFF000000)
-                            : const Color(0xFFC7C7CC),
+                    return GestureDetector(
+                      onTap: () {
+                        final target =
+                            _initialPage + index; // Align with infinite pager
+                        _pageController.animateToPage(
+                          target,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: isActive ? 10 : 8,
+                        height: isActive ? 10 : 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isActive
+                              ? const Color(0xFF000000)
+                              : const Color(0xFFC7C7CC),
+                        ),
                       ),
                     );
                   }),

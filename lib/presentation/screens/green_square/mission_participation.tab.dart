@@ -74,16 +74,20 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 16),
-        const Text('🌿 친환경 미션인증이란?'),
+        const SizedBox(height: 24),
+        const Text(
+          '🌿 친환경 미션인증이란?',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         Container(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
           constraints: const BoxConstraints(
             maxWidth: 400,
           ),
           child: const Text(
-            '일상 속에서 할 수 있는 친환경 활동들을 사진으로 남겨주세요.  환경을 지키면 마일리지로 돌아오는 즐거움,  바로 확인해 보세요! ',
+            '일상 속에서 할 수 있는 친환경 활동들을\n사진으로 남겨주세요.\n환경을 지키면 마일리지로 돌아오는 즐거움,\n바로 확인해 보세요!',
             textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.w300),
           ),
         ),
         const SizedBox(height: 16),
@@ -97,29 +101,80 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            decoration: BoxDecoration(
-              color: const Color(0xffe0dfde),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '오늘 미션참여 가능 횟수 $todayParticipationCount/$MAX_PARTICIPATION',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE9E7E5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '오늘 미션참여 가능 횟수 $todayParticipationCount/$MAX_PARTICIPATION',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w400),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style.copyWith(
+                          fontWeight: FontWeight.w300,
+                          color: const Color(0xFF3B3733),
+                        ),
+                        children: [
+                          const TextSpan(
+                            text: 'Level.3',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF3B3733),
+                            ),
+                          ),
+                          const TextSpan(
+                            text: ' 혜택으로',
+                            style: TextStyle(color: Color(0xFF3B3733)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style.copyWith(
+                          fontWeight: FontWeight.w300,
+                          color: const Color(0xFF3B3733),
+                        ),
+                        children: [
+                          const TextSpan(
+                            text: '20마일리지',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF3B3733),
+                            ),
+                          ),
+                          const TextSpan(
+                            text: '가 추가로 쌓여요!',
+                            style: TextStyle(color: Color(0xFF3B3733)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         // Current Missions
         if (currentMissions.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              '현재 미션',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

@@ -197,18 +197,14 @@ class _OriginalSectionAll extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          'All Products',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            'Browse every product from CodeGreen designers.',
-            style: theme.textTheme.bodyLarge,
+            '기획, 디자인, 생산까지 모든 과정이 code green 에 의한 제품들입니다.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF979797),
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -234,16 +230,16 @@ class _OriginalSectionBest extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          'Best Sellers',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            '기획, 디자인, 생산까지 모든 과정이 code green 에 의한 제품들입니다.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF979797),
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Community favorites refreshed weekly.',
-          style: theme.textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
         CurationShopProductFetch(
@@ -277,16 +273,16 @@ class _OriginalSectionStyle extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Shop by Style',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              '기획, 디자인, 생산까지 모든 과정이 code green 에 의한 제품들입니다.',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF979797),
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Find totes, cross bags, and more by vibe.',
-            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
           Center(
@@ -364,16 +360,16 @@ class _OriginalSectionType extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Shop by Type',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              '기획, 디자인, 생산까지 모든 과정이 code green 에 의한 제품들입니다.',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF979797),
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Filter by material sources and sustainability type.',
-            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
           Center(

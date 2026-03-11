@@ -175,7 +175,7 @@ class CodeGreenLeftDrawer extends StatelessWidget {
                                 (sub) => ListTile(
                                   dense: true,
                                   title: Text(
-                                    sub,
+                                    _toTitleCase(sub),
                                     style: theme.textTheme.bodyMedium,
                                   ),
                                   onTap: () {
@@ -243,4 +243,12 @@ class CodeGreenLeftDrawer extends StatelessWidget {
       ),
     );
   }
+}
+
+String _toTitleCase(String id) {
+  if (id.isEmpty) return id;
+  final parts = id.split('_').where((p) => p.isNotEmpty);
+  return parts
+      .map((p) => p[0].toUpperCase() + (p.length > 1 ? p.substring(1) : ''))
+      .join(' ');
 }

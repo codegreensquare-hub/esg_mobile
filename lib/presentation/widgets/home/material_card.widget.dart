@@ -5,6 +5,7 @@ class MaterialCard extends StatelessWidget {
   final String imagePath;
   final String koreanTitle;
   final String englishTitle;
+  final String description;
   final String buttonText;
   final VoidCallback? onButtonPressed;
 
@@ -13,6 +14,7 @@ class MaterialCard extends StatelessWidget {
     required this.imagePath,
     required this.koreanTitle,
     required this.englishTitle,
+    required this.description,
     required this.buttonText,
     this.onButtonPressed,
   });
@@ -57,6 +59,18 @@ class MaterialCard extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 22,
                       fontFamily: 'EB Garamond',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    description,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 24),

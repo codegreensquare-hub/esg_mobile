@@ -25,16 +25,16 @@ class CurationSectionStyle extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Shop by Style',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              '소싱이나 협업으로 만든 가방에 \ncode green 의 가치와 솔루션을 추가한 라인입니다.',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF979797),
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Find totes, cross bags, and more by vibe.',
-            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
           Center(
