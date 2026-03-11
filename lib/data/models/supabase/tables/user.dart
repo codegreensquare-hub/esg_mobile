@@ -45,6 +45,7 @@ class UserRow extends SupabaseDataRow {
     String? photoFileName,
     String? department,
     bool? isEmployee,
+    String? subDepartment,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -76,6 +77,8 @@ class UserRow extends SupabaseDataRow {
            'photo_file_name': supaSerialize(photoFileName),
          if (department != null) 'department': supaSerialize(department),
          if (isEmployee != null) 'is_employee': supaSerialize(isEmployee),
+         if (subDepartment != null)
+           'sub_department': supaSerialize(subDepartment),
        });
 
   /// User Row
@@ -257,6 +260,14 @@ class UserRow extends SupabaseDataRow {
   bool get isEmployee => getField<bool>(isEmployeeField, defaultValue: true)!;
   set isEmployee(bool value) => setField<bool>(isEmployeeField, value);
 
+  /// Sub Department field name
+  static const String subDepartmentField = 'sub_department';
+
+  /// Sub Department
+  String? get subDepartment => getField<String>(subDepartmentField);
+  set subDepartment(String? value) =>
+      setField<String>(subDepartmentField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -281,6 +292,7 @@ class UserRow extends SupabaseDataRow {
     String? photoFileName,
     String? department,
     bool? isEmployee,
+    String? subDepartment,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -311,8 +323,9 @@ class UserRow extends SupabaseDataRow {
     'photo_file_name': supaSerialize(photoFileName) ?? data['photo_file_name'],
     'department': supaSerialize(department) ?? data['department'],
     'is_employee': supaSerialize(isEmployee) ?? data['is_employee'],
+    'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-11 13:30:59.688732
+/// Date: 2026-03-11 15:32:51.732153

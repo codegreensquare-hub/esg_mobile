@@ -73,6 +73,7 @@ export 'story_photo.dart';
 export 'story_related_mission.dart';
 export 'story_related_product.dart';
 export 'story_tag.dart';
+export 'sub_department.dart';
 export 'trigger_event_log.dart';
 export 'user.dart';
 export 'user_organization.dart';
@@ -82,4 +83,4 @@ export 'user_settings.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-03-11 13:30:59.691102
+/// Date: 2026-03-11 15:32:51.734630

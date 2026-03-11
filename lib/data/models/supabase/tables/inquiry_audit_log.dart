@@ -152,4 +152,4 @@ class InquiryAuditLogRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-11 13:30:59.650127
+/// Date: 2026-03-11 15:32:51.705512
