@@ -43,6 +43,7 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
 
   String get _mainProfileName => UserAuthService.instance.displayName;
   int get _profileCount => _profiles.length + 1;
+  String get _nextProfilePlaceholder => '프로필 ${_profileCount + 1}';
   bool get _canAddProfile =>
       _profiles.length < ProfileService.maxCustomProfiles;
 
@@ -201,7 +202,7 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
                         onChanged: (_) => setState(() {}),
                         onSubmitted: (_) => _handleCreateProfile(),
                         decoration: InputDecoration(
-                          hintText: '프로필 4',
+                          hintText: _nextProfilePlaceholder,
                           filled: true,
                           fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(

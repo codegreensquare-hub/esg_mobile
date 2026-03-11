@@ -27,6 +27,12 @@ class ProfileService {
   List<String> get profiles => List.unmodifiable(_profiles);
   int? get selectedProfileIndex => _selectedProfileIndex;
   bool get isMainProfileSelected => _isMainProfileSelected;
+  String? get selectedProfileId {
+    final index = _selectedProfileIndex;
+    if (index == null || index < 0 || index >= _profileIds.length) return null;
+    return _profileIds[index];
+  }
+
   List<String> get cachedProfiles => List.unmodifiable(_cachedProfiles);
   int? get cachedSelectedProfileIndex => _cachedSelectedProfileIndex;
   bool get cachedIsMainProfileSelected => _cachedIsMainProfileSelected;

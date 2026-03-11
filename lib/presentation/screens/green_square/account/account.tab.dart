@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:esg_mobile/core/enums/device.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/profile.service.dart';
@@ -18,6 +20,7 @@ import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.
 import 'package:esg_mobile/presentation/screens/green_square/wishlisted_products.dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AccountTab extends StatefulWidget {
@@ -28,12 +31,16 @@ class AccountTab extends StatefulWidget {
 }
 
 class _AccountTabState extends State<AccountTab> {
+  static const _accountCacheKeyPrefix = 'green_square_account_cache';
+
   String? userName;
   String? userId;
   double totalMileage = 0;
   List<ActiveMission> activeMissions = [];
   List<Participation> participations = [];
-  bool isLoading = true;
+  bool isSummaryLoading = true;
+  bool isActiveMissionsLoading = true;
+  bool isParticipationsLoading = true;
   String? companyName;
   bool? isEmployee;
   String? departmentName;
@@ -42,188 +49,310 @@ class _AccountTabState extends State<AccountTab> {
   @override
   void initState() {
     super.initState();
+    final profileService = ProfileService.instance;
+    userName =
+        profileService.selectedProfileName ??
+        UserAuthService.instance.displayName;
+    activeProfileCount = profileService.cachedProfiles.length;
+    _restoreCachedAccountData();
     _fetchAccountData();
   }
 
-  Future<void> _fetchAccountData() async {
+  String _accountCacheKey(String userId) => '$_accountCacheKeyPrefix:$userId';
+
+  Future<void> _restoreCachedAccountData() async {
+    final user = UserAuthService.instance.currentUser;
+    if (user == null) return;
+
     try {
-      final user = UserAuthService.instance.currentUser;
-      if (user == null) {
-        setState(() => isLoading = false);
-        return;
-      }
+      final preferences = await SharedPreferences.getInstance();
+      final rawCache = preferences.getString(_accountCacheKey(user.id));
+      if (rawCache == null) return;
 
-      userId = user.id;
+      final cache = _AccountTabCache.fromJson(
+        jsonDecode(rawCache) as Map<String, dynamic>,
+      );
 
-      final profileService = ProfileService.instance;
-        await profileService.refresh();
-      activeProfileCount = profileService.profiles.length;
-      userName =
-          profileService.selectedProfileName ??
-          UserAuthService.instance.displayName;
+      if (!mounted) return;
+      setState(() {
+        userId = user.id;
+        userName = cache.userName;
+        activeProfileCount = cache.activeProfileCount;
+        totalMileage = cache.totalMileage;
+        companyName = cache.companyName;
+        isEmployee = cache.isEmployee;
+        departmentName = cache.departmentName;
+        activeMissions = cache.activeMissions;
+        participations = cache.participations;
+      });
+    } catch (error) {
+      debugPrint('Error restoring account cache: $error');
+    }
+  }
 
-      final client = Supabase.instance.client;
+  Future<void> _persistAccountCache() async {
+    final currentUserId = userId;
+    if (currentUserId == null) return;
 
-      // Fetch user company, is_employee, department
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      final cache = _AccountTabCache(
+        userName: userName ?? UserAuthService.instance.displayName,
+        activeProfileCount: activeProfileCount,
+        totalMileage: totalMileage,
+        activeMissions: activeMissions,
+        participations: participations,
+        companyName: companyName,
+        isEmployee: isEmployee,
+        departmentName: departmentName,
+      );
+
+      await preferences.setString(
+        _accountCacheKey(currentUserId),
+        jsonEncode(cache.toJson()),
+      );
+    } catch (error) {
+      debugPrint('Error persisting account cache: $error');
+    }
+  }
+
+  Future<void> _fetchAccountData() async {
+    final user = UserAuthService.instance.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      setState(() {
+        userId = null;
+        userName = null;
+        totalMileage = 0;
+        activeMissions = [];
+        participations = [];
+        companyName = null;
+        isEmployee = null;
+        departmentName = null;
+        activeProfileCount = 0;
+        isSummaryLoading = false;
+        isActiveMissionsLoading = false;
+        isParticipationsLoading = false;
+      });
+      return;
+    }
+
+    userId = user.id;
+
+    final profileService = ProfileService.instance;
+    await profileService.refresh();
+    final resolvedUserName =
+        profileService.selectedProfileName ??
+        UserAuthService.instance.displayName;
+    final resolvedProfileCount = profileService.profiles.length;
+    final selectedProfileId = profileService.selectedProfileId;
+    final isMainProfile =
+        profileService.isMainProfileSelected || selectedProfileId == null;
+
+    if (!mounted) return;
+    setState(() {
+      userName = resolvedUserName;
+      activeProfileCount = resolvedProfileCount;
+      isSummaryLoading = true;
+      isActiveMissionsLoading = true;
+      isParticipationsLoading = true;
+    });
+
+    final client = Supabase.instance.client;
+
+    try {
       final userRow = await client
           .from('user')
           .select('company, is_employee, department')
           .eq('id', user.id)
           .single();
-      final companyId = userRow['company'] as String?;
-      isEmployee = userRow['is_employee'] as bool?;
-      final departmentId = userRow['department'] as String?;
-      if (companyId != null) {
-        final companyRow = await client
-            .from('company')
-            .select('name')
-            .eq('id', companyId)
-            .single();
-        companyName = companyRow['name'] as String?;
-      } else {
-        companyName = null;
-      }
-      if (departmentId != null) {
-        final departmentRow = await client
-            .from('department')
-            .select('name')
-            .eq('id', departmentId)
-            .single();
-        departmentName = departmentRow['name'] as String?;
-      } else {
-        departmentName = null;
-      }
-
-      // Fetch total mileage from award_points balance
       final pointsRow = await client
           .from(AwardPointsTable().tableName)
           .select(AwardPointsRow.pointsField)
           .eq(AwardPointsRow.userField, user.id)
           .maybeSingle();
 
-      totalMileage =
+      final companyId = userRow['company'] as String?;
+      final departmentId = userRow['department'] as String?;
+      final resolvedCompanyName = companyId != null
+          ? (await client
+                    .from('company')
+                    .select('name')
+                    .eq('id', companyId)
+                    .single())['name']
+                as String?
+          : null;
+      final resolvedDepartmentName = departmentId != null
+          ? (await client
+                    .from('department')
+                    .select('name')
+                    .eq('id', departmentId)
+                    .single())['name']
+                as String?
+          : null;
+      final resolvedMileage =
           (pointsRow?[AwardPointsRow.pointsField] as num?)?.toDouble() ?? 0;
 
-      // Fetch all active missions
-      final now = DateTime.now().toIso8601String().split('T')[0];
-      final missionResponse = await client
-          .from('mission')
-          .select(
-            'id, title, award_points, stamp(bucket, folder_path, file_name)',
-          )
-          .eq('is_published', true)
-          .eq('publicity', 'public')
-          .lte('start_active_date', now)
-          .gte('last_active_date', now)
-          .order('order');
-
-      final missionIds = missionResponse.map((m) => m['id'] as String).toList();
-
-      // Fetch earned points for all missions in one query
-      final earnedResponse = missionIds.isNotEmpty
-          ? await client
-                .from('mission_participation')
-                .select('id, award_points, mission')
-                .eq('participated_by', user.id)
-                .filter('mission', 'in', missionIds)
-          : [];
-
-      final earnedMap = <String, int>{};
-      for (final row in earnedResponse) {
-        final mid = row['mission'] as String?;
-        final points = (row?['award_points'] ?? 0) as int;
-        if (mid != null) {
-          earnedMap[mid] = (earnedMap[mid] ?? 0) + points;
-        }
+      if (!mounted) return;
+      setState(() {
+        companyName = resolvedCompanyName;
+        isEmployee = userRow['is_employee'] as bool?;
+        departmentName = resolvedDepartmentName;
+        totalMileage = resolvedMileage;
+        isSummaryLoading = false;
+      });
+      await _persistAccountCache();
+    } catch (error) {
+      debugPrint('Error fetching account summary: $error');
+      if (mounted) {
+        setState(() => isSummaryLoading = false);
       }
-
-      // Build active missions
-      final List<ActiveMission> missionsWithPoints = [];
-      for (final missionData in missionResponse) {
-        final missionId = missionData['id'] as String;
-        final title = missionData['title'] as String?;
-        final awardPoints = missionData['award_points'] as int?;
-        final earned = earnedMap[missionId] ?? 0;
-
-        final stampData = missionData['stamp'] as Map<String, dynamic>?;
-        final stamp = stampData != null ? Stamp.fromJson(stampData) : null;
-
-        missionsWithPoints.add(
-          ActiveMission(
-            id: missionId,
-            title: title,
-            awardPoints: awardPoints,
-            earned: earned,
-            stamp: stamp,
-          ),
-        );
-      }
-
-      activeMissions = missionsWithPoints;
-
-      // Fetch user's participations with mission details
-      final participationsResponse = await client
-          .from(MissionParticipationTable().tableName)
-          .select(
-            'id, mission(title, stamp(bucket, folder_path, file_name)), created_at, approved_at, rejected_at, rejected_by, rejection_reason, photo_bucket, photo_folder_path, photo_file_name',
-          )
-          .eq(MissionParticipationRow.participatedByField, user.id)
-          .order('created_at', ascending: false);
-
-      participations = participationsResponse.map((p) {
-        final approvedAt = p['approved_at'];
-        final rejectedBy = p['rejected_by'];
-        final rejectionReason = p['rejection_reason'] as String?;
-        final status = approvedAt != null
-            ? 'approved'
-            : (rejectedBy != null || rejectionReason != null)
-            ? 'rejected'
-            : 'pending';
-        final bucket = p['photo_bucket'] as String?;
-        final folder = p['photo_folder_path'] as String?;
-        final fileName = p['photo_file_name'] as String?;
-        String? photoUrl;
-        if (bucket != null && fileName != null) {
-          final path = folder != null && folder.isNotEmpty
-              ? '$folder/$fileName'
-              : fileName;
-          photoUrl = Supabase.instance.client.storage
-              .from(bucket)
-              .getPublicUrl(path);
-        }
-        final missionData = p['mission'] as Map<String, dynamic>?;
-        String? stampUrl;
-        if (missionData != null) {
-          final stampData = missionData['stamp'] as Map<String, dynamic>?;
-          if (stampData != null) {
-            final bucket = stampData['bucket'] as String?;
-            final folder = stampData['folder_path'] as String?;
-            final fileName = stampData['file_name'] as String?;
-            if (bucket != null && fileName != null) {
-              final path = folder != null && folder.isNotEmpty
-                  ? '$folder/$fileName'
-                  : fileName;
-              stampUrl = Supabase.instance.client.storage
-                  .from(bucket)
-                  .getPublicUrl(path);
-            }
-          }
-        }
-        return Participation(
-          id: p['id'] as String,
-          missionTitle: missionData?['title'] as String? ?? '미션',
-          status: status,
-          createdAt: DateTime.parse(p['created_at'] as String),
-          photoUrl: photoUrl,
-          rejectionReason: rejectionReason,
-          stampUrl: stampUrl,
-        );
-      }).toList();
-    } catch (e) {
-      debugPrint('Error fetching account data: $e');
     }
-    if (!mounted) return;
-    setState(() => isLoading = false);
+
+    final now = DateTime.now().toIso8601String().split('T')[0];
+
+    Future<void> fetchActiveMissions() async {
+      try {
+        final missionResponse = await client
+            .from('mission')
+            .select(
+              'id, title, award_points, stamp(bucket, folder_path, file_name)',
+            )
+            .eq('is_published', true)
+            .eq('publicity', 'public')
+            .lte('start_active_date', now)
+            .gte('last_active_date', now)
+            .order('order');
+
+        final missionIds = missionResponse
+            .map((mission) => mission['id'] as String)
+            .toList();
+        final earnedResponse = missionIds.isEmpty
+            ? <dynamic>[]
+            : await (() {
+                final query = client
+                    .from('mission_participation')
+                    .select('id, award_points, mission')
+                    .eq('participated_by', user.id)
+                    .filter('mission', 'in', missionIds);
+
+                return isMainProfile
+                    ? query.isFilter('profile_used', null)
+                    : query.eq('profile_used', selectedProfileId);
+              })();
+
+        final earnedMap = earnedResponse.fold<Map<String, int>>({}, (map, row) {
+          final missionId = row['mission'] as String?;
+          if (missionId == null) return map;
+
+          map[missionId] =
+              (map[missionId] ?? 0) + ((row['award_points'] ?? 0) as int);
+          return map;
+        });
+
+        final resolvedActiveMissions = missionResponse.map((missionData) {
+          final stampData = missionData['stamp'] as Map<String, dynamic>?;
+
+          return ActiveMission(
+            id: missionData['id'] as String,
+            title: missionData['title'] as String?,
+            awardPoints: missionData['award_points'] as int?,
+            earned: earnedMap[missionData['id'] as String] ?? 0,
+            stamp: stampData != null ? Stamp.fromJson(stampData) : null,
+          );
+        }).toList();
+
+        if (!mounted) return;
+        setState(() {
+          activeMissions = resolvedActiveMissions;
+          isActiveMissionsLoading = false;
+        });
+        await _persistAccountCache();
+      } catch (error) {
+        debugPrint('Error fetching active missions: $error');
+        if (mounted) {
+          setState(() => isActiveMissionsLoading = false);
+        }
+      }
+    }
+
+    Future<void> fetchParticipations() async {
+      try {
+        final participationsQuery = client
+            .from(MissionParticipationTable().tableName)
+            .select(
+              'id, mission(title, stamp(bucket, folder_path, file_name)), created_at, approved_at, rejected_at, rejected_by, rejection_reason, photo_bucket, photo_folder_path, photo_file_name',
+            )
+            .eq(MissionParticipationRow.participatedByField, user.id);
+
+        final participationsResponse =
+            await (isMainProfile
+                    ? participationsQuery.isFilter('profile_used', null)
+                    : participationsQuery.eq('profile_used', selectedProfileId))
+                .order('created_at', ascending: false);
+
+        final resolvedParticipations = participationsResponse.map((row) {
+          final approvedAt = row['approved_at'];
+          final rejectedBy = row['rejected_by'];
+          final rejectionReason = row['rejection_reason'] as String?;
+          final status = approvedAt != null
+              ? 'approved'
+              : (rejectedBy != null || rejectionReason != null)
+              ? 'rejected'
+              : 'pending';
+          final bucket = row['photo_bucket'] as String?;
+          final folder = row['photo_folder_path'] as String?;
+          final fileName = row['photo_file_name'] as String?;
+          final photoUrl = bucket != null && fileName != null
+              ? Supabase.instance.client.storage
+                    .from(bucket)
+                    .getPublicUrl(
+                      folder != null && folder.isNotEmpty
+                          ? '$folder/$fileName'
+                          : fileName,
+                    )
+              : null;
+          final missionData = row['mission'] as Map<String, dynamic>?;
+          final stampData = missionData?['stamp'] as Map<String, dynamic>?;
+          final stampBucket = stampData?['bucket'] as String?;
+          final stampFileName = stampData?['file_name'] as String?;
+          final stampFolder = stampData?['folder_path'] as String?;
+          final stampUrl = stampBucket != null && stampFileName != null
+              ? Supabase.instance.client.storage
+                    .from(stampBucket)
+                    .getPublicUrl(
+                      stampFolder != null && stampFolder.isNotEmpty
+                          ? '$stampFolder/$stampFileName'
+                          : stampFileName,
+                    )
+              : null;
+
+          return Participation(
+            id: row['id'] as String,
+            missionTitle: missionData?['title'] as String? ?? '미션',
+            status: status,
+            createdAt: DateTime.parse(row['created_at'] as String),
+            photoUrl: photoUrl,
+            rejectionReason: rejectionReason,
+            stampUrl: stampUrl,
+          );
+        }).toList();
+
+        if (!mounted) return;
+        setState(() {
+          participations = resolvedParticipations;
+          isParticipationsLoading = false;
+        });
+        await _persistAccountCache();
+      } catch (error) {
+        debugPrint('Error fetching participations: $error');
+        if (mounted) {
+          setState(() => isParticipationsLoading = false);
+        }
+      }
+    }
+
+    await Future.wait([fetchActiveMissions(), fetchParticipations()]);
   }
 
   void _openShippingAddressDialog() {
@@ -471,14 +600,6 @@ class _AccountTabState extends State<AccountTab> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    if (isLoading) {
-      return SizedBox(
-        height: screenHeight - 200,
-        child: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return ListenableBuilder(
       listenable: UserAuthService.instance,
       builder: (context, _) {
@@ -492,11 +613,13 @@ class _AccountTabState extends State<AccountTab> {
         }
 
         return AccountLoggedInContent(
-          userName: userName ?? '사용자',
+          userName: userName ?? UserAuthService.instance.displayName,
           activeProfileCount: activeProfileCount,
           totalMileage: totalMileage,
           activeMissions: activeMissions,
           participations: participations,
+          isActiveMissionsLoading: isActiveMissionsLoading,
+          isParticipationsLoading: isParticipationsLoading,
           onManageShipping: _openShippingAddressDialog,
           onOrderLookup: _handleOrderLookup,
           onWishlist: _openWishlist,
@@ -519,18 +642,77 @@ class _AccountTabState extends State<AccountTab> {
   }
 
   void _handleProfileChange() {
-    context.push<String>(ProfileSelectScreen.route).then((_) async {
-      final profileService = ProfileService.instance;
-      await profileService.refresh();
-      if (!mounted) return;
+    context.push<String>(ProfileSelectScreen.route).then((
+      selectedProfile,
+    ) async {
+      if (selectedProfile == null || !mounted) return;
 
       setState(() {
-        activeProfileCount = profileService.profiles.length;
-        userName =
-            profileService.selectedProfileName ??
-            UserAuthService.instance.displayName;
+        isSummaryLoading = true;
+        isActiveMissionsLoading = true;
+        isParticipationsLoading = true;
       });
+      await _fetchAccountData();
     });
+  }
+}
+
+class _AccountTabCache {
+  const _AccountTabCache({
+    required this.userName,
+    required this.activeProfileCount,
+    required this.totalMileage,
+    required this.activeMissions,
+    required this.participations,
+    required this.companyName,
+    required this.isEmployee,
+    required this.departmentName,
+  });
+
+  final String userName;
+  final int activeProfileCount;
+  final double totalMileage;
+  final List<ActiveMission> activeMissions;
+  final List<Participation> participations;
+  final String? companyName;
+  final bool? isEmployee;
+  final String? departmentName;
+
+  factory _AccountTabCache.fromJson(Map<String, dynamic> json) {
+    return _AccountTabCache(
+      userName:
+          json['user_name'] as String? ?? UserAuthService.instance.displayName,
+      activeProfileCount: json['active_profile_count'] as int? ?? 0,
+      totalMileage: (json['total_mileage'] as num?)?.toDouble() ?? 0,
+      activeMissions: ((json['active_missions'] as List<dynamic>?) ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(ActiveMission.fromJson)
+          .toList(),
+      participations: ((json['participations'] as List<dynamic>?) ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(Participation.fromJson)
+          .toList(),
+      companyName: json['company_name'] as String?,
+      isEmployee: json['is_employee'] as bool?,
+      departmentName: json['department_name'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user_name': userName,
+      'active_profile_count': activeProfileCount,
+      'total_mileage': totalMileage,
+      'active_missions': activeMissions
+          .map((mission) => mission.toJson())
+          .toList(),
+      'participations': participations
+          .map((participation) => participation.toJson())
+          .toList(),
+      'company_name': companyName,
+      'is_employee': isEmployee,
+      'department_name': departmentName,
+    };
   }
 }
 
