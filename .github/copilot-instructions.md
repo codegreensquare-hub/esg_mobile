@@ -37,3 +37,10 @@ Do not return a Widget from a helper method. Instead, create a new Widget class 
 ## Cached Network Images
 
 When displaying network images, always use cached network images to improve performance and reduce data usage. This helps in loading images faster and provides a better user experience.
+
+### Features
+
+Profile selection.
+User can have up to 4 profiles.
+Each profile has its own name.
+One account will have a default main profile that cannot be deleted.

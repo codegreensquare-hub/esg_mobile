@@ -39,6 +39,7 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? photoFileName,
     double? awardPoints,
     double? cost,
+    String? profileUsed,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (participatedBy != null)
@@ -58,6 +59,7 @@ class MissionParticipationRow extends SupabaseDataRow {
            'photo_file_name': supaSerialize(photoFileName),
          if (awardPoints != null) 'award_points': supaSerialize(awardPoints),
          if (cost != null) 'cost': supaSerialize(cost),
+         if (profileUsed != null) 'profile_used': supaSerialize(profileUsed),
        });
 
   /// Mission Participation Row
@@ -179,6 +181,13 @@ class MissionParticipationRow extends SupabaseDataRow {
   double? get cost => getField<double>(costField);
   set cost(double? value) => setField<double>(costField, value);
 
+  /// Profile Used field name
+  static const String profileUsedField = 'profile_used';
+
+  /// Profile Used
+  String? get profileUsed => getField<String>(profileUsedField);
+  set profileUsed(String? value) => setField<String>(profileUsedField, value);
+
   /// Make a copy of the current [MissionParticipationRow]
   /// overriding the provided fields
   MissionParticipationRow copyWith({
@@ -196,6 +205,7 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? photoFileName,
     double? awardPoints,
     double? cost,
+    String? profileUsed,
   }) => MissionParticipationRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'participated_by': supaSerialize(participatedBy) ?? data['participated_by'],
@@ -213,8 +223,9 @@ class MissionParticipationRow extends SupabaseDataRow {
     'photo_file_name': supaSerialize(photoFileName) ?? data['photo_file_name'],
     'award_points': supaSerialize(awardPoints) ?? data['award_points'],
     'cost': supaSerialize(cost) ?? data['cost'],
+    'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 17:29:12.947647
+/// Date: 2026-03-11 13:30:59.664226

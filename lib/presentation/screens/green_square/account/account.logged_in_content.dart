@@ -19,6 +19,8 @@ class AccountLoggedInContent extends StatelessWidget {
     required this.totalMileage,
     required this.activeMissions,
     required this.participations,
+    required this.isActiveMissionsLoading,
+    required this.isParticipationsLoading,
     required this.onManageShipping,
     required this.onOrderLookup,
     required this.onWishlist,
@@ -42,6 +44,8 @@ class AccountLoggedInContent extends StatelessWidget {
   final double totalMileage;
   final List<ActiveMission> activeMissions;
   final List<Participation> participations;
+  final bool isActiveMissionsLoading;
+  final bool isParticipationsLoading;
   final VoidCallback onManageShipping;
   final VoidCallback onOrderLookup;
   final VoidCallback onWishlist;
@@ -504,77 +508,93 @@ class AccountLoggedInContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              if (activeMissions.isEmpty)
-                const Center(child: Text('현재 진행 중인 미션이 없습니다.'))
+              if (isActiveMissionsLoading && activeMissions.isEmpty)
+                const Center(child: CircularProgressIndicator.adaptive())
               else
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 4 / 3,
-                  children: activeMissions.map((mission) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: cs.outlineVariant,
-                          width: 0.5,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (isActiveMissionsLoading)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: LinearProgressIndicator(),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: mission.stampUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: mission.stampUrl!,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    fit: BoxFit.contain,
-                                    placeholder: (context, url) => const Center(
-                                      child:
-                                          CircularProgressIndicator.adaptive(),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(
-                                          Icons.broken_image,
-                                          size: 40,
-                                        ),
-                                  )
-                                : SvgPicture.network(
-                                    getImageLink(
-                                      bucket.asset,
-                                      asset.cMilage,
-                                      folderPath:
-                                          assetFolderPath[asset.cMilage],
-                                    ),
-                                    width: 40,
-                                    height: 40,
-                                    semanticsLabel: '미션 스탬프',
-                                  ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            mission.title ?? '미션',
-                            style: theme.textTheme.titleMedium?.copyWith(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '${mission.earned} 회',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: cs.primary,
-                              fontWeight: FontWeight.bold,
+                    if (activeMissions.isEmpty)
+                      const Center(child: Text('현재 진행 중인 미션이 없습니다.'))
+                    else
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 4 / 3,
+                        children: activeMissions.map((mission) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: cs.outlineVariant,
+                                width: 0.5,
+                              ),
                             ),
-                          ),
-                        ],
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: mission.stampUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: mission.stampUrl!,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.contain,
+                                          placeholder: (context, url) =>
+                                              const Center(
+                                                child:
+                                                    CircularProgressIndicator.adaptive(),
+                                              ),
+                                          errorWidget: (context, url, error) =>
+                                              const Icon(
+                                                Icons.broken_image,
+                                                size: 40,
+                                              ),
+                                        )
+                                      : SvgPicture.network(
+                                          getImageLink(
+                                            bucket.asset,
+                                            asset.cMilage,
+                                            folderPath:
+                                                assetFolderPath[asset.cMilage],
+                                          ),
+                                          width: 40,
+                                          height: 40,
+                                          semanticsLabel: '미션 스탬프',
+                                        ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  mission.title ?? '미션',
+                                  style: theme.textTheme.titleMedium
+                                      ?.copyWith(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${mission.earned} 회',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: cs.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
+                  ],
                 ),
               const SizedBox(height: 32),
               Text(
@@ -584,150 +604,158 @@ class AccountLoggedInContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              if (participations.isEmpty)
-                const Center(child: Text('참여 기록이 없습니다.'))
+              if (isParticipationsLoading && participations.isEmpty)
+                const Center(child: CircularProgressIndicator.adaptive())
               else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: participations.length,
-                  itemBuilder: (context, index) {
-                    final participation = participations[index];
-                    final rejectionReason = participation.rejectionReason;
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (isParticipationsLoading)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: LinearProgressIndicator(),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: SizedBox(
-                              width: 72,
-                              height: 72,
-                              child: participation.stampUrl != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: participation.stampUrl!,
-                                      width: 72,
-                                      height: 72,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const SizedBox(
-                                            width: 72,
-                                            height: 72,
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                      errorWidget: (context, url, error) =>
-                                          Container(
-                                            width: 72,
-                                            height: 72,
-                                            color: cs.surfaceTint.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                            child: const Icon(
-                                              Icons.photo_outlined,
-                                            ),
-                                          ),
-                                    )
-                                  : Container(
-                                      width: 72,
-                                      height: 72,
-                                      color: cs.surfaceTint.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      child: const Icon(Icons.photo_outlined),
-                                    ),
+                    if (participations.isEmpty)
+                      const Center(child: Text('참여 기록이 없습니다.'))
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        itemCount: participations.length,
+                        itemBuilder: (context, index) {
+                          final participation = participations[index];
+                          final rejectionReason = participation.rejectionReason;
+
+                          return Container(
+                            margin: const EdgeInsets.only(top: 12, bottom: 12),
+                            // padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainer,
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        participation.missionTitle,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: participation.isApproved
-                                            ? Colors.green.shade100
-                                            : participation.isPending
-                                            ? Colors.orange.shade100
-                                            : Colors.red.shade100,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Text(
-                                        participation.isApproved
-                                            ? '승인됨'
-                                            : participation.isPending
-                                            ? '심사 중'
-                                            : '거부됨',
-                                        style: theme.textTheme.labelSmall
-                                            ?.copyWith(
-                                              color: participation.isApproved
-                                                  ? Colors.green.shade800
-                                                  : participation.isPending
-                                                  ? Colors.orange.shade800
-                                                  : Colors.red.shade800,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if (participation.photoUrl != null) ...[
-                                  const SizedBox(height: 8),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: CachedNetworkImage(
-                                      imageUrl: participation.photoUrl!,
-                                      height: screenWidth / 2,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: SizedBox(
+                                    width: 72,
+                                    height: 72,
+                                    child: participation.stampUrl != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: participation.stampUrl!,
+                                            width: 72,
+                                            height: 72,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) =>
+                                                const SizedBox(
+                                                  width: 72,
+                                                  height: 72,
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const _StampFallbackBox(),
+                                          )
+                                        : const _StampFallbackBox(),
                                   ),
-                                ],
-                                const SizedBox(height: 4),
-                                Text(
-                                  '참여일: ${participation.createdAt.toLocal().toString().split(' ')[0]}',
-                                  style: theme.textTheme.bodySmall,
                                 ),
-                                if (!participation.isApproved &&
-                                    rejectionReason != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      '사유: $rejectionReason',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: Colors.red.shade700,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              participation.missionTitle,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
                                           ),
-                                    ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: participation.isApproved
+                                                  ? Colors.green.shade100
+                                                  : participation.isPending
+                                                  ? Colors.orange.shade100
+                                                  : Colors.red.shade100,
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            child: Text(
+                                              participation.isApproved
+                                                  ? '승인됨'
+                                                  : participation.isPending
+                                                  ? '심사 중'
+                                                  : '거부됨',
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        participation.isApproved
+                                                        ? Colors.green.shade800
+                                                        : participation
+                                                              .isPending
+                                                        ? Colors.orange.shade800
+                                                        : Colors.red.shade800,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (participation.photoUrl != null) ...[
+                                        const SizedBox(height: 8),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          child: CachedNetworkImage(
+                                            imageUrl: participation.photoUrl!,
+                                            height: screenWidth / 2,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '참여일: ${participation.createdAt.toLocal().toString().split(' ')[0]}',
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                      if (!participation.isApproved &&
+                                          rejectionReason != null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
+                                          child: Text(
+                                            '사유: $rejectionReason',
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: Colors.red.shade700,
+                                                ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
+                                ),
                               ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
+                  ],
                 ),
             ],
           ),
@@ -766,6 +794,32 @@ class _ActionButton extends StatelessWidget {
           Text(label, style: Theme.of(context).textTheme.labelSmall),
           const SizedBox(height: 8),
         ],
+      ),
+    );
+  }
+}
+
+class _StampFallbackBox extends StatelessWidget {
+  const _StampFallbackBox();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 72,
+      height: 72,
+      color: cs.surfaceTint.withValues(alpha: 0.1),
+      alignment: Alignment.center,
+      child: SvgPicture.network(
+        getImageLink(
+          bucket.asset,
+          asset.cMilage,
+          folderPath: assetFolderPath[asset.cMilage],
+        ),
+        width: 28,
+        height: 28,
+        semanticsLabel: '기본 스탬프',
       ),
     );
   }

@@ -29,11 +29,13 @@ class UserProfileRow extends SupabaseDataRow {
     String? id,
     DateTime? createdAt,
     String? name,
+    DateTime? deletedAt,
   }) : super({
          'user': supaSerialize(user),
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (name != null) 'name': supaSerialize(name),
+         if (deletedAt != null) 'deleted_at': supaSerialize(deletedAt),
        });
 
   /// User Profile Row
@@ -79,6 +81,13 @@ class UserProfileRow extends SupabaseDataRow {
   String? get name => getField<String>(nameField);
   set name(String? value) => setField<String>(nameField, value);
 
+  /// Deleted At field name
+  static const String deletedAtField = 'deleted_at';
+
+  /// Deleted At
+  DateTime? get deletedAt => getField<DateTime>(deletedAtField);
+  set deletedAt(DateTime? value) => setField<DateTime>(deletedAtField, value);
+
   /// Make a copy of the current [UserProfileRow]
   /// overriding the provided fields
   UserProfileRow copyWith({
@@ -86,13 +95,15 @@ class UserProfileRow extends SupabaseDataRow {
     String? id,
     DateTime? createdAt,
     String? name,
+    DateTime? deletedAt,
   }) => UserProfileRow.fromJson({
     'user': supaSerialize(user) ?? data['user'],
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'name': supaSerialize(name) ?? data['name'],
+    'deleted_at': supaSerialize(deletedAt) ?? data['deleted_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 17:29:12.969361
+/// Date: 2026-03-11 13:30:59.689663
