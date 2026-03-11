@@ -76,9 +76,10 @@ export 'story_tag.dart';
 export 'trigger_event_log.dart';
 export 'user.dart';
 export 'user_organization.dart';
+export 'user_profile.dart';
 export 'user_setting_detail.dart';
 export 'user_settings.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-03-10 15:21:09.884812
+/// Date: 2026-03-10 17:29:12.970602

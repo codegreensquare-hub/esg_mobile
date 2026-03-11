@@ -505,7 +505,10 @@ class GreenSquareTermsScreen extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12, bottom: 8),
-              child: Text('① 회사는 배송/CS를 직접 수행하거나 제3자에게 위탁할 수 있습니다.', style: articleBodyStyle),
+              child: Text(
+                '① 회사는 배송/CS를 직접 수행하거나 제3자에게 위탁할 수 있습니다.',
+                style: articleBodyStyle,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12, bottom: 8),
@@ -556,7 +559,10 @@ class GreenSquareTermsScreen extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
-              child: Text('제20조(인증사진의 제휴사 제공 및 2차 활용)', style: articleLabelStyle),
+              child: Text(
+                '제20조(인증사진의 제휴사 제공 및 2차 활용)',
+                style: articleLabelStyle,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12, bottom: 8),
@@ -632,7 +638,10 @@ class GreenSquareTermsScreen extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12, bottom: 8),
-              child: Text('① 마일리지는 유상 구매/충전이 없으며 현금 환불되지 않습니다.', style: articleBodyStyle),
+              child: Text(
+                '① 마일리지는 유상 구매/충전이 없으며 현금 환불되지 않습니다.',
+                style: articleBodyStyle,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12, bottom: 8),

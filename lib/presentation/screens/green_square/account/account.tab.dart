@@ -1,5 +1,6 @@
 import 'package:esg_mobile/core/enums/device.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/profile.service.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/stamp.dart';
 import 'package:esg_mobile/data/entities/participation.dart';
@@ -36,6 +37,7 @@ class _AccountTabState extends State<AccountTab> {
   String? companyName;
   bool? isEmployee;
   String? departmentName;
+  int activeProfileCount = 0;
 
   @override
   void initState() {
@@ -52,7 +54,13 @@ class _AccountTabState extends State<AccountTab> {
       }
 
       userId = user.id;
-      userName = UserAuthService.instance.displayName;
+
+      final profileService = ProfileService.instance;
+      await profileService.initialize();
+      activeProfileCount = profileService.profiles.length;
+      userName =
+          profileService.selectedProfileName ??
+          UserAuthService.instance.displayName;
 
       final client = Supabase.instance.client;
 
@@ -323,8 +331,7 @@ class _AccountTabState extends State<AccountTab> {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) =>
-            BlockedReportHistoryScreen(userId: userId!),
+        builder: (context) => BlockedReportHistoryScreen(userId: userId!),
       ),
     );
   }
@@ -392,7 +399,10 @@ class _AccountTabState extends State<AccountTab> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+            constraints: BoxConstraints(
+              maxWidth: maxWidth,
+              maxHeight: maxHeight,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -426,7 +436,10 @@ class _AccountTabState extends State<AccountTab> {
                   const SizedBox(height: 16),
                   Expanded(
                     child: SingleChildScrollView(
-                      child: _BenefitsByLevelContent(colorScheme: cs, textTheme: theme.textTheme),
+                      child: _BenefitsByLevelContent(
+                        colorScheme: cs,
+                        textTheme: theme.textTheme,
+                      ),
                     ),
                   ),
                 ],
@@ -480,6 +493,7 @@ class _AccountTabState extends State<AccountTab> {
 
         return AccountLoggedInContent(
           userName: userName ?? '사용자',
+          activeProfileCount: activeProfileCount,
           totalMileage: totalMileage,
           activeMissions: activeMissions,
           participations: participations,
@@ -505,7 +519,18 @@ class _AccountTabState extends State<AccountTab> {
   }
 
   void _handleProfileChange() {
-    context.push(ProfileSelectScreen.route);
+    context.push<String>(ProfileSelectScreen.route).then((_) async {
+      final profileService = ProfileService.instance;
+      await profileService.initialize();
+      if (!mounted) return;
+
+      setState(() {
+        activeProfileCount = profileService.profiles.length;
+        userName =
+            profileService.selectedProfileName ??
+            UserAuthService.instance.displayName;
+      });
+    });
   }
 }
 
@@ -696,10 +721,12 @@ class _LevelSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          ...conditions.map((c) => Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 2),
-            child: Text('• $c', style: bulletStyle),
-          )),
+          ...conditions.map(
+            (c) => Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 2),
+              child: Text('• $c', style: bulletStyle),
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             '혜택',
@@ -709,10 +736,12 @@ class _LevelSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          ...benefits.map((b) => Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 2),
-            child: Text('• $b', style: bulletStyle),
-          )),
+          ...benefits.map(
+            (b) => Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 2),
+              child: Text('• $b', style: bulletStyle),
+            ),
+          ),
         ],
       ),
     );

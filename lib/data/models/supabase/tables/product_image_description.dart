@@ -118,4 +118,4 @@ class ProductImageDescriptionRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 15:21:09.868113
+/// Date: 2026-03-10 17:29:12.955332

@@ -15,6 +15,7 @@ class AccountLoggedInContent extends StatelessWidget {
   const AccountLoggedInContent({
     super.key,
     required this.userName,
+    required this.activeProfileCount,
     required this.totalMileage,
     required this.activeMissions,
     required this.participations,
@@ -37,6 +38,7 @@ class AccountLoggedInContent extends StatelessWidget {
   });
 
   final String userName;
+  final int activeProfileCount;
   final double totalMileage;
   final List<ActiveMission> activeMissions;
   final List<Participation> participations;
@@ -245,7 +247,7 @@ class AccountLoggedInContent extends StatelessWidget {
         builder: (context) => UserInfoScreen(
           userName: userName,
           affiliationName: companyName,
-          activeProfileCount: 0,
+          activeProfileCount: activeProfileCount,
           upperDepartmentName: departmentName,
           lowerDepartmentName: departmentName,
         ),
@@ -380,10 +382,11 @@ class AccountLoggedInContent extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Text(
                                   mileageText,
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: cs.primary,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: cs.primary,
+                                      ),
                                 ),
                               ],
                             ),

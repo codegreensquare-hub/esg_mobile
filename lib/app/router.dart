@@ -124,8 +124,11 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: ProfileSelectScreen.route,
-      builder: (BuildContext context, GoRouterState state) {
-        return const ProfileSelectScreen();
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        return NoTransitionPage<void>(
+          key: state.pageKey,
+          child: const ProfileSelectScreen(),
+        );
       },
     ),
     GoRoute(

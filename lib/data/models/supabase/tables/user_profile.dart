@@ -9,46 +9,46 @@ import 'package:supabase_codegen/supabase_codegen.dart';
 // ignore: unused_import, always_use_package_imports
 import '../database.dart';
 
-/// Organization Table
-class OrganizationTable extends SupabaseTable<OrganizationRow> {
+/// User Profile Table
+class UserProfileTable extends SupabaseTable<UserProfileRow> {
   /// Table Name
   @override
-  String get tableName => 'organization';
+  String get tableName => 'user_profile';
 
-  /// Create a [OrganizationRow] from the [data] provided
+  /// Create a [UserProfileRow] from the [data] provided
   @override
-  OrganizationRow createRow(Map<String, dynamic> data) =>
-      OrganizationRow.fromJson(data);
+  UserProfileRow createRow(Map<String, dynamic> data) =>
+      UserProfileRow.fromJson(data);
 }
 
-/// Organization Row
-class OrganizationRow extends SupabaseDataRow {
-  /// Organization Row
-  OrganizationRow({
+/// User Profile Row
+class UserProfileRow extends SupabaseDataRow {
+  /// User Profile Row
+  UserProfileRow({
+    required String user,
     String? id,
     DateTime? createdAt,
     String? name,
-    String? createdBy,
   }) : super({
+         'user': supaSerialize(user),
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (name != null) 'name': supaSerialize(name),
-         if (createdBy != null) 'created_by': supaSerialize(createdBy),
        });
 
-  /// Organization Row
-  const OrganizationRow._(super.data);
+  /// User Profile Row
+  const UserProfileRow._(super.data);
 
-  /// Create Organization Row from a [data] map
-  factory OrganizationRow.fromJson(Map<String, dynamic> data) =>
-      OrganizationRow._(data.cleaned);
+  /// Create User Profile Row from a [data] map
+  factory UserProfileRow.fromJson(Map<String, dynamic> data) =>
+      UserProfileRow._(data.cleaned);
 
   /// Get the Json representation of the row
   Map<String, dynamic> toJson() => data;
 
   /// Get the [SupabaseTable] for this row
   @override
-  SupabaseTable get table => OrganizationTable();
+  SupabaseTable get table => UserProfileTable();
 
   /// Id field name
   static const String idField = 'id';
@@ -65,6 +65,13 @@ class OrganizationRow extends SupabaseDataRow {
       getField<DateTime>(createdAtField, defaultValue: DateTime.now())!;
   set createdAt(DateTime value) => setField<DateTime>(createdAtField, value);
 
+  /// User field name
+  static const String userField = 'user';
+
+  /// User
+  String get user => getField<String>(userField)!;
+  set user(String value) => setField<String>(userField, value);
+
   /// Name field name
   static const String nameField = 'name';
 
@@ -72,28 +79,20 @@ class OrganizationRow extends SupabaseDataRow {
   String? get name => getField<String>(nameField);
   set name(String? value) => setField<String>(nameField, value);
 
-  /// Created By field name
-  static const String createdByField = 'created_by';
-
-  /// Created By
-  String get createdBy =>
-      getField<String>(createdByField, defaultValue: 'auth.')!;
-  set createdBy(String value) => setField<String>(createdByField, value);
-
-  /// Make a copy of the current [OrganizationRow]
+  /// Make a copy of the current [UserProfileRow]
   /// overriding the provided fields
-  OrganizationRow copyWith({
+  UserProfileRow copyWith({
+    String? user,
     String? id,
     DateTime? createdAt,
     String? name,
-    String? createdBy,
-  }) => OrganizationRow.fromJson({
+  }) => UserProfileRow.fromJson({
+    'user': supaSerialize(user) ?? data['user'],
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'name': supaSerialize(name) ?? data['name'],
-    'created_by': supaSerialize(createdBy) ?? data['created_by'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 17:29:12.952339
+/// Date: 2026-03-10 17:29:12.969361
