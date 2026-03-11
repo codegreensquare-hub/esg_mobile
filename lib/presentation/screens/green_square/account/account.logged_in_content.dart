@@ -511,6 +511,7 @@ class AccountLoggedInContent extends StatelessWidget {
                   crossAxisCount: 2,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
                   childAspectRatio: 4 / 3,
@@ -590,6 +591,7 @@ class AccountLoggedInContent extends StatelessWidget {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
                   itemCount: participations.length,
                   itemBuilder: (context, index) {
                     final participation = participations[index];
@@ -597,7 +599,7 @@ class AccountLoggedInContent extends StatelessWidget {
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
+                      // padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainer,
                         borderRadius: BorderRadius.circular(12),
@@ -623,25 +625,9 @@ class AccountLoggedInContent extends StatelessWidget {
                                             child: CircularProgressIndicator(),
                                           ),
                                       errorWidget: (context, url, error) =>
-                                          Container(
-                                            width: 72,
-                                            height: 72,
-                                            color: cs.surfaceTint.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                            child: const Icon(
-                                              Icons.photo_outlined,
-                                            ),
-                                          ),
+                                          const _StampFallbackBox(),
                                     )
-                                  : Container(
-                                      width: 72,
-                                      height: 72,
-                                      color: cs.surfaceTint.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      child: const Icon(Icons.photo_outlined),
-                                    ),
+                                  : const _StampFallbackBox(),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -766,6 +752,32 @@ class _ActionButton extends StatelessWidget {
           Text(label, style: Theme.of(context).textTheme.labelSmall),
           const SizedBox(height: 8),
         ],
+      ),
+    );
+  }
+}
+
+class _StampFallbackBox extends StatelessWidget {
+  const _StampFallbackBox();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 72,
+      height: 72,
+      color: cs.surfaceTint.withValues(alpha: 0.1),
+      alignment: Alignment.center,
+      child: SvgPicture.network(
+        getImageLink(
+          bucket.asset,
+          asset.cMilage,
+          folderPath: assetFolderPath[asset.cMilage],
+        ),
+        width: 28,
+        height: 28,
+        semanticsLabel: '기본 스탬프',
       ),
     );
   }

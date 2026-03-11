@@ -150,4 +150,4 @@ class AnnouncementRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 17:29:12.926096
+/// Date: 2026-03-11 11:28:36.833833

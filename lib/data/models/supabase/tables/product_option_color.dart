@@ -157,4 +157,4 @@ class ProductOptionColorRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 17:29:12.955676
+/// Date: 2026-03-11 11:28:36.864947

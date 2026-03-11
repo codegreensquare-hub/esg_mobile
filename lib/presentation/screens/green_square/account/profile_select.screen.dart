@@ -1,4 +1,5 @@
 import 'package:esg_mobile/core/constants/green_square_navigation.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/profile.service.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/enums/navigations.dart';
@@ -15,8 +16,6 @@ import 'package:esg_mobile/presentation/screens/green_square/info/privacy_policy
 import 'package:esg_mobile/presentation/screens/green_square/info/terms.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:esg_mobile/presentation/screens/green_square/account/profile_creation.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/cart/cart_bottom_sheet.dart';
 import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
@@ -35,40 +34,115 @@ class ProfileSelectScreen extends StatefulWidget {
 
 class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _nameController = TextEditingController();
   List<String> _profiles = List<String>.from(ProfileService.defaultProfiles);
   int? _selectedIndex;
   bool _isDeleteMode = false;
+  bool _isCreatingProfile = false;
   final Set<int> _deleteSelectedIndices = {};
+
+  String get _mainProfileName => UserAuthService.instance.displayName;
+  int get _profileCount => _profiles.length + 1;
+  bool get _canAddProfile =>
+      _profiles.length < ProfileService.maxCustomProfiles;
 
   @override
   void initState() {
     super.initState();
+    final profileService = ProfileService.instance;
+    _profiles = profileService.cachedProfiles;
+    _selectedIndex = _resolveSelectedIndex(
+      selectedProfileIndex: profileService.cachedSelectedProfileIndex,
+      isMainProfileSelected: profileService.cachedIsMainProfileSelected,
+    );
     _loadProfiles();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProfiles() async {
     final profileService = ProfileService.instance;
-    await profileService.initialize();
+    await profileService.refresh();
     if (!mounted) return;
 
+    final profiles = profileService.profiles;
+    final selectedIndex = _resolveSelectedIndex(
+      selectedProfileIndex: profileService.selectedProfileIndex,
+      isMainProfileSelected: profileService.isMainProfileSelected,
+    );
+    final hasChanged =
+        profiles.length != _profiles.length ||
+        !_profiles.asMap().entries.every(
+          (entry) => entry.value == profiles[entry.key],
+        ) ||
+        _selectedIndex != selectedIndex;
+
+    if (!hasChanged) return;
+
     setState(() {
-      _profiles = profileService.profiles;
-      _selectedIndex = profileService.selectedProfileIndex;
+      _profiles = profiles;
+      _selectedIndex = selectedIndex;
     });
   }
 
+  int? _resolveSelectedIndex({
+    required int? selectedProfileIndex,
+    required bool isMainProfileSelected,
+  }) {
+    if (isMainProfileSelected) return 0;
+    if (selectedProfileIndex == null) return null;
+    return selectedProfileIndex + 1;
+  }
+
   Future<void> _handleAddProfile() async {
-    if (_profiles.length >= 4) return;
-    final name = await context.push<String>(ProfileCreationScreen.route);
-    if (name == null || name.isEmpty || !mounted) return;
+    if (_profiles.length >= ProfileService.maxCustomProfiles) return;
+    setState(() {
+      _isCreatingProfile = true;
+      _isDeleteMode = false;
+      _deleteSelectedIndices.clear();
+      _nameController.clear();
+    });
+  }
+
+  Future<void> _handleCreateProfile() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty || !mounted) return;
 
     final profileService = ProfileService.instance;
-    await profileService.addProfile(name);
+    try {
+      await profileService.addProfile(name);
+    } on ProfileServiceException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('프로필을 만들 수 없습니다. 다시 시도해주세요.')),
+      );
+      return;
+    }
+
     if (!mounted) return;
 
     setState(() {
       _profiles = profileService.profiles;
-      _selectedIndex = _profiles.isEmpty ? null : _profiles.length - 1;
+      _selectedIndex = _profiles.length;
+      _isCreatingProfile = false;
+      _nameController.clear();
+    });
+  }
+
+  void _handleBackFromCreate() {
+    setState(() {
+      _isCreatingProfile = false;
+      _nameController.clear();
     });
   }
 
@@ -96,7 +170,63 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
               ),
             ],
           ),
-          if (_profiles.isEmpty)
+          if (_isCreatingProfile)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 40),
+                      Icon(
+                        Icons.person_outline,
+                        size: 72,
+                        color: primary,
+                      ),
+                      const SizedBox(height: 32),
+                      Text(
+                        '프로필 이름',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontFamily: 'Noto Sans KR',
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _nameController,
+                        autofocus: true,
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _handleCreateProfile(),
+                        decoration: InputDecoration(
+                          hintText: '프로필 4',
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          enabledBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                            borderSide: BorderSide(color: Color(0xFFDDDDDD)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                            borderSide: BorderSide(
+                              color: primary,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (_profiles.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
               child: SafeArea(
@@ -119,7 +249,7 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
                       const SizedBox(height: 32),
                       Expanded(
                         child: Center(
-                          child: _AddProfileTile(onTap: _handleAddProfile),
+                          child: _buildProfileContent(),
                         ),
                       ),
                     ],
@@ -165,24 +295,63 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: InkWell(
-                  onTap: _toggleDeleteMode,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 12, 0, 72),
-                    child: Text(
-                      '프로필 삭제하기',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontFamily: 'Noto Sans KR',
-                        color: theme.colorScheme.onSurfaceVariant,
-                        decoration: TextDecoration.underline,
-                        decorationColor: theme.colorScheme.onSurfaceVariant,
+              if (!_isCreatingProfile)
+                Center(
+                  child: InkWell(
+                    onTap: _toggleDeleteMode,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 12, 0, 72),
+                      child: Text(
+                        '프로필 삭제하기',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontFamily: 'Noto Sans KR',
+                          color: theme.colorScheme.onSurfaceVariant,
+                          decoration: TextDecoration.underline,
+                          decorationColor: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              if (_isDeleteMode)
+              if (_isCreatingProfile)
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _handleBackFromCreate,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: primary,
+                          side: BorderSide(color: primary),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('뒤로가기'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: _nameController.text.trim().isNotEmpty
+                            ? _handleCreateProfile
+                            : null,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: primary,
+                          foregroundColor: onPrimary,
+                          disabledBackgroundColor: Colors.grey.shade400,
+                          disabledForegroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('만들기'),
+                      ),
+                    ),
+                  ],
+                )
+              else if (_isDeleteMode)
                 Row(
                   children: [
                     Expanded(
@@ -223,14 +392,15 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
                   style: FilledButton.styleFrom(
                     backgroundColor: primary,
                     foregroundColor: onPrimary,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    disabledForegroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed:
-                      _selectedIndex != null &&
-                          _selectedIndex! < _profiles.length
+                      _selectedIndex != null && _selectedIndex! < _profileCount
                       ? _handleNext
                       : null,
                   child: const Text('다음'),
@@ -393,11 +563,14 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
   }
 
   Widget _buildProfileContent() {
-    final count = _profiles.length;
     Widget tile(int index) => _ProfileTile(
-      name: _profiles[index],
+      name: index == 0 ? _mainProfileName : _profiles[index - 1],
       onTap: () {
         setState(() {
+          if (_isDeleteMode && index == 0) {
+            return;
+          }
+
           if (_isDeleteMode) {
             if (_deleteSelectedIndices.contains(index)) {
               _deleteSelectedIndices.remove(index);
@@ -409,7 +582,9 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
           }
         });
       },
-      isDeleteSelected: _isDeleteMode && _deleteSelectedIndices.contains(index),
+      isSelected: !_isDeleteMode && _selectedIndex == index,
+      isDeleteSelected:
+          index != 0 && _isDeleteMode && _deleteSelectedIndices.contains(index),
     );
     Widget addTile() => _AddProfileTile(onTap: _handleAddProfile);
     // Height matches one tile (icon 72 + gap 28 + text ~24) so divider is not full container
@@ -418,85 +593,63 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
       child: VerticalDivider(width: 32, thickness: 1, color: _dividerColor),
     );
 
-    if (count == 1) {
+    final tileWidgets = List<Widget>.generate(
+      _profileCount,
+      tile,
+      growable: true,
+    )..addAll(_canAddProfile ? [addTile()] : const <Widget>[]);
+
+    final rows = List<Widget>.generate((tileWidgets.length / 2).ceil(), (
+      rowIndex,
+    ) {
+      final leftIndex = rowIndex * 2;
+      final rightIndex = leftIndex + 1;
+
       return Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: tile(0)),
-          divider(),
-          Expanded(child: addTile()),
+          Expanded(child: tileWidgets[leftIndex]),
+          if (rightIndex < tileWidgets.length) ...[
+            divider(),
+            Expanded(child: tileWidgets[rightIndex]),
+          ] else
+            const Expanded(child: SizedBox.shrink()),
         ],
       );
-    }
-    if (count == 2) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: tile(0)),
-              divider(),
-              Expanded(child: tile(1)),
-            ],
-          ),
-          addTile(),
-        ],
-      );
-    }
-    if (count == 3) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: tile(0)),
-              divider(),
-              Expanded(child: tile(1)),
-            ],
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: tile(2)),
-              divider(),
-              Expanded(child: addTile()),
-            ],
-          ),
-        ],
-      );
-    }
-    // count == 4
+    });
+
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: tile(0)),
-            divider(),
-            Expanded(child: tile(1)),
-          ],
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: tile(2)),
-            divider(),
-            Expanded(child: tile(3)),
-          ],
-        ),
-      ],
+      children: rows,
     );
   }
 
-  void _handleNext() {
-    if (_selectedIndex == null) return;
-    ProfileService.instance.selectProfile(_selectedIndex!).then((_) {
-      if (!mounted || !context.canPop()) return;
-      context.pop(_profiles[_selectedIndex!]);
-    });
+  Future<void> _handleNext() async {
+    final selectedIndex = _selectedIndex;
+    if (selectedIndex == null) return;
+
+    try {
+      if (selectedIndex == 0) {
+        await ProfileService.instance.selectMainProfile();
+      } else {
+        await ProfileService.instance.selectProfile(selectedIndex - 1);
+      }
+
+      if (!mounted || !Navigator.of(context).canPop()) return;
+      Navigator.of(context).pop(
+        selectedIndex == 0 ? _mainProfileName : _profiles[selectedIndex - 1],
+      );
+    } on ProfileServiceException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('프로필을 선택할 수 없습니다. 다시 시도해주세요.')),
+      );
+    }
   }
 
   void _toggleDeleteMode() {
@@ -506,19 +659,67 @@ class _ProfileSelectScreenState extends State<ProfileSelectScreen> {
     });
   }
 
-  void _handleDeleteConfirm() {
+  Future<void> _handleDeleteConfirm() async {
     if (_deleteSelectedIndices.isEmpty) return;
-    final selectedIndices = Set<int>.from(_deleteSelectedIndices);
-    ProfileService.instance.removeProfiles(selectedIndices).then((_) {
+    final selectedIndices = _deleteSelectedIndices
+        .where((index) => index > 0)
+        .map((index) => index - 1)
+        .toSet();
+    if (selectedIndices.isEmpty) return;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+
+        return AlertDialog(
+          title: const Text('프로필 삭제'),
+          content: const Text('선택한 프로필을 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(
+                '취소',
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text(
+                '삭제',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (shouldDelete != true || !mounted) return;
+
+    try {
+      await ProfileService.instance.removeProfiles(selectedIndices);
       if (!mounted) return;
 
       setState(() {
         _profiles = ProfileService.instance.profiles;
-        _selectedIndex = ProfileService.instance.selectedProfileIndex;
+        _selectedIndex = _resolveSelectedIndex(
+          selectedProfileIndex: ProfileService.instance.selectedProfileIndex,
+          isMainProfileSelected: ProfileService.instance.isMainProfileSelected,
+        );
         _isDeleteMode = false;
         _deleteSelectedIndices.clear();
       });
-    });
+    } on ProfileServiceException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('프로필을 삭제할 수 없습니다. 다시 시도해주세요.')),
+      );
+    }
   }
 }
 
@@ -528,26 +729,44 @@ class _ProfileTile extends StatelessWidget {
   const _ProfileTile({
     required this.name,
     required this.onTap,
+    this.isSelected = false,
     this.isDeleteSelected = false,
   });
 
   final String name;
   final VoidCallback onTap;
+  final bool isSelected;
   final bool isDeleteSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-    final color = isDeleteSelected ? Colors.red : primary;
+    final highlightColor = primary;
+    final color = isDeleteSelected
+        ? Colors.red
+        : isSelected
+        ? highlightColor
+        : primary;
     final textColor = isDeleteSelected
         ? Colors.red
+        : isSelected
+        ? highlightColor
         : theme.colorScheme.onSurface;
 
     return Material(
-      color: Colors.transparent,
+      color: isSelected
+          ? highlightColor.withValues(alpha: 0.08)
+          : Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? highlightColor : Colors.transparent,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
           child: Column(

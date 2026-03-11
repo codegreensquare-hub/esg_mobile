@@ -56,7 +56,7 @@ class _AccountTabState extends State<AccountTab> {
       userId = user.id;
 
       final profileService = ProfileService.instance;
-      await profileService.initialize();
+        await profileService.refresh();
       activeProfileCount = profileService.profiles.length;
       userName =
           profileService.selectedProfileName ??
@@ -521,7 +521,7 @@ class _AccountTabState extends State<AccountTab> {
   void _handleProfileChange() {
     context.push<String>(ProfileSelectScreen.route).then((_) async {
       final profileService = ProfileService.instance;
-      await profileService.initialize();
+      await profileService.refresh();
       if (!mounted) return;
 
       setState(() {

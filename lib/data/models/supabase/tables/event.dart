@@ -187,4 +187,4 @@ class EventRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-10 17:29:12.935866
+/// Date: 2026-03-11 11:28:36.843691

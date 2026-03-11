@@ -4,7 +4,6 @@ import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.d
 import 'package:esg_mobile/presentation/screens/auth/signup_type.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_terms.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_form.screen.dart';
-import 'package:esg_mobile/presentation/screens/green_square/account/profile_creation.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/profile_select.screen.dart';
 import 'package:esg_mobile/presentation/screens/main.screen.dart';
 import 'package:esg_mobile/app/app.dart';
@@ -129,12 +128,6 @@ final GoRouter router = GoRouter(
           key: state.pageKey,
           child: const ProfileSelectScreen(),
         );
-      },
-    ),
-    GoRoute(
-      path: ProfileCreationScreen.route,
-      builder: (BuildContext context, GoRouterState state) {
-        return const ProfileCreationScreen();
       },
     ),
     GoRoute(
