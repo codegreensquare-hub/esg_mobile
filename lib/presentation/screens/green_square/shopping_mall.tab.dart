@@ -121,6 +121,19 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     _loadProducts();
   }
 
+  /// Puts the popular category (인기 / Popular) first so it always comes after the 'All' tab.
+  List<ProductCategoryRow> _orderCategoriesWithPopularFirst(
+    List<ProductCategoryRow> list,
+  ) {
+    if (list.isEmpty) return list;
+    const popularNames = ['인기', 'Popular'];
+    final popularIndex = list.indexWhere((c) => popularNames
+        .any((name) => c.name.trim().toLowerCase() == name.toLowerCase()));
+    if (popularIndex <= 0) return list;
+    final popular = list[popularIndex];
+    return [popular, ...list.where((c) => c.id != popular.id)];
+  }
+
   Future<void> _loadData() async {
     setState(() => isLoading = true);
     try {
@@ -136,8 +149,9 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
       }
 
       final fetchedCategories = await ProductService.instance.fetchCategories();
+      final orderedCategories = _orderCategoriesWithPopularFirst(fetchedCategories);
       setState(() {
-        categories = fetchedCategories;
+        categories = orderedCategories;
         final categoryStillExists =
             selectedCategoryId == 'All' ||
             categories.any((category) => category.id == selectedCategoryId);
