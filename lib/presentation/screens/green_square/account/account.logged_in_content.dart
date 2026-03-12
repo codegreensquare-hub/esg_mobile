@@ -15,6 +15,7 @@ class AccountLoggedInContent extends StatelessWidget {
   const AccountLoggedInContent({
     super.key,
     required this.userName,
+    required this.showProfileChange,
     required this.activeProfileCount,
     required this.totalMileage,
     required this.activeMissions,
@@ -40,6 +41,7 @@ class AccountLoggedInContent extends StatelessWidget {
   });
 
   final String userName;
+  final bool showProfileChange;
   final int activeProfileCount;
   final double totalMileage;
   final List<ActiveMission> activeMissions;
@@ -278,39 +280,49 @@ class AccountLoggedInContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: InkWell(
-                      onTap: () => _openUserInfoScreen(context),
-                      child: Text(
-                        userName,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          onTap: () => _openUserInfoScreen(context),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                            child: Text(
+                              userName,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+
+                        if (showProfileChange)
+                          InkWell(
+                            onTap: onProfileChange,
+                            child: Text(
+                              '프로필 변경',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: cs.primary,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                                decorationColor: cs.primary,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   TextButton.icon(
                     onPressed: onManageShipping,
+
                     icon: const Icon(Icons.location_on_outlined),
                     label: const Text('배송지 관리'),
                   ),
                 ],
               ),
-              const SizedBox(height: 0),
-              InkWell(
-                onTap: onProfileChange,
-                child: Text(
-                  '프로필 변경',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                    decorationColor: cs.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 0),
               Row(
                 children: [
                   InkWell(

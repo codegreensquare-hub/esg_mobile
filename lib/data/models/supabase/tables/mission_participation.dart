@@ -40,6 +40,8 @@ class MissionParticipationRow extends SupabaseDataRow {
     double? awardPoints,
     double? cost,
     String? profileUsed,
+    String? department,
+    String? subDepartment,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (participatedBy != null)
@@ -60,6 +62,9 @@ class MissionParticipationRow extends SupabaseDataRow {
          if (awardPoints != null) 'award_points': supaSerialize(awardPoints),
          if (cost != null) 'cost': supaSerialize(cost),
          if (profileUsed != null) 'profile_used': supaSerialize(profileUsed),
+         if (department != null) 'department': supaSerialize(department),
+         if (subDepartment != null)
+           'sub_department': supaSerialize(subDepartment),
        });
 
   /// Mission Participation Row
@@ -188,6 +193,21 @@ class MissionParticipationRow extends SupabaseDataRow {
   String? get profileUsed => getField<String>(profileUsedField);
   set profileUsed(String? value) => setField<String>(profileUsedField, value);
 
+  /// Department field name
+  static const String departmentField = 'department';
+
+  /// Department
+  String? get department => getField<String>(departmentField);
+  set department(String? value) => setField<String>(departmentField, value);
+
+  /// Sub Department field name
+  static const String subDepartmentField = 'sub_department';
+
+  /// Sub Department
+  String? get subDepartment => getField<String>(subDepartmentField);
+  set subDepartment(String? value) =>
+      setField<String>(subDepartmentField, value);
+
   /// Make a copy of the current [MissionParticipationRow]
   /// overriding the provided fields
   MissionParticipationRow copyWith({
@@ -206,6 +226,8 @@ class MissionParticipationRow extends SupabaseDataRow {
     double? awardPoints,
     double? cost,
     String? profileUsed,
+    String? department,
+    String? subDepartment,
   }) => MissionParticipationRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'participated_by': supaSerialize(participatedBy) ?? data['participated_by'],
@@ -224,8 +246,10 @@ class MissionParticipationRow extends SupabaseDataRow {
     'award_points': supaSerialize(awardPoints) ?? data['award_points'],
     'cost': supaSerialize(cost) ?? data['cost'],
     'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
+    'department': supaSerialize(department) ?? data['department'],
+    'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 10:37:49.555735
+/// Date: 2026-03-12 16:36:10.618937

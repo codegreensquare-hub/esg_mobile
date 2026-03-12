@@ -6,13 +6,15 @@
 
 /// Client Admin Type enum
 enum ClientAdminType {
-  /// super (DB value: super)
-  super_,
-  /// mid
-  mid,
-  /// general
-  general,
+  /// super_admin
+  super_admin,
+
+  /// mid_admin
+  mid_admin,
+
+  /// general_admin
+  general_admin,
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 10:33:15.556287
+/// Date: 2026-03-12 16:36:10.560555

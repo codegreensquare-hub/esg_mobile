@@ -29,11 +29,18 @@ class MissionClickRow extends SupabaseDataRow {
     DateTime? createdAt,
     String? mission,
     String? user,
+    String? profileUsed,
+    String? department,
+    String? subDepartment,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (mission != null) 'mission': supaSerialize(mission),
          if (user != null) 'user': supaSerialize(user),
+         if (profileUsed != null) 'profile_used': supaSerialize(profileUsed),
+         if (department != null) 'department': supaSerialize(department),
+         if (subDepartment != null)
+           'sub_department': supaSerialize(subDepartment),
        });
 
   /// Mission Click Row
@@ -79,6 +86,28 @@ class MissionClickRow extends SupabaseDataRow {
   String? get user => getField<String>(userField);
   set user(String? value) => setField<String>(userField, value);
 
+  /// Profile Used field name
+  static const String profileUsedField = 'profile_used';
+
+  /// Profile Used
+  String? get profileUsed => getField<String>(profileUsedField);
+  set profileUsed(String? value) => setField<String>(profileUsedField, value);
+
+  /// Department field name
+  static const String departmentField = 'department';
+
+  /// Department
+  String? get department => getField<String>(departmentField);
+  set department(String? value) => setField<String>(departmentField, value);
+
+  /// Sub Department field name
+  static const String subDepartmentField = 'sub_department';
+
+  /// Sub Department
+  String? get subDepartment => getField<String>(subDepartmentField);
+  set subDepartment(String? value) =>
+      setField<String>(subDepartmentField, value);
+
   /// Make a copy of the current [MissionClickRow]
   /// overriding the provided fields
   MissionClickRow copyWith({
@@ -86,13 +115,19 @@ class MissionClickRow extends SupabaseDataRow {
     DateTime? createdAt,
     String? mission,
     String? user,
+    String? profileUsed,
+    String? department,
+    String? subDepartment,
   }) => MissionClickRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'mission': supaSerialize(mission) ?? data['mission'],
     'user': supaSerialize(user) ?? data['user'],
+    'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
+    'department': supaSerialize(department) ?? data['department'],
+    'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 10:37:49.553047
+/// Date: 2026-03-12 16:36:10.617879

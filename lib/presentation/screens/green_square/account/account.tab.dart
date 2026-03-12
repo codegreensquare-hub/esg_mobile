@@ -49,6 +49,7 @@ class _AccountTabState extends State<AccountTab> {
   bool? isEmployee;
   String? departmentName;
   int activeProfileCount = 0;
+  bool allowMultipleProfiles = false;
 
   @override
   void initState() {
@@ -58,9 +59,12 @@ class _AccountTabState extends State<AccountTab> {
         .participationSubmittedStream
         .listen((_) => _handleParticipationSubmitted());
     final profileService = ProfileService.instance;
-    userName =
-        profileService.selectedProfileName ??
-        UserAuthService.instance.displayName;
+    allowMultipleProfiles =
+        UserAuthService.instance.userRow?.allowMultipleProfiles ?? false;
+    userName = allowMultipleProfiles
+        ? profileService.selectedProfileName ??
+              UserAuthService.instance.displayName
+        : UserAuthService.instance.displayName;
     activeProfileCount = profileService.cachedProfiles.length;
     _restoreCachedAccountData();
     _fetchAccountData();
@@ -90,7 +94,9 @@ class _AccountTabState extends State<AccountTab> {
       if (!mounted) return;
       setState(() {
         userId = user.id;
-        userName = cache.userName;
+        userName = allowMultipleProfiles
+            ? cache.userName
+            : UserAuthService.instance.displayName;
         activeProfileCount = cache.activeProfileCount;
         totalMileage = cache.totalMileage;
         companyName = cache.companyName;
@@ -155,39 +161,61 @@ class _AccountTabState extends State<AccountTab> {
 
     final profileService = ProfileService.instance;
     await profileService.refresh();
-    final resolvedUserName =
-        profileService.selectedProfileName ??
-        UserAuthService.instance.displayName;
+
+    final client = Supabase.instance.client;
+    Map<String, dynamic>? userRow;
+
+    try {
+      userRow = await client
+          .from('user')
+          .select('company, is_employee, department, allow_multiple_profiles')
+          .eq('id', user.id)
+          .single();
+    } catch (error) {
+      debugPrint('Error fetching account summary: $error');
+    }
+
+    final resolvedAllowMultipleProfiles =
+        userRow?['allow_multiple_profiles'] as bool? ??
+        UserAuthService.instance.userRow?.allowMultipleProfiles ??
+        false;
+
+    if (!resolvedAllowMultipleProfiles) {
+      await profileService.selectMainProfile();
+    }
+
+    final resolvedUserName = resolvedAllowMultipleProfiles
+        ? profileService.selectedProfileName ??
+              UserAuthService.instance.displayName
+        : UserAuthService.instance.displayName;
     final resolvedProfileCount = profileService.profiles.length;
-    final selectedProfileId = profileService.selectedProfileId;
+    final selectedProfileId = resolvedAllowMultipleProfiles
+        ? profileService.selectedProfileId
+        : null;
     final isMainProfile =
-        profileService.isMainProfileSelected || selectedProfileId == null;
+        !resolvedAllowMultipleProfiles ||
+        profileService.isMainProfileSelected ||
+        selectedProfileId == null;
 
     if (!mounted) return;
     setState(() {
       userName = resolvedUserName;
       activeProfileCount = resolvedProfileCount;
+      allowMultipleProfiles = resolvedAllowMultipleProfiles;
       isSummaryLoading = true;
       isActiveMissionsLoading = true;
       isParticipationsLoading = true;
     });
 
-    final client = Supabase.instance.client;
-
     try {
-      final userRow = await client
-          .from('user')
-          .select('company, is_employee, department')
-          .eq('id', user.id)
-          .single();
       final pointsRow = await client
           .from(AwardPointsTable().tableName)
           .select(AwardPointsRow.pointsField)
           .eq(AwardPointsRow.userField, user.id)
           .maybeSingle();
 
-      final companyId = userRow['company'] as String?;
-      final departmentId = userRow['department'] as String?;
+      final companyId = userRow?['company'] as String?;
+      final departmentId = userRow?['department'] as String?;
       final resolvedCompanyName = companyId != null
           ? (await client
                     .from('company')
@@ -209,8 +237,9 @@ class _AccountTabState extends State<AccountTab> {
 
       if (!mounted) return;
       setState(() {
+        allowMultipleProfiles = resolvedAllowMultipleProfiles;
         companyName = resolvedCompanyName;
-        isEmployee = userRow['is_employee'] as bool?;
+        isEmployee = userRow?['is_employee'] as bool?;
         departmentName = resolvedDepartmentName;
         totalMileage = resolvedMileage;
         isSummaryLoading = false;
@@ -638,6 +667,9 @@ class _AccountTabState extends State<AccountTab> {
 
         return AccountLoggedInContent(
           userName: userName ?? UserAuthService.instance.displayName,
+          showProfileChange:
+              UserAuthService.instance.userRow?.allowMultipleProfiles ??
+              allowMultipleProfiles,
           activeProfileCount: activeProfileCount,
           totalMileage: totalMileage,
           activeMissions: activeMissions,
@@ -665,19 +697,29 @@ class _AccountTabState extends State<AccountTab> {
     );
   }
 
-  void _handleProfileChange() {
-    context.push<String>(ProfileSelectScreen.route).then((
-      selectedProfile,
-    ) async {
-      if (selectedProfile == null || !mounted) return;
+  Future<void> _handleProfileChange() async {
+    final canUseMultipleProfiles =
+        UserAuthService.instance.userRow?.allowMultipleProfiles ??
+        allowMultipleProfiles;
+    if (!canUseMultipleProfiles) {
+      await ProfileService.instance.selectMainProfile();
+      if (mounted) {
+        await _fetchAccountData();
+      }
+      return;
+    }
 
-      setState(() {
-        isSummaryLoading = true;
-        isActiveMissionsLoading = true;
-        isParticipationsLoading = true;
-      });
-      await _fetchAccountData();
+    final selectedProfile = await context.push<String>(
+      ProfileSelectScreen.route,
+    );
+    if (selectedProfile == null || !mounted) return;
+
+    setState(() {
+      isSummaryLoading = true;
+      isActiveMissionsLoading = true;
+      isParticipationsLoading = true;
     });
+    await _fetchAccountData();
   }
 }
 
