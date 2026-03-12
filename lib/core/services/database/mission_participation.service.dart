@@ -211,6 +211,11 @@ class MissionParticipationService {
     final profileUsed = profileService.isMainProfileSelected
         ? null
         : profileService.selectedProfileId;
+    var userRow = UserAuthService.instance.userRow;
+    if (userRow == null) {
+      await UserAuthService.instance.refresh();
+      userRow = UserAuthService.instance.userRow;
+    }
 
     await _client
         .from(_participationTable.tableName)
@@ -221,6 +226,8 @@ class MissionParticipationService {
           MissionParticipationRow.photoFolderPathField: photo.folderPath,
           MissionParticipationRow.photoFileNameField: photo.fileName,
           MissionParticipationRow.profileUsedField: profileUsed,
+          MissionParticipationRow.departmentField: userRow?.department,
+          MissionParticipationRow.subDepartmentField: userRow?.subDepartment,
         })
         .select()
         .single();

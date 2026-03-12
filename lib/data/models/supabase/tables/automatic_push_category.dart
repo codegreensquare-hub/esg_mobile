@@ -111,4 +111,4 @@ class AutomaticPushCategoryRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 10:37:49.425696
+/// Date: 2026-03-12 16:36:10.593190

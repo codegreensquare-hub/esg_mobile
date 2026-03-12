@@ -169,4 +169,4 @@ class ClientAdminNotificationRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 10:37:49.450034
+/// Date: 2026-03-12 16:36:10.598370
