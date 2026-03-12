@@ -823,7 +823,6 @@ class _MainScreenState extends State<MainScreen> {
 
       await showModalBottomSheet<void>(
         context: context,
-        showDragHandle: true,
         isScrollControlled: true,
         builder: (ctx) {
           final closeButton = IconButton(
@@ -1135,12 +1134,15 @@ class _MissionListSheetContentState extends State<_MissionListSheetContent> {
         children: [
           Row(
             children: [
-              const SizedBox(width: 48, height: 48),
+              const SizedBox(width: 48, height: 64),
               Expanded(
                 child: Center(
                   child: Text(
                     '콕 미션 참여하기',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontFamily: 'Noto Sans KR',
+                      fontWeight: FontWeight(700),
+                    ),
                   ),
                 ),
               ),
@@ -1148,6 +1150,7 @@ class _MissionListSheetContentState extends State<_MissionListSheetContent> {
                 icon: const Icon(Icons.close),
                 onPressed: widget.onClose,
               ),
+              const SizedBox(width: 16),
             ],
           ),
           Center(
