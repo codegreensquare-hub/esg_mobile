@@ -46,6 +46,7 @@ class UserRow extends SupabaseDataRow {
     String? department,
     bool? isEmployee,
     String? subDepartment,
+    ClientAdminType? clientAdminType,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -79,6 +80,8 @@ class UserRow extends SupabaseDataRow {
          if (isEmployee != null) 'is_employee': supaSerialize(isEmployee),
          if (subDepartment != null)
            'sub_department': supaSerialize(subDepartment),
+         if (clientAdminType != null)
+           'client_admin_type': supaSerialize(clientAdminType),
        });
 
   /// User Row
@@ -268,6 +271,17 @@ class UserRow extends SupabaseDataRow {
   set subDepartment(String? value) =>
       setField<String>(subDepartmentField, value);
 
+  /// Client Admin Type field name
+  static const String clientAdminTypeField = 'client_admin_type';
+
+  /// Client Admin Type
+  ClientAdminType? get clientAdminType => getField<ClientAdminType>(
+    clientAdminTypeField,
+    enumValues: ClientAdminType.values,
+  );
+  set clientAdminType(ClientAdminType? value) =>
+      setField<ClientAdminType>(clientAdminTypeField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -293,6 +307,7 @@ class UserRow extends SupabaseDataRow {
     String? department,
     bool? isEmployee,
     String? subDepartment,
+    ClientAdminType? clientAdminType,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -324,8 +339,10 @@ class UserRow extends SupabaseDataRow {
     'department': supaSerialize(department) ?? data['department'],
     'is_employee': supaSerialize(isEmployee) ?? data['is_employee'],
     'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
+    'client_admin_type':
+        supaSerialize(clientAdminType) ?? data['client_admin_type'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-11 15:32:51.732153
+/// Date: 2026-03-12 10:37:49.713164

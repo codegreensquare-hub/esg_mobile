@@ -14,6 +14,8 @@ export 'award_points_transaction.dart';
 export 'cart_item.dart';
 export 'cart_item_option.dart';
 export 'client_admin_notification.dart';
+export 'comment_blocked.dart';
+export 'comment_reported.dart';
 export 'company.dart';
 export 'cost_change_request.dart';
 export 'department.dart';
@@ -83,4 +85,4 @@ export 'user_settings.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-03-11 15:32:51.734630
+/// Date: 2026-03-12 10:37:49.720389

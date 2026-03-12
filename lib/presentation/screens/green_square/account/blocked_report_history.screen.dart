@@ -1,19 +1,8 @@
+import 'package:esg_mobile/core/services/database/story.service.dart';
+import 'package:esg_mobile/data/entities/blocked_report_comment_entry.dart';
 import 'package:flutter/material.dart';
 
-/// Mock entry for blocked or reported history list.
-class _HistoryEntry {
-  const _HistoryEntry({
-    required this.maskedName,
-    required this.date,
-    required this.comment,
-  });
-
-  final String maskedName;
-  final String date;
-  final String comment;
-}
-
-class BlockedReportHistoryScreen extends StatelessWidget {
+class BlockedReportHistoryScreen extends StatefulWidget {
   const BlockedReportHistoryScreen({
     super.key,
     required this.userId,
@@ -21,45 +10,47 @@ class BlockedReportHistoryScreen extends StatelessWidget {
 
   final String userId;
 
+  @override
+  State<BlockedReportHistoryScreen> createState() =>
+      _BlockedReportHistoryScreenState();
+}
+
+class _BlockedReportHistoryScreenState extends State<BlockedReportHistoryScreen> {
   static const Color _appBarBg = Color(0xFFF5F3F1);
   static const Color _buttonBg = Color(0xFFB9B7B5);
   static const Color _pageBg = Color(0xFFF5F3F1);
 
-  static const List<_HistoryEntry> _mockBlocked = [
-    _HistoryEntry(
-      maskedName: '김**',
-      date: '2020.02.01',
-      comment: '우와 꼭 한번 가보고 싶네요',
-    ),
-    _HistoryEntry(
-      maskedName: '김**',
-      date: '2020.11.03',
-      comment: '우와 꼭 한번 가보고 싶네요',
-    ),
-    _HistoryEntry(
-      maskedName: '김**',
-      date: '2020.11.03',
-      comment: '우와 꼭 한번 가보고 싶네요',
-    ),
-  ];
+  static const int _initialCount = 3;
 
-  static const List<_HistoryEntry> _mockReported = [
-    _HistoryEntry(
-      maskedName: '김**',
-      date: '2020.11.03',
-      comment: '우와 꼭 한번 가보고 싶네요',
-    ),
-    _HistoryEntry(
-      maskedName: '김**',
-      date: '2020.11.03',
-      comment: '우와 꼭 한번 가보고 싶네요',
-    ),
-    _HistoryEntry(
-      maskedName: '김**',
-      date: '2020.11.03',
-      comment: '우와 꼭 한번 가보고 싶네요',
-    ),
-  ];
+  List<BlockedReportCommentEntry> _blocked = [];
+  List<BlockedReportCommentEntry> _reported = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final blocked = await StoryService.instance.fetchBlockedCommentHistory(
+      widget.userId,
+      limit: _initialCount,
+      offset: 0,
+    );
+    final reported = await StoryService.instance.fetchReportedCommentHistory(
+      widget.userId,
+      limit: _initialCount,
+      offset: 0,
+    );
+    if (!mounted) return;
+    setState(() {
+      _blocked = blocked;
+      _reported = reported;
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +70,8 @@ class BlockedReportHistoryScreen extends StatelessWidget {
               children: [
                 Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 36, vertical: 8),
                     decoration: BoxDecoration(
                       color: _buttonBg,
                       borderRadius: BorderRadius.circular(6),
@@ -128,48 +120,83 @@ class BlockedReportHistoryScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 32),
-              _SectionHeader(
-                title: '차단 내역',
-                onMore: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => _BlockedOrReportedListScreen(
-                        isBlocked: true,
-                        userId: userId,
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 32),
+                    _SectionHeader(
+                      title: '차단 내역',
+                      onMore: () => _openListScreen(isBlocked: true),
+                    ),
+                    const SizedBox(height: 12),
+                    ..._blocked.map(
+                      (e) => _HistoryCard(
+                        entry: e,
+                        showUnblock: true,
+                        onUnblock: () => _onUnblock(e.commentId),
                       ),
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              ..._mockBlocked.map((e) => _HistoryCard(entry: e, showUnblock: true)),
-              const SizedBox(height: 24),
-              _SectionHeader(
-                title: '신고 내역',
-                onMore: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => _BlockedOrReportedListScreen(
-                        isBlocked: false,
-                        userId: userId,
+                    const SizedBox(height: 24),
+                    _SectionHeader(
+                      title: '신고 내역',
+                      onMore: () => _openListScreen(isBlocked: false),
+                    ),
+                    const SizedBox(height: 6),
+                    ..._reported.map(
+                      (e) => _HistoryCard(
+                        entry: e,
+                        showUnblock: false,
+                        onUnblock: null,
                       ),
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-              const SizedBox(height: 6),
-              ..._mockReported.map((e) => _HistoryCard(entry: e, showUnblock: false)),
-            ],
-          ),
-        ),
       ),
     );
+  }
+
+  void _openListScreen({required bool isBlocked}) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (context) => _BlockedOrReportedListScreen(
+              isBlocked: isBlocked,
+              userId: widget.userId,
+            ),
+          ),
+        )
+        .then((_) {
+      if (!mounted) return;
+      _load();
+    });
+  }
+
+  Future<void> _onUnblock(String commentId) async {
+    try {
+      await StoryService.instance.unblockComment(
+        commentId: commentId,
+        userId: widget.userId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _blocked = _blocked.where((e) => e.commentId != commentId).toList();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('차단이 해제되었습니다.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('차단 해제에 실패했습니다. 다시 시도해 주세요.'),
+        ),
+      );
+    }
   }
 }
 
@@ -220,10 +247,12 @@ class _HistoryCard extends StatelessWidget {
   const _HistoryCard({
     required this.entry,
     required this.showUnblock,
+    this.onUnblock,
   });
 
-  final _HistoryEntry entry;
+  final BlockedReportCommentEntry entry;
   final bool showUnblock;
+  final VoidCallback? onUnblock;
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +301,7 @@ class _HistoryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  entry.comment,
+                  entry.commentText,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Noto Sans KR',
                     color: const Color(0xFF3B3733),
@@ -281,9 +310,9 @@ class _HistoryCard extends StatelessWidget {
               ],
             ),
           ),
-          if (showUnblock)
+          if (showUnblock && onUnblock != null)
             TextButton(
-              onPressed: () {},
+              onPressed: onUnblock,
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 minimumSize: Size.zero,
@@ -318,80 +347,78 @@ class _BlockedOrReportedListScreen extends StatefulWidget {
       _BlockedOrReportedListScreenState();
 }
 
-class _BlockedOrReportedListScreenState extends State<_BlockedOrReportedListScreen> {
+class _BlockedOrReportedListScreenState
+    extends State<_BlockedOrReportedListScreen> {
   static const Color _pageBg = Color(0xFFF5F3F1);
   static const Color _appBarBg = Color(0xFFF5F3F1);
   static const Color _buttonBg = Color(0xFFB9B7B5);
 
-  static const List<_HistoryEntry> _mockAllBlocked = [
-    _HistoryEntry(maskedName: '김**', date: '2020.02.01', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '김**', date: '2020.11.03', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '이**', date: '2020.10.01', comment: '좋은 정보 감사해요'),
-    _HistoryEntry(maskedName: '박**', date: '2020.09.15', comment: '다음에 가봐야겠어요'),
-    _HistoryEntry(maskedName: '최**', date: '2020.08.20', comment: '추천해주셔서 감사합니다'),
-    _HistoryEntry(maskedName: '정**', date: '2020.07.10', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '강**', date: '2020.06.05', comment: '유익한 글이에요'),
-    _HistoryEntry(maskedName: '조**', date: '2020.05.22', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '윤**', date: '2020.04.18', comment: '다음에 참여해볼게요'),
-    _HistoryEntry(maskedName: '장**', date: '2020.03.12', comment: '좋은 정보 감사해요'),
-    _HistoryEntry(maskedName: '임**', date: '2020.02.28', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '한**', date: '2020.01.15', comment: '유익한 글이에요'),
-    _HistoryEntry(maskedName: '오**', date: '2019.12.01', comment: '다음에 가봐야겠어요'),
-    _HistoryEntry(maskedName: '서**', date: '2019.11.20', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '신**', date: '2019.10.10', comment: '추천해주셔서 감사합니다'),
-    _HistoryEntry(maskedName: '김**', date: '2019.09.05', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '이**', date: '2019.08.12', comment: '좋은 정보 감사해요'),
-    _HistoryEntry(maskedName: '박**', date: '2019.07.20', comment: '다음에 가봐야겠어요'),
-    _HistoryEntry(maskedName: '최**', date: '2019.06.08', comment: '유익한 글이에요'),
-    _HistoryEntry(maskedName: '정**', date: '2019.05.15', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '강**', date: '2019.04.22', comment: '추천해주셔서 감사합니다'),
-    _HistoryEntry(maskedName: '조**', date: '2019.03.10', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '윤**', date: '2019.02.01', comment: '다음에 참여해볼게요'),
-    _HistoryEntry(maskedName: '장**', date: '2019.01.18', comment: '좋은 정보 감사해요'),
-  ];
-
-  static const List<_HistoryEntry> _mockAllReported = [
-    _HistoryEntry(maskedName: '김**', date: '2020.11.03', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '이**', date: '2020.10.25', comment: '부적절한 댓글입니다'),
-    _HistoryEntry(maskedName: '박**', date: '2020.09.30', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '최**', date: '2020.08.15', comment: '스팸으로 신고합니다'),
-    _HistoryEntry(maskedName: '정**', date: '2020.07.08', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '강**', date: '2020.06.12', comment: '부적절한 내용'),
-    _HistoryEntry(maskedName: '조**', date: '2020.05.20', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '윤**', date: '2020.04.05', comment: '신고합니다'),
-    _HistoryEntry(maskedName: '장**', date: '2020.03.18', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '임**', date: '2020.02.22', comment: '부적절한 댓글'),
-    _HistoryEntry(maskedName: '한**', date: '2020.01.10', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '오**', date: '2019.12.15', comment: '스팸 신고'),
-    _HistoryEntry(maskedName: '서**', date: '2019.11.08', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '신**', date: '2019.10.20', comment: '부적절한 글'),
-    _HistoryEntry(maskedName: '홍**', date: '2019.09.01', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '김**', date: '2019.08.12', comment: '부적절한 댓글입니다'),
-    _HistoryEntry(maskedName: '이**', date: '2019.07.20', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '박**', date: '2019.06.08', comment: '스팸으로 신고합니다'),
-    _HistoryEntry(maskedName: '최**', date: '2019.05.15', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '정**', date: '2019.04.22', comment: '부적절한 내용'),
-    _HistoryEntry(maskedName: '강**', date: '2019.03.10', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '조**', date: '2019.02.01', comment: '신고합니다'),
-    _HistoryEntry(maskedName: '윤**', date: '2019.01.18', comment: '우와 꼭 한번 가보고 싶네요'),
-    _HistoryEntry(maskedName: '장**', date: '2018.12.05', comment: '부적절한 댓글'),
-  ];
-
   static const int _pageSize = 5;
+  static const int _maxFetch = 500;
 
+  List<BlockedReportCommentEntry> _allEntries = [];
+  bool _loading = true;
   int _currentPage = 1;
-
-  List<_HistoryEntry> get _allEntries =>
-      widget.isBlocked ? _mockAllBlocked : _mockAllReported;
 
   int get _totalItems => _allEntries.length;
   int get _totalPages => (_totalItems / _pageSize).ceil().clamp(1, 999);
 
-  List<_HistoryEntry> get _pageItems {
+  List<BlockedReportCommentEntry> get _pageItems {
     final start = (_currentPage - 1) * _pageSize;
     final end = (start + _pageSize).clamp(0, _totalItems);
     if (start >= _totalItems) return [];
     return _allEntries.sublist(start, end);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final list = widget.isBlocked
+        ? await StoryService.instance.fetchBlockedCommentHistory(
+            widget.userId,
+            limit: _maxFetch,
+            offset: 0,
+          )
+        : await StoryService.instance.fetchReportedCommentHistory(
+            widget.userId,
+            limit: _maxFetch,
+            offset: 0,
+          );
+    if (!mounted) return;
+    setState(() {
+      _allEntries = list;
+      _loading = false;
+      _currentPage = 1;
+    });
+  }
+
+  Future<void> _onUnblock(String commentId) async {
+    try {
+      await StoryService.instance.unblockComment(
+        commentId: commentId,
+        userId: widget.userId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _allEntries =
+            _allEntries.where((e) => e.commentId != commentId).toList();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('차단이 해제되었습니다.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('차단 해제에 실패했습니다. 다시 시도해 주세요.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -405,62 +432,78 @@ class _BlockedOrReportedListScreenState extends State<_BlockedOrReportedListScre
       backgroundColor: _pageBg,
       appBar: _buildSameAppBar(context, theme),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: InkWell(
-                onTap: () => Navigator.of(context).pop(),
-                borderRadius: BorderRadius.circular(4),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    '< 이전 페이지',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontFamily: 'Noto Sans KR',
-                      color: const Color(0xFF4E4E4E),
-                      fontWeight: FontWeight.w400,
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          '< 이전 페이지',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontFamily: 'Noto Sans KR',
+                            color: const Color(0xFF4E4E4E),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Center(
-                child: Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontFamily: 'Noto Sans KR',
-                    color: const Color(0xFF3B3733),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Center(
+                      child: Text(
+                        subtitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontFamily: 'Noto Sans KR',
+                          color: const Color(0xFF3B3733),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: _allEntries.isEmpty
+                        ? Center(
+                            child: Text(
+                              '표시할 내역이 없습니다.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: 'Noto Sans KR',
+                                color: const Color(0xFF4E4E4E),
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: _pageItems.length,
+                            itemBuilder: (context, index) {
+                              final entry = _pageItems[index];
+                              return _HistoryCard(
+                                entry: entry,
+                                showUnblock: widget.isBlocked,
+                                onUnblock: widget.isBlocked
+                                    ? () => _onUnblock(entry.commentId)
+                                    : null,
+                              );
+                            },
+                          ),
+                  ),
+                  if (_totalItems > 0)
+                    _PaginationBar(
+                      currentPage: _currentPage,
+                      totalPages: _totalPages,
+                      onPageChanged: (page) {
+                        setState(() => _currentPage = page);
+                      },
+                    ),
+                ],
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _pageItems.length,
-                itemBuilder: (context, index) {
-                  final entry = _pageItems[index];
-                  return _HistoryCard(
-                    entry: entry,
-                    showUnblock: widget.isBlocked,
-                  );
-                },
-              ),
-            ),
-            _PaginationBar(
-              currentPage: _currentPage,
-              totalPages: _totalPages,
-              onPageChanged: (page) {
-                setState(() => _currentPage = page);
-              },
-            ),
-          ],
-        ),
       ),
     );
   }

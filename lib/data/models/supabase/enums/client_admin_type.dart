@@ -4,14 +4,15 @@
 //
 // ignore_for_file: require_trailing_commas, constant_identifier_names
 
-/// Mission Type enum
-enum MissionType {
+/// Client Admin Type enum
+enum ClientAdminType {
+  /// super (DB value: super)
+  super_,
+  /// mid
+  mid,
   /// general
   general,
-
-  /// banner_exposed
-  banner_exposed,
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 10:37:49.312795
+/// Date: 2026-03-12 10:33:15.556287

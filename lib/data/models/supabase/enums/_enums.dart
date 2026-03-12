@@ -6,6 +6,7 @@
 
 export 'automatic_push_type.dart';
 export 'client_admin_notification_type.dart';
+export 'client_admin_type.dart';
 export 'cost_change_request_type.dart';
 export 'interval_unit.dart';
 export 'mission_publicity.dart';
@@ -18,4 +19,4 @@ export 'user_type.dart';
 export 'vendor_admin_type.dart';
 
 /// Tag: v2
-/// Date: 2026-03-11 15:32:51.663774
+/// Date: 2026-03-12 10:37:49.314121

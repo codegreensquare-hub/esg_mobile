@@ -1,3 +1,4 @@
+import 'package:esg_mobile/data/entities/blocked_report_comment_entry.dart';
 import 'package:esg_mobile/data/entities/liked_story.dart';
 import 'package:esg_mobile/data/entities/product_with_other_details.dart';
 import 'package:esg_mobile/data/entities/story_comment_with_user.dart';
@@ -353,5 +354,178 @@ class StoryService {
       ReportRow.reporterField: userId,
       ReportRow.storyReportedField: storyId,
     });
+  }
+
+  Future<void> blockComment({
+    required String commentId,
+    required String userId,
+  }) async {
+    await _client.from(CommentBlockedTable().tableName).insert({
+      CommentBlockedRow.blockerField: userId,
+      CommentBlockedRow.commentBlockedField: commentId,
+    });
+  }
+
+  Future<void> unblockComment({
+    required String commentId,
+    required String userId,
+  }) async {
+    await _client
+        .from(CommentBlockedTable().tableName)
+        .delete()
+        .eq(CommentBlockedRow.commentBlockedField, commentId)
+        .eq(CommentBlockedRow.blockerField, userId);
+  }
+
+  /// Returns comment IDs that [userId] has blocked.
+  Future<List<String>> fetchBlockedCommentIds(String userId) async {
+    final response = await _client
+        .from(CommentBlockedTable().tableName)
+        .select(CommentBlockedRow.commentBlockedField)
+        .eq(CommentBlockedRow.blockerField, userId);
+    return (response as List)
+        .map<String>(
+            (e) => e[CommentBlockedRow.commentBlockedField] as String)
+        .toList();
+  }
+
+  static String _maskDisplayName(String? username, String? email) {
+    final raw = username?.trim() ?? email?.trim() ?? '';
+    if (raw.isEmpty) return '***';
+    if (raw.length == 1) return '$raw**';
+    return '${raw[0]}**';
+  }
+
+  static String _formatDate(DateTime d) {
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y.$m.$day';
+  }
+
+  /// Fetches blocked comment history for [userId], ordered by created_at desc.
+  Future<List<BlockedReportCommentEntry>> fetchBlockedCommentHistory(
+    String userId, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final rows = await _client
+        .from(CommentBlockedTable().tableName)
+        .select('id, created_at, ${CommentBlockedRow.commentBlockedField}')
+        .eq(CommentBlockedRow.blockerField, userId)
+        .order(CommentBlockedRow.createdAtField, ascending: false)
+        .range(offset, offset + limit - 1);
+    final list = rows as List;
+    if (list.isEmpty) return [];
+    final commentIds =
+        list
+            .map<String>(
+                (e) => e[CommentBlockedRow.commentBlockedField] as String)
+            .toList();
+    final comments = await _client
+        .from(StoryCommentTable().tableName)
+        .select('*, user:comment_by(username, email)')
+        .inFilter(StoryCommentRow.idField, commentIds);
+    final commentMap = <String, Map<String, dynamic>>{};
+    for (final c in comments as List) {
+      final id = c[StoryCommentRow.idField] as String?;
+      if (id != null) commentMap[id] = c as Map<String, dynamic>;
+    }
+    final result = <BlockedReportCommentEntry>[];
+    for (final row in list) {
+      final commentId = row[CommentBlockedRow.commentBlockedField] as String?;
+      if (commentId == null) continue;
+      final commentData = commentMap[commentId];
+      if (commentData == null) continue;
+      final userData = commentData['user'];
+      final username = userData is Map ? userData['username'] as String? : null;
+      final email = userData is Map ? userData['email'] as String? : null;
+      final createdAt = commentData[StoryCommentRow.createdAtField];
+      final dateStr = createdAt != null
+          ? _formatDate(DateTime.parse(createdAt.toString()))
+          : '';
+      result.add(BlockedReportCommentEntry(
+        commentId: commentId,
+        maskedName: _maskDisplayName(username, email),
+        date: dateStr,
+        commentText:
+            (commentData[StoryCommentRow.commentField] as String?) ?? '',
+        isBlocked: true,
+      ));
+    }
+    return result;
+  }
+
+  /// Fetches reported comment history for [userId], ordered by created_at desc.
+  Future<List<BlockedReportCommentEntry>> fetchReportedCommentHistory(
+    String userId, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final rows = await _client
+        .from(CommentReportedTable().tableName)
+        .select('id, created_at, ${CommentReportedRow.commentReportedField}')
+        .eq(CommentReportedRow.reporterField, userId)
+        .order(CommentReportedRow.createdAtField, ascending: false)
+        .range(offset, offset + limit - 1);
+    final list = rows as List;
+    if (list.isEmpty) return [];
+    final commentIds =
+        list
+            .map<String>(
+                (e) => e[CommentReportedRow.commentReportedField] as String)
+            .toList();
+    final comments = await _client
+        .from(StoryCommentTable().tableName)
+        .select('*, user:comment_by(username, email)')
+        .inFilter(StoryCommentRow.idField, commentIds);
+    final commentMap = <String, Map<String, dynamic>>{};
+    for (final c in comments as List) {
+      final id = c[StoryCommentRow.idField] as String?;
+      if (id != null) commentMap[id] = c as Map<String, dynamic>;
+    }
+    final result = <BlockedReportCommentEntry>[];
+    for (final row in list) {
+      final commentId =
+          row[CommentReportedRow.commentReportedField] as String?;
+      if (commentId == null) continue;
+      final commentData = commentMap[commentId];
+      if (commentData == null) continue;
+      final userData = commentData['user'];
+      final username = userData is Map ? userData['username'] as String? : null;
+      final email = userData is Map ? userData['email'] as String? : null;
+      final createdAt = commentData[StoryCommentRow.createdAtField];
+      final dateStr = createdAt != null
+          ? _formatDate(DateTime.parse(createdAt.toString()))
+          : '';
+      result.add(BlockedReportCommentEntry(
+        commentId: commentId,
+        maskedName: _maskDisplayName(username, email),
+        date: dateStr,
+        commentText:
+            (commentData[StoryCommentRow.commentField] as String?) ?? '',
+        isBlocked: false,
+      ));
+    }
+    return result;
+  }
+
+  Future<void> reportComment({
+    required String commentId,
+    required String userId,
+  }) async {
+    try {
+      await _client.from(CommentReportedTable().tableName).insert({
+        CommentReportedRow.reporterField: userId,
+        CommentReportedRow.commentReportedField: commentId,
+      });
+    } on PostgrestException catch (e) {
+      // Ignore duplicate reports from the same user for the same comment.
+      // The unique (reporter, comment_reported) constraint will raise a 23505 error.
+      if (e.code == '23505') {
+        return;
+      }
+      rethrow;
+    }
   }
 }

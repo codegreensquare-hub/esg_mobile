@@ -63,6 +63,7 @@ class _StoryDialogState extends State<StoryDialog> {
   String? userId;
   double _baseDiscountRate = 0.0;
   String? _editingCommentId;
+  Set<String> _blockedCommentIds = {};
 
   @override
   void initState() {
@@ -116,6 +117,9 @@ class _StoryDialogState extends State<StoryDialog> {
         : (await StoryService.instance.fetchBlockedStoryIds(
             userId!,
           )).contains(storyId);
+    final blockedCommentIds = userId == null
+        ? <String>[]
+        : await StoryService.instance.fetchBlockedCommentIds(userId!);
 
     if (!mounted) return;
     setState(() {
@@ -141,6 +145,7 @@ class _StoryDialogState extends State<StoryDialog> {
       likeCount = count;
       hasLiked = liked;
       isBlocked = blocked;
+      _blockedCommentIds = Set<String>.from(blockedCommentIds);
       recommendedProducts = fetchedProducts;
       recommendedMissions = fetchedMissions;
       isLoadingRecommendations = false;
@@ -251,6 +256,178 @@ class _StoryDialogState extends State<StoryDialog> {
           ],
         );
       },
+    );
+  }
+
+  Future<void> _showBlockCompletedDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 36, 24, 36),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '차단되었습니다.',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFC6C6C6),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('확인'),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showReportCompletedDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 36, 24, 36),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '신고가 접수되었습니다.',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFC6C6C6),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('확인'),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildBlockedCommentRow(
+    BuildContext context,
+    String commentId,
+    ThemeData theme,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: const CircleAvatar(
+            child: Icon(Icons.person),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      '*차단한 댓글입니다',
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () async {
+                      final uid = userId;
+                      if (uid == null) return;
+                      try {
+                        await StoryService.instance.unblockComment(
+                          commentId: commentId,
+                          userId: uid,
+                        );
+                        if (!mounted) return;
+                        setState(() => _blockedCommentIds.remove(commentId));
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('차단이 해제되었습니다.'),
+                          ),
+                        );
+                      } catch (_) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('차단 해제에 실패했습니다. 다시 시도해 주세요.'),
+                          ),
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      foregroundColor: const Color(0xFF4E4E4E),
+                      textStyle: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    child: const Text('차단 해제'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -907,7 +1084,27 @@ class _StoryDialogState extends State<StoryDialog> {
                               itemCount: comments.length,
                               itemBuilder: (context, index) {
                                 final commentWithUser = comments[index];
-                                final isOwner = userId != null &&
+                                final isBlockedComment = _blockedCommentIds
+                                    .contains(
+                                      commentWithUser.comment.id,
+                                    );
+                                if (isBlockedComment) {
+                                  return Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      16,
+                                      16,
+                                      0,
+                                    ),
+                                    child: _buildBlockedCommentRow(
+                                      context,
+                                      commentWithUser.comment.id,
+                                      theme,
+                                    ),
+                                  );
+                                }
+                                final isOwner =
+                                    userId != null &&
                                     commentWithUser.comment.commentBy.trim() ==
                                         userId!.trim();
                                 return Padding(
@@ -951,11 +1148,12 @@ class _StoryDialogState extends State<StoryDialog> {
                                                             .email ??
                                                         'Anonymous',
                                                     style: theme
-                                                        .textTheme.bodyMedium
+                                                        .textTheme
+                                                        .bodyMedium
                                                         ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                   ),
@@ -964,32 +1162,36 @@ class _StoryDialogState extends State<StoryDialog> {
                                                 Text(
                                                   _formatDateYyyyMmDd(
                                                     commentWithUser
-                                                        .comment.createdAt,
+                                                        .comment
+                                                        .createdAt,
                                                   ),
                                                   style: theme
-                                                      .textTheme.bodySmall
+                                                      .textTheme
+                                                      .bodySmall
                                                       ?.copyWith(
-                                                    color: cs.onSurfaceVariant,
-                                                  ),
+                                                        color:
+                                                            cs.onSurfaceVariant,
+                                                      ),
                                                 ),
                                                 const Spacer(),
-                                                if (isOwner) ...[
+                                                if (userId != null &&
+                                                    isOwner) ...[
                                                   TextButton(
                                                     onPressed: () {
                                                       setState(() {
                                                         _editingCommentId =
                                                             commentWithUser
-                                                                .comment.id;
+                                                                .comment
+                                                                .id;
                                                         _editCommentController
-                                                            .text =
-                                                                commentWithUser
-                                                                        .comment
-                                                                        .comment ??
-                                                                    '';
+                                                                .text =
+                                                            commentWithUser
+                                                                .comment
+                                                                .comment ??
+                                                            '';
                                                       });
                                                     },
-                                                    style:
-                                                        TextButton.styleFrom(
+                                                    style: TextButton.styleFrom(
                                                       padding: EdgeInsets.zero,
                                                       minimumSize: Size.zero,
                                                       tapTargetSize:
@@ -997,13 +1199,15 @@ class _StoryDialogState extends State<StoryDialog> {
                                                               .shrinkWrap,
                                                       foregroundColor:
                                                           const Color(
-                                                              0xFF4E4E4E),
+                                                            0xFF4E4E4E,
+                                                          ),
                                                       textStyle: theme
-                                                          .textTheme.bodySmall
+                                                          .textTheme
+                                                          .bodySmall
                                                           ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
                                                     ),
                                                     child: const Text('수정'),
                                                   ),
@@ -1012,15 +1216,16 @@ class _StoryDialogState extends State<StoryDialog> {
                                                     onPressed: () async {
                                                       final confirmed =
                                                           await _confirmDeleteComment(
-                                                        context,
-                                                      );
+                                                            context,
+                                                          );
                                                       if (confirmed == true) {
                                                         await StoryService
                                                             .instance
                                                             .deleteComment(
-                                                          commentWithUser
-                                                              .comment.id,
-                                                        );
+                                                              commentWithUser
+                                                                  .comment
+                                                                  .id,
+                                                            );
                                                         if (!mounted) return;
                                                         setState(() {
                                                           comments.removeAt(
@@ -1032,8 +1237,7 @@ class _StoryDialogState extends State<StoryDialog> {
                                                         );
                                                       }
                                                     },
-                                                    style:
-                                                        TextButton.styleFrom(
+                                                    style: TextButton.styleFrom(
                                                       padding: EdgeInsets.zero,
                                                       minimumSize: Size.zero,
                                                       tapTargetSize:
@@ -1041,25 +1245,64 @@ class _StoryDialogState extends State<StoryDialog> {
                                                               .shrinkWrap,
                                                       foregroundColor:
                                                           const Color(
-                                                              0xFF4E4E4E),
+                                                            0xFF4E4E4E,
+                                                          ),
                                                       textStyle: theme
-                                                          .textTheme.bodySmall
+                                                          .textTheme
+                                                          .bodySmall
                                                           ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
                                                     ),
                                                     child: const Text('삭제'),
                                                   ),
-                                                ] else ...[
+                                                ] else if (userId != null &&
+                                                    !isOwner) ...[
                                                   TextButton(
                                                     onPressed: () async {
-                                                      await _confirmBlockComment(
-                                                        context,
-                                                      );
+                                                      final confirmed =
+                                                          await _confirmBlockComment(
+                                                            context,
+                                                          );
+                                                      if (confirmed != true)
+                                                        return;
+                                                      try {
+                                                        await StoryService
+                                                            .instance
+                                                            .blockComment(
+                                                              commentId:
+                                                                  commentWithUser
+                                                                      .comment
+                                                                      .id,
+                                                              userId: userId!,
+                                                            );
+                                                        if (!mounted) return;
+                                                        setState(() {
+                                                          _blockedCommentIds
+                                                              .add(
+                                                                commentWithUser
+                                                                    .comment
+                                                                    .id,
+                                                              );
+                                                        });
+                                                        await _showBlockCompletedDialog(
+                                                          context,
+                                                        );
+                                                      } catch (_) {
+                                                        if (!mounted) return;
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          const SnackBar(
+                                                            content: Text(
+                                                              '차단에 실패했습니다. 다시 시도해 주세요.',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
                                                     },
-                                                    style:
-                                                        TextButton.styleFrom(
+                                                    style: TextButton.styleFrom(
                                                       padding: EdgeInsets.zero,
                                                       minimumSize: Size.zero,
                                                       tapTargetSize:
@@ -1067,25 +1310,55 @@ class _StoryDialogState extends State<StoryDialog> {
                                                               .shrinkWrap,
                                                       foregroundColor:
                                                           const Color(
-                                                              0xFF4E4E4E),
+                                                            0xFF4E4E4E,
+                                                          ),
                                                       textStyle: theme
-                                                          .textTheme.bodySmall
+                                                          .textTheme
+                                                          .bodySmall
                                                           ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
                                                     ),
                                                     child: const Text('차단'),
                                                   ),
                                                   const SizedBox(width: 8),
                                                   TextButton(
                                                     onPressed: () async {
-                                                      await _confirmReportComment(
-                                                        context,
-                                                      );
+                                                      final confirmed =
+                                                          await _confirmReportComment(
+                                                            context,
+                                                          );
+                                                      if (confirmed != true)
+                                                        return;
+                                                      try {
+                                                        await StoryService
+                                                            .instance
+                                                            .reportComment(
+                                                              commentId:
+                                                                  commentWithUser
+                                                                      .comment
+                                                                      .id,
+                                                              userId: userId!,
+                                                            );
+                                                        if (!mounted) return;
+                                                        await _showReportCompletedDialog(
+                                                          context,
+                                                        );
+                                                      } catch (_) {
+                                                        if (!mounted) return;
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          const SnackBar(
+                                                            content: Text(
+                                                              '신고에 실패했습니다. 다시 시도해 주세요.',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
                                                     },
-                                                    style:
-                                                        TextButton.styleFrom(
+                                                    style: TextButton.styleFrom(
                                                       padding: EdgeInsets.zero,
                                                       minimumSize: Size.zero,
                                                       tapTargetSize:
@@ -1093,13 +1366,15 @@ class _StoryDialogState extends State<StoryDialog> {
                                                               .shrinkWrap,
                                                       foregroundColor:
                                                           const Color(
-                                                              0xFF4E4E4E),
+                                                            0xFF4E4E4E,
+                                                          ),
                                                       textStyle: theme
-                                                          .textTheme.bodySmall
+                                                          .textTheme
+                                                          .bodySmall
                                                           ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
                                                     ),
                                                     child: const Text('신고'),
                                                   ),
@@ -1119,14 +1394,14 @@ class _StoryDialogState extends State<StoryDialog> {
                                                         _editCommentController,
                                                     maxLines: null,
                                                     style: theme
-                                                        .textTheme.bodyMedium,
-                                                    decoration:
-                                                        const InputDecoration(
+                                                        .textTheme
+                                                        .bodyMedium,
+                                                    decoration: const InputDecoration(
                                                       isDense: true,
                                                       contentPadding:
                                                           EdgeInsets.symmetric(
-                                                        vertical: 8,
-                                                      ),
+                                                            vertical: 8,
+                                                          ),
                                                       border:
                                                           UnderlineInputBorder(),
                                                     ),
@@ -1145,8 +1420,7 @@ class _StoryDialogState extends State<StoryDialog> {
                                                                 .clear();
                                                           });
                                                         },
-                                                        child:
-                                                            const Text('취소'),
+                                                        child: const Text('취소'),
                                                       ),
                                                       const SizedBox(width: 8),
                                                       TextButton(
@@ -1163,23 +1437,23 @@ class _StoryDialogState extends State<StoryDialog> {
                                                           await StoryService
                                                               .instance
                                                               .updateComment(
-                                                            commentWithUser
-                                                                .comment.id,
-                                                            updatedText,
-                                                          );
+                                                                commentWithUser
+                                                                    .comment
+                                                                    .id,
+                                                                updatedText,
+                                                              );
                                                           if (!mounted) {
                                                             return;
                                                           }
                                                           setState(() {
-                                                            comments[index] =
-                                                                StoryCommentWithUser(
+                                                            comments[index] = StoryCommentWithUser(
                                                               comment:
                                                                   commentWithUser
                                                                       .comment
                                                                       .copyWith(
-                                                                comment:
-                                                                    updatedText,
-                                                              ),
+                                                                        comment:
+                                                                            updatedText,
+                                                                      ),
                                                               commentBy:
                                                                   commentWithUser
                                                                       .commentBy,
@@ -1188,8 +1462,7 @@ class _StoryDialogState extends State<StoryDialog> {
                                                                 null;
                                                           });
                                                         },
-                                                        child:
-                                                            const Text('저장'),
+                                                        child: const Text('저장'),
                                                       ),
                                                     ],
                                                   ),
@@ -1198,7 +1471,8 @@ class _StoryDialogState extends State<StoryDialog> {
                                             else
                                               Text(
                                                 commentWithUser
-                                                        .comment.comment ??
+                                                        .comment
+                                                        .comment ??
                                                     '',
                                                 style:
                                                     theme.textTheme.bodyMedium,
