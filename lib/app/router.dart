@@ -4,6 +4,8 @@ import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.d
 import 'package:esg_mobile/presentation/screens/auth/signup_type.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_terms.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_form.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_minor_terms.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_guardian_form.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/account/profile_select.screen.dart';
 import 'package:esg_mobile/presentation/screens/main.screen.dart';
 import 'package:esg_mobile/app/app.dart';
@@ -33,6 +35,22 @@ final GoRouter router = GoRouter(
     }
     if (!needsConfirmation && isOnConfirmation) {
       return MainScreen.route;
+    }
+    // Minor signup screens require SignupFormData; redirect if missing (e.g. refresh/back).
+    if (state.uri.path == SignupMinorTermsScreen.route ||
+        state.uri.path == SignupGuardianFormScreen.route) {
+      if (state.extra == null) {
+        if (loggedIn) {
+          debugPrint(
+            '[Router.redirect] ${state.uri.path} has null extra but user is logged in → going to main',
+          );
+          return '/greensquare';
+        }
+        debugPrint(
+          '[Router.redirect] ${state.uri.path} has null extra → redirecting to signup form',
+        );
+        return SignupFormScreen.route;
+      }
     }
     return null;
   },
@@ -113,6 +131,54 @@ final GoRouter router = GoRouter(
       path: SignupFormScreen.route,
       builder: (BuildContext context, GoRouterState state) {
         return const SignupFormScreen();
+      },
+    ),
+    GoRoute(
+      path: SignupMinorTermsScreen.route,
+      builder: (BuildContext context, GoRouterState state) {
+        debugPrint(
+          '[Router.builder] ${SignupMinorTermsScreen.route} extra=${state.extra}, path=${state.uri.path}',
+        );
+        final formData = state.extra;
+        if (formData == null || formData is! SignupFormData) {
+          final destination = _authService.isLoggedIn
+              ? '/greensquare'
+              : SignupFormScreen.route;
+          debugPrint(
+            '[Router.builder] minor-terms: extra null or wrong type, redirecting to $destination',
+          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go(destination);
+          });
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return SignupMinorTermsScreen(formData: formData);
+      },
+    ),
+    GoRoute(
+      path: SignupGuardianFormScreen.route,
+      builder: (BuildContext context, GoRouterState state) {
+        debugPrint(
+          '[Router.builder] ${SignupGuardianFormScreen.route} extra=${state.extra}, path=${state.uri.path}',
+        );
+        final formData = state.extra;
+        if (formData == null || formData is! SignupFormData) {
+          final destination = _authService.isLoggedIn
+              ? '/greensquare'
+              : SignupFormScreen.route;
+          debugPrint(
+            '[Router.builder] guardian: extra null or wrong type, redirecting to $destination',
+          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go(destination);
+          });
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return SignupGuardianFormScreen(formData: formData);
       },
     ),
     GoRoute(

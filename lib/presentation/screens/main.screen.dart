@@ -1171,14 +1171,20 @@ class _MissionListSheetContentState extends State<_MissionListSheetContent> {
             ),
           ),
           Expanded(
-            child: ListView.separated(
+            child: GridView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
               itemCount: widget.missions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.95,
+              ),
               itemBuilder: (_, index) => MissionAvailableListTile(
                 mission: widget.missions[index],
                 onTap: widget.onTapMission,
+                variant: MissionAvailableTileVariant.grid,
               ),
             ),
           ),

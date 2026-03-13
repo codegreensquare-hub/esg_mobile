@@ -9,7 +9,7 @@ class GreenSquareInfoPage extends StatelessWidget {
     required this.title,
     this.body,
     this.bodyBuilder,
-    this.appbarBackgroundColor = const Color.fromARGB(255, 255, 255, 255),
+    this.appbarBackgroundColor,
     this.backgroundColor,
   }) : assert(
          body != null || bodyBuilder != null,
@@ -22,7 +22,7 @@ class GreenSquareInfoPage extends StatelessWidget {
   /// When set (with [backgroundColor]), content is built with a [Theme]
   /// that uses Noto Sans KR, so [Theme.of(context).textTheme] has the font.
   final Widget Function(BuildContext context)? bodyBuilder;
-  final Color appbarBackgroundColor;
+  final Color? appbarBackgroundColor;
   final Color? backgroundColor;
 
   @override

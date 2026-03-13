@@ -25,26 +25,83 @@ class StoryService {
     int limit = 20,
     int offset = 0,
   }) async {
-    PostgrestFilterBuilder query = _client
+    final trimmedSearch = search?.trim() ?? '';
+
+    // Base query: published stories, searchable by title/subtitle/content.
+    PostgrestFilterBuilder baseQuery = _client
         .from(StoryTable().tableName)
-        .select('*, story_tag(*)');
+        .select('*, story_tag(*)')
+        .eq(StoryRow.isPublishedField, true);
 
-    // Only fetch published stories
-    query = query.eq(StoryRow.isPublishedField, true);
-
-    if (search != null && search.isNotEmpty) {
-      query = query.or(
-        'title.ilike.%$search%,subtitle.ilike.%$search%,content.ilike.%$search%',
+    if (trimmedSearch.isNotEmpty) {
+      final pattern = '%$trimmedSearch%';
+      baseQuery = baseQuery.or(
+        'title.ilike.$pattern,'
+        'subtitle.ilike.$pattern,'
+        'content.ilike.$pattern',
       );
     }
 
-    final response = await query
+    // Fetch primary matches (title/subtitle/content) with server-side paging
+    final primaryResponse = await baseQuery
         .order(StoryRow.createdAtField, ascending: false)
         .range(offset, offset + limit - 1);
 
-    debugPrint('Fetched stories response: $response');
+    List<Map<String, dynamic>> combined =
+        (primaryResponse as List).whereType<Map<String, dynamic>>().toList();
 
-    return (response as List).map((json) {
+    // When there is a search term, also fetch stories whose tags match, then
+    // merge them client-side to provide a unified search experience.
+    if (trimmedSearch.isNotEmpty) {
+      final pattern = '%$trimmedSearch%';
+
+      final tagRows = await _client
+          .from(StoryTagTable().tableName)
+          .select(StoryTagRow.storyField)
+          .ilike(StoryTagRow.tagField, pattern);
+
+      final tagStoryIds = (tagRows as List)
+          .whereType<Map<String, dynamic>>()
+          .map((row) => row[StoryTagRow.storyField] as String?)
+          .whereType<String>()
+          .toList(growable: false);
+
+      if (tagStoryIds.isNotEmpty) {
+        final tagStoriesResponse = await _client
+            .from(StoryTable().tableName)
+            .select('*, story_tag(*)')
+            .eq(StoryRow.isPublishedField, true)
+            .inFilter(StoryRow.idField, tagStoryIds)
+            .order(StoryRow.createdAtField, ascending: false);
+
+        final tagStories = (tagStoriesResponse as List)
+            .whereType<Map<String, dynamic>>()
+            .toList(growable: false);
+
+        // Merge, de-duplicating by story id and then slicing to the desired window.
+        final seenIds = <String>{};
+        final merged = <Map<String, dynamic>>[];
+
+        void addAll(List<Map<String, dynamic>> source) {
+          for (final json in source) {
+            final id = json[StoryRow.idField] as String?;
+            if (id == null || seenIds.contains(id)) continue;
+            seenIds.add(id);
+            merged.add(json);
+          }
+        }
+
+        addAll(combined);
+        addAll(tagStories);
+
+        // Apply offset/limit on the merged result to approximate unified paging.
+        combined = merged.skip(offset).take(limit).toList(growable: false);
+      }
+    }
+
+    debugPrint('Fetched stories (combined) count: ${combined.length}');
+
+    return combined.map((json) {
       final story = StoryRow.fromJson(json);
       final tags =
           (json[StoryTagTable().tableName] as List?)

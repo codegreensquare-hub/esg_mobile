@@ -11,16 +11,21 @@ import 'package:esg_mobile/presentation/widgets/general_mission_card.dart';
 import 'package:esg_mobile/presentation/widgets/mission/banner_mission_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+
+enum MissionAvailableTileVariant { list, grid }
 
 class MissionAvailableListTile extends StatefulWidget {
   const MissionAvailableListTile({
     super.key,
     required this.mission,
     this.onTap,
+    this.variant = MissionAvailableTileVariant.list,
   });
 
   final MissionRow mission;
   final void Function(MissionRow mission)? onTap;
+  final MissionAvailableTileVariant variant;
 
   @override
   State<MissionAvailableListTile> createState() =>
@@ -57,6 +62,23 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     final isBannerMission =
         widget.mission.type == MissionType.banner_exposed;
 
+    if (widget.variant == MissionAvailableTileVariant.grid) {
+      // Grid cards should look identical for all mission types.
+      return GestureDetector(
+        onTap: widget.onTap != null
+            ? () {
+                unawaited(
+                  MissionEventTrackingService.instance.logClick(
+                    missionId: widget.mission.id,
+                  ),
+                );
+                widget.onTap?.call(widget.mission);
+              }
+            : null,
+        child: _buildGridCard(theme, cs, imageUrl, points),
+      );
+    }
+
     return GestureDetector(
       onTap: widget.onTap != null
           ? () {
@@ -74,16 +96,105 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
               child: _buildBannerContent(theme, cs, points),
             )
           : GeneralMissionCard(
-              child: Row(
-                children: [
-                  _buildThumbnail(imageUrl),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextContent(theme, cs, points),
+                    child: Row(
+                      children: [
+                        _buildThumbnail(imageUrl),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildTextContent(theme, cs, points),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+    );
+  }
+
+  Widget _buildGridCard(
+    ThemeData theme,
+    ColorScheme cs,
+    String? imageUrl,
+    int? points,
+  ) {
+    final formatter = NumberFormat('#,###');
+    final formattedPoints = formatter.format(points ?? 0);
+
+    return GeneralMissionCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(12),
+      borderRadius: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            widget.mission.title ?? 'No Title',
+            style:
+                (theme.textTheme.titleSmall ?? const TextStyle(fontSize: 14))
+                    .copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize:
+                          (theme.textTheme.titleSmall?.fontSize ?? 14) + 1,
+                    ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.network(
+                getImageLink(
+                  bucket.asset,
+                  asset.cMilage,
+                  folderPath: assetFolderPath[asset.cMilage],
+                ),
+                width: 18,
+                height: 18,
+                semanticsLabel: '포인트',
+              ),
+              const SizedBox(width: 6),
+              Text(
+                formattedPoints,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Hero(
+              tag: 'green-square-mission-image-${widget.mission.id}',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: _buildGridImage(imageUrl),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGridImage(String? imageUrl) {
+    if (imageUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[200],
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[200],
+          child: const Icon(Icons.image_not_supported),
+        ),
+      );
+    }
+
+    return Container(
+      color: Colors.grey[200],
+      child: const Icon(Icons.image_not_supported),
     );
   }
 

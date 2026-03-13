@@ -32,6 +32,7 @@ class _StoriesSectionState extends State<StoriesSection> {
   String _searchQuery = '';
   int _offset = 0;
   static const int _limit = 20;
+  String? _activeFilter;
   static const List<String> _staticFilters = [
     '#리필스테이션',
     '#제로웨이스트샵',
@@ -54,6 +55,12 @@ class _StoriesSectionState extends State<StoriesSection> {
   }
 
   void _onSearchChanged(String value) {
+    // Typing manually clears any active static filter.
+    if (_activeFilter != null) {
+      setState(() {
+        _activeFilter = null;
+      });
+    }
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       setState(() {
@@ -150,15 +157,15 @@ class _StoriesSectionState extends State<StoriesSection> {
               widthFactor: 0.8,
               child: TextField(
                 controller: _searchController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: '키워드 검색',
                   filled: true,
                   fillColor: Colors.white,
-                  suffixIcon: const Icon(Icons.search),
+                  suffixIcon: Icon(Icons.search),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
+                  contentPadding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
@@ -176,64 +183,123 @@ class _StoriesSectionState extends State<StoriesSection> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              children: _staticFilters
-                  .map(
-                    (label) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: const Color(0xFFE5E5EA),
+              children: _staticFilters.map((label) {
+                final bool isActive = _activeFilter == label;
+                final Color borderColor =
+                    isActive ? const Color(0xFFF3550F) : const Color(0xFFE5E5EA);
+                final Color textColor =
+                    isActive ? const Color(0xFFF3550F) : const Color(0xFF1C1C1E);
+                final Color bgColor =
+                    isActive ? const Color(0xFFFFF6F1) : Colors.white;
+
+                void applyFilter() {
+                  final keyword =
+                      label.startsWith('#') ? label.substring(1) : label;
+                  _debounce?.cancel();
+                  setState(() {
+                    _activeFilter = label;
+                    _searchController.text = keyword;
+                    _searchQuery = keyword;
+                    _offset = 0;
+                  });
+                  _refreshStories();
+                }
+
+                void clearFilter() {
+                  _debounce?.cancel();
+                  setState(() {
+                    _activeFilter = null;
+                    _searchController.clear();
+                    _searchQuery = '';
+                    _offset = 0;
+                  });
+                  _refreshStories();
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () {
+                      if (isActive) {
+                        clearFilter();
+                      } else {
+                        applyFilter();
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: textColor,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          label,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF1C1C1E),
-                          ),
-                        ),
+                          if (isActive) ...[
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.close,
+                              size: 14,
+                              color: textColor,
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                  )
-                  .toList(),
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ),
         const SizedBox(height: 16),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _stories.length + (_isLoadingMore ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == _stories.length) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
+        if (_isLoadingMore && _offset == 0)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 48),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _stories.length + (_isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == _stories.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final story = _stories[index];
+              if (index == _stories.length - 1 && !_isLoadingMore) {
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _loadMore(),
+                );
+              }
+              return StoryCard(
+                storyWithTags: story,
+                onBlocked: _refreshStories,
+                onUnblocked: _refreshStories,
+                onTap: widget.onTapStory != null
+                    ? () => widget.onTapStory!(story)
+                    : null,
               );
-            }
-            final story = _stories[index];
-            if (index == _stories.length - 1 && !_isLoadingMore) {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _loadMore(),
-              );
-            }
-            return StoryCard(
-              storyWithTags: story,
-              onBlocked: _refreshStories,
-              onUnblocked: _refreshStories,
-              onTap: widget.onTapStory != null
-                  ? () => widget.onTapStory!(story)
-                  : null,
-            );
-          },
-        ),
+            },
+          ),
       ],
     );
   }
