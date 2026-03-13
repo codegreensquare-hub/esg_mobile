@@ -1,11 +1,31 @@
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.dart';
+import 'package:esg_mobile/presentation/screens/auth/signup_minor_terms.screen.dart';
 import 'package:esg_mobile/presentation/screens/main.screen.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+/// Data collected in the signup form, passed forward when the user is under 14.
+class SignupFormData {
+  const SignupFormData({
+    required this.email,
+    required this.password,
+    required this.username,
+    this.phone,
+    this.birthdate,
+    this.company,
+  });
+
+  final String email;
+  final String password;
+  final String username;
+  final String? phone;
+  final String? birthdate;
+  final String? company;
+}
 
 /// Step 3 of Green Square sign-up: personal info form and submit.
 class SignupFormScreen extends StatefulWidget {
@@ -81,8 +101,41 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
     super.dispose();
   }
 
+  bool _isUnder14() {
+    if (_selectedBirthdate == null) return false;
+    final today = DateTime.now();
+    final turning14 = DateTime(
+      _selectedBirthdate!.year + 14,
+      _selectedBirthdate!.month,
+      _selectedBirthdate!.day,
+    );
+    return today.isBefore(turning14);
+  }
+
+  SignupFormData _buildFormData() {
+    final normalizedBirthdate = _selectedBirthdate != null
+        ? _selectedBirthdate!.toIso8601String().split('T')[0]
+        : null;
+    return SignupFormData(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      username: _nameController.text.trim(),
+      phone: _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
+      birthdate: normalizedBirthdate,
+      company: _isCompanyType(context) ? _selectedCompanyId : null,
+    );
+  }
+
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_isUnder14()) {
+      context.push(SignupMinorTermsScreen.route, extra: _buildFormData());
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
       _error = null;
