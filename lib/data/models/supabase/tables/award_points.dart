@@ -29,11 +29,13 @@ class AwardPointsRow extends SupabaseDataRow {
     DateTime? createdAt,
     double? points,
     DateTime? updatedAt,
+    String? profile,
   }) : super({
          'user': supaSerialize(user),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (points != null) 'points': supaSerialize(points),
          if (updatedAt != null) 'updated_at': supaSerialize(updatedAt),
+         if (profile != null) 'profile': supaSerialize(profile),
        });
 
   /// Award Points Row
@@ -80,6 +82,13 @@ class AwardPointsRow extends SupabaseDataRow {
       getField<DateTime>(updatedAtField, defaultValue: DateTime.now())!;
   set updatedAt(DateTime value) => setField<DateTime>(updatedAtField, value);
 
+  /// Profile field name
+  static const String profileField = 'profile';
+
+  /// Profile
+  String? get profile => getField<String>(profileField);
+  set profile(String? value) => setField<String>(profileField, value);
+
   /// Make a copy of the current [AwardPointsRow]
   /// overriding the provided fields
   AwardPointsRow copyWith({
@@ -87,13 +96,15 @@ class AwardPointsRow extends SupabaseDataRow {
     DateTime? createdAt,
     double? points,
     DateTime? updatedAt,
+    String? profile,
   }) => AwardPointsRow.fromJson({
     'user': supaSerialize(user) ?? data['user'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'points': supaSerialize(points) ?? data['points'],
     'updated_at': supaSerialize(updatedAt) ?? data['updated_at'],
+    'profile': supaSerialize(profile) ?? data['profile'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 16:36:10.595370
+/// Date: 2026-03-13 15:28:25.371864

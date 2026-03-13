@@ -31,6 +31,9 @@ class OrderRow extends SupabaseDataRow {
     String? payment,
     double? awardPointsUsed,
     String? transactionReference,
+    String? profileUsed,
+    String? department,
+    String? subDepartment,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -42,6 +45,10 @@ class OrderRow extends SupabaseDataRow {
            'award_points_used': supaSerialize(awardPointsUsed),
          if (transactionReference != null)
            'transaction_reference': supaSerialize(transactionReference),
+         if (profileUsed != null) 'profile_used': supaSerialize(profileUsed),
+         if (department != null) 'department': supaSerialize(department),
+         if (subDepartment != null)
+           'sub_department': supaSerialize(subDepartment),
        });
 
   /// Order Row
@@ -112,6 +119,28 @@ class OrderRow extends SupabaseDataRow {
   set transactionReference(String? value) =>
       setField<String>(transactionReferenceField, value);
 
+  /// Profile Used field name
+  static const String profileUsedField = 'profile_used';
+
+  /// Profile Used
+  String? get profileUsed => getField<String>(profileUsedField);
+  set profileUsed(String? value) => setField<String>(profileUsedField, value);
+
+  /// Department field name
+  static const String departmentField = 'department';
+
+  /// Department
+  String? get department => getField<String>(departmentField);
+  set department(String? value) => setField<String>(departmentField, value);
+
+  /// Sub Department field name
+  static const String subDepartmentField = 'sub_department';
+
+  /// Sub Department
+  String? get subDepartment => getField<String>(subDepartmentField);
+  set subDepartment(String? value) =>
+      setField<String>(subDepartmentField, value);
+
   /// Make a copy of the current [OrderRow]
   /// overriding the provided fields
   OrderRow copyWith({
@@ -122,6 +151,9 @@ class OrderRow extends SupabaseDataRow {
     String? payment,
     double? awardPointsUsed,
     String? transactionReference,
+    String? profileUsed,
+    String? department,
+    String? subDepartment,
   }) => OrderRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -133,8 +165,11 @@ class OrderRow extends SupabaseDataRow {
         supaSerialize(awardPointsUsed) ?? data['award_points_used'],
     'transaction_reference':
         supaSerialize(transactionReference) ?? data['transaction_reference'],
+    'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
+    'department': supaSerialize(department) ?? data['department'],
+    'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 16:36:10.621636
+/// Date: 2026-03-13 15:28:25.391964

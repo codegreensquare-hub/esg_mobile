@@ -31,6 +31,7 @@ class CartItemRow extends SupabaseDataRow {
     String? customer,
     String? product,
     String? optionColor,
+    String? profileUsed,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -38,6 +39,7 @@ class CartItemRow extends SupabaseDataRow {
          if (customer != null) 'customer': supaSerialize(customer),
          if (product != null) 'product': supaSerialize(product),
          if (optionColor != null) 'option_color': supaSerialize(optionColor),
+         if (profileUsed != null) 'profile_used': supaSerialize(profileUsed),
        });
 
   /// Cart Item Row
@@ -97,6 +99,13 @@ class CartItemRow extends SupabaseDataRow {
   String? get optionColor => getField<String>(optionColorField);
   set optionColor(String? value) => setField<String>(optionColorField, value);
 
+  /// Profile Used field name
+  static const String profileUsedField = 'profile_used';
+
+  /// Profile Used
+  String? get profileUsed => getField<String>(profileUsedField);
+  set profileUsed(String? value) => setField<String>(profileUsedField, value);
+
   /// Make a copy of the current [CartItemRow]
   /// overriding the provided fields
   CartItemRow copyWith({
@@ -106,6 +115,7 @@ class CartItemRow extends SupabaseDataRow {
     String? customer,
     String? product,
     String? optionColor,
+    String? profileUsed,
   }) => CartItemRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -113,8 +123,9 @@ class CartItemRow extends SupabaseDataRow {
     'customer': supaSerialize(customer) ?? data['customer'],
     'product': supaSerialize(product) ?? data['product'],
     'option_color': supaSerialize(optionColor) ?? data['option_color'],
+    'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 16:36:10.596940
+/// Date: 2026-03-13 15:28:25.373255

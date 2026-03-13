@@ -35,6 +35,7 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
     String? transactionBy,
     double? previousAmount,
     String? relatedParticipation,
+    String? profile,
   }) : super({
          'award_amount': supaSerialize(awardAmount),
          'new_amount': supaSerialize(newAmount),
@@ -48,6 +49,7 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
            'previous_amount': supaSerialize(previousAmount),
          if (relatedParticipation != null)
            'related_participation': supaSerialize(relatedParticipation),
+         if (profile != null) 'profile': supaSerialize(profile),
        });
 
   /// Award Points Transaction Row
@@ -135,6 +137,13 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
   set relatedParticipation(String? value) =>
       setField<String>(relatedParticipationField, value);
 
+  /// Profile field name
+  static const String profileField = 'profile';
+
+  /// Profile
+  String? get profile => getField<String>(profileField);
+  set profile(String? value) => setField<String>(profileField, value);
+
   /// Make a copy of the current [AwardPointsTransactionRow]
   /// overriding the provided fields
   AwardPointsTransactionRow copyWith({
@@ -147,6 +156,7 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
     String? transactionBy,
     double? previousAmount,
     String? relatedParticipation,
+    String? profile,
   }) => AwardPointsTransactionRow.fromJson({
     'award_amount': supaSerialize(awardAmount) ?? data['award_amount'],
     'new_amount': supaSerialize(newAmount) ?? data['new_amount'],
@@ -158,8 +168,9 @@ class AwardPointsTransactionRow extends SupabaseDataRow {
     'previous_amount': supaSerialize(previousAmount) ?? data['previous_amount'],
     'related_participation':
         supaSerialize(relatedParticipation) ?? data['related_participation'],
+    'profile': supaSerialize(profile) ?? data['profile'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 16:36:10.596154
+/// Date: 2026-03-13 15:28:25.372569

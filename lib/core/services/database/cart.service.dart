@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:esg_mobile/core/services/profile.service.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/entities/product_option_definition.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
@@ -133,15 +134,37 @@ class CartService {
     return fromOptions.isEmpty ? '' : fromOptions.first;
   }
 
+  Future<String?> _resolveActiveProfileUsed() async {
+    final profileService = ProfileService.instance;
+    await profileService.initialize();
+
+    if (profileService.isMainProfileSelected) {
+      return null;
+    }
+
+    return profileService.selectedProfileId;
+  }
+
   Future<List<CartItemWithProduct>> fetchCartItems(String userId) async {
     try {
-      final response = await _client
-          .from(CartItemTable().tableName)
-          .select(
-            '*, product:product(*), cart_item_option(*)',
-          )
-          .eq(CartItemRow.customerField, userId)
-          .order(CartItemRow.createdAtField, ascending: false);
+      final profileUsed = await _resolveActiveProfileUsed();
+      final response =
+          await ((profileUsed == null)
+                  ? _client
+                        .from(CartItemTable().tableName)
+                        .select(
+                          '*, product:product(*), cart_item_option(*)',
+                        )
+                        .eq(CartItemRow.customerField, userId)
+                        .isFilter(CartItemRow.profileUsedField, null)
+                  : _client
+                        .from(CartItemTable().tableName)
+                        .select(
+                          '*, product:product(*), cart_item_option(*)',
+                        )
+                        .eq(CartItemRow.customerField, userId)
+                        .eq(CartItemRow.profileUsedField, profileUsed))
+              .order(CartItemRow.createdAtField, ascending: false);
 
       return response.whereType<Map<String, dynamic>>().map((data) {
         final productData = data['product'] as Map<String, dynamic>?;
@@ -171,14 +194,23 @@ class CartService {
     Map<String, String> selectedOptions = const {},
   }) async {
     try {
+      final profileUsed = await _resolveActiveProfileUsed();
       final requestedSignature = _optionsSignature(selectedOptions);
       final requestedColor = _extractRequestedColor(selectedOptions);
 
-      final existingResponse = await _client
-          .from(CartItemTable().tableName)
-          .select('*, cart_item_option(*)')
-          .eq(CartItemRow.customerField, userId)
-          .eq(CartItemRow.productField, productId);
+      final existingResponse = await ((profileUsed == null)
+          ? _client
+                .from(CartItemTable().tableName)
+                .select('*, cart_item_option(*)')
+                .eq(CartItemRow.customerField, userId)
+                .eq(CartItemRow.productField, productId)
+                .isFilter(CartItemRow.profileUsedField, null)
+          : _client
+                .from(CartItemTable().tableName)
+                .select('*, cart_item_option(*)')
+                .eq(CartItemRow.customerField, userId)
+                .eq(CartItemRow.productField, productId)
+                .eq(CartItemRow.profileUsedField, profileUsed));
 
       final existingItems = existingResponse
           .whereType<Map<String, dynamic>>()
@@ -221,6 +253,7 @@ class CartService {
         CartItemRow.customerField: userId,
         CartItemRow.productField: productId,
         CartItemRow.quantityField: quantity,
+        if (profileUsed != null) CartItemRow.profileUsedField: profileUsed,
       };
 
       final insertPayload = {
@@ -417,11 +450,19 @@ class CartService {
     // Defensive cleanup: older buggy clients could have inserted cart items with
     // an empty product id, which will crash checkout when the DB expects UUIDs.
     final userId = _client.auth.currentUser?.id;
+    final profileUsed = await _resolveActiveProfileUsed();
     if (userId != null && userId.trim().isNotEmpty) {
-      final rows = await _client
-          .from(CartItemTable().tableName)
-          .select('id, product')
-          .eq(CartItemRow.customerField, userId);
+      final rows = await ((profileUsed == null)
+          ? _client
+                .from(CartItemTable().tableName)
+                .select('id, product')
+                .eq(CartItemRow.customerField, userId)
+                .isFilter(CartItemRow.profileUsedField, null)
+          : _client
+                .from(CartItemTable().tableName)
+                .select('id, product')
+                .eq(CartItemRow.customerField, userId)
+                .eq(CartItemRow.profileUsedField, profileUsed));
 
       final invalidIds = rows
           .whereType<Map<String, dynamic>>()
@@ -460,6 +501,7 @@ class CartService {
       params: {
         'p_shipping_address': normalized,
         'p_award_points': awardPoints,
+        'p_profile_used': profileUsed,
       },
     );
     debugPrint('Checkout response: $response');
@@ -476,11 +518,41 @@ class CartService {
       throw StateError('User not logged in');
     }
 
+    final profileUsed = await _resolveActiveProfileUsed();
+    final normalizedOrderId = (orderId ?? '').trim();
+    if (normalizedOrderId.isNotEmpty) {
+      final existingOrder = await _client
+          .from(OrderTable().tableName)
+          .select(OrderRow.paymentField)
+          .eq(OrderRow.idField, normalizedOrderId)
+          .maybeSingle();
+
+      final existingPaymentId =
+          (existingOrder?[OrderRow.paymentField] as String?)?.trim();
+      if ((existingPaymentId ?? '').isNotEmpty) {
+        final response = await _client
+            .from(PaymentTable().tableName)
+            .update({
+              PaymentRow.paymentByField: userId,
+              PaymentRow.amountField: amount,
+              PaymentRow.statusField: status ?? 'pending',
+              PaymentRow.orderBeingPaidField: normalizedOrderId,
+              PaymentRow.profileUsedField: profileUsed,
+            })
+            .eq(PaymentRow.idField, existingPaymentId!)
+            .select()
+            .single();
+
+        return PaymentRow.fromJson(response);
+      }
+    }
+
     final payment = PaymentRow(
       paymentBy: userId,
       amount: amount,
       status: status ?? 'pending',
-      // order_being_paid: orderId, assuming field exists
+      orderBeingPaid: normalizedOrderId.isEmpty ? null : normalizedOrderId,
+      profileUsed: profileUsed,
     );
 
     final response = await _client

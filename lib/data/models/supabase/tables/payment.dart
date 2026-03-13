@@ -35,6 +35,7 @@ class PaymentRow extends SupabaseDataRow {
     String? cancellationId,
     DateTime? cancelledAt,
     String? orderBeingPaid,
+    String? profileUsed,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (paymentBy != null) 'payment_by': supaSerialize(paymentBy),
@@ -49,6 +50,7 @@ class PaymentRow extends SupabaseDataRow {
          if (cancelledAt != null) 'cancelled_at': supaSerialize(cancelledAt),
          if (orderBeingPaid != null)
            'order_being_paid': supaSerialize(orderBeingPaid),
+         if (profileUsed != null) 'profile_used': supaSerialize(profileUsed),
        });
 
   /// Payment Row
@@ -146,6 +148,13 @@ class PaymentRow extends SupabaseDataRow {
   set orderBeingPaid(String? value) =>
       setField<String>(orderBeingPaidField, value);
 
+  /// Profile Used field name
+  static const String profileUsedField = 'profile_used';
+
+  /// Profile Used
+  String? get profileUsed => getField<String>(profileUsedField);
+  set profileUsed(String? value) => setField<String>(profileUsedField, value);
+
   /// Make a copy of the current [PaymentRow]
   /// overriding the provided fields
   PaymentRow copyWith({
@@ -160,6 +169,7 @@ class PaymentRow extends SupabaseDataRow {
     String? cancellationId,
     DateTime? cancelledAt,
     String? orderBeingPaid,
+    String? profileUsed,
   }) => PaymentRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'payment_by': supaSerialize(paymentBy) ?? data['payment_by'],
@@ -173,8 +183,9 @@ class PaymentRow extends SupabaseDataRow {
     'cancelled_at': supaSerialize(cancelledAt) ?? data['cancelled_at'],
     'order_being_paid':
         supaSerialize(orderBeingPaid) ?? data['order_being_paid'],
+    'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-12 16:36:10.623413
+/// Date: 2026-03-13 15:28:25.393636
