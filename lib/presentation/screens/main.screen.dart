@@ -1,5 +1,6 @@
 import 'package:esg_mobile/core/enums/navigations.dart';
 import 'package:esg_mobile/core/enums/mission_status.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/cart.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/core/services/database/product.service.dart';
@@ -813,10 +814,12 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _onTapKnock() async {
     try {
+      final companyId = UserAuthService.instance.userRow?.company;
       final missions = await MissionService.instance.fetchList(
         isPublished: true,
         status: MissionStatus.current,
         publicity: MissionPublicity.public,
+        companyId: companyId,
       );
 
       if (!mounted) return;
