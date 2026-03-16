@@ -441,10 +441,19 @@ class _AccountTabState extends State<AccountTab> {
     }
   }
 
-  void _handleKakaoLogin() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('카카오 로그인은 준비 중입니다.')),
-    );
+  void _handleKakaoLogin() async {
+    try {
+      await UserAuthService.instance.signInWithKakao();
+      if (!mounted) return;
+      await _fetchAccountData();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('카카오 로그인에 실패했습니다. 다시 시도해주세요.'),
+        ),
+      );
+    }
   }
 
   void _handleAppleLogin() {

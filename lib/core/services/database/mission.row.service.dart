@@ -45,6 +45,7 @@ class MissionService {
     MissionType? type,
     MissionPublicity? publicity,
     bool? isPublished,
+    String? companyId,
     DateTime? lastActiveDateBefore,
     DateTime? lastActiveDateAfter,
     MissionStatus? status,
@@ -57,10 +58,21 @@ class MissionService {
     final filters = <_FilterStep>[
       if (type != null)
         (builder) => builder.eq(MissionRow.typeField, type.name),
-      if (publicity != null)
-        (builder) => builder.eq(MissionRow.publicityField, publicity.name),
       if (isPublished != null)
         (builder) => builder.eq(MissionRow.isPublishedField, isPublished),
+      // When both publicity and companyId are provided, show missions that are
+      // either public OR belong to the given company.
+      if (publicity != null && companyId != null)
+        (builder) => builder.or(
+              '${MissionRow.publicityField}.eq.${publicity.name},'
+              '${MissionRow.companyIdField}.eq.$companyId',
+            ),
+      // When only publicity is provided, filter by publicity.
+      if (publicity != null && companyId == null)
+        (builder) => builder.eq(MissionRow.publicityField, publicity.name),
+      // When only companyId is provided, filter strictly by company.
+      if (publicity == null && companyId != null)
+        (builder) => builder.eq(MissionRow.companyIdField, companyId),
       if (lastActiveDateBefore != null)
         (builder) => builder.lt(
           MissionRow.lastActiveDateField,
