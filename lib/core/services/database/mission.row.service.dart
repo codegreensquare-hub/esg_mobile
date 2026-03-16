@@ -45,6 +45,7 @@ class MissionService {
     MissionType? type,
     MissionPublicity? publicity,
     bool? isPublished,
+    String? companyId,
     DateTime? lastActiveDateBefore,
     DateTime? lastActiveDateAfter,
     MissionStatus? status,
@@ -61,6 +62,8 @@ class MissionService {
         (builder) => builder.eq(MissionRow.publicityField, publicity.name),
       if (isPublished != null)
         (builder) => builder.eq(MissionRow.isPublishedField, isPublished),
+      if (companyId != null)
+        (builder) => builder.eq(MissionRow.companyIdField, companyId),
       if (lastActiveDateBefore != null)
         (builder) => builder.lt(
           MissionRow.lastActiveDateField,

@@ -1,4 +1,5 @@
 import 'package:esg_mobile/core/enums/mission_status.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
 import 'package:esg_mobile/core/config/maxParticipation.dart';
@@ -39,20 +40,24 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
   }
 
   void _fetchCurrentMissions() async {
+    final companyId = UserAuthService.instance.userRow?.company;
     currentMissions = await MissionService.instance.fetchList(
       isPublished: true,
       status: MissionStatus.current,
       publicity: MissionPublicity.public,
+      companyId: companyId,
     );
     if (!mounted) return;
     setState(() {});
   }
 
   void _fetchPastMissions() async {
+    final companyId = UserAuthService.instance.userRow?.company;
     pastMissions = await MissionService.instance.fetchList(
       isPublished: true,
       status: MissionStatus.past,
       publicity: MissionPublicity.public,
+      companyId: companyId,
     );
     if (!mounted) return;
     setState(() {});
