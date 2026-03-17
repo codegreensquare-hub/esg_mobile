@@ -24,6 +24,7 @@ export 'event.dart';
 export 'event_comment.dart';
 export 'faq.dart';
 export 'faq_category.dart';
+export 'featured_product_banner.dart';
 export 'inquiry.dart';
 export 'inquiry_audit_log.dart';
 export 'inquiry_comment.dart';
@@ -87,4 +88,4 @@ export 'user_settings.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-03-17 11:11:48.579423
+/// Date: 2026-03-17 16:20:06.159696

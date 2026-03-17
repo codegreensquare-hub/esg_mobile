@@ -1,18 +1,23 @@
-import 'package:cached_network_image/cached_network_image.dart';
-
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/services/database/featured_product_banner.service.dart';
+import 'package:esg_mobile/core/services/database/product.service.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
+import 'package:esg_mobile/data/entities/product_with_other_details.dart';
+import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
+import 'package:esg_mobile/presentation/screens/code_green/product_detail_tab.screen.dart';
 import 'package:flutter/material.dart';
 
 class CodegreenBannerCarousel extends StatefulWidget {
   const CodegreenBannerCarousel({
     super.key,
-    required this.imagePaths,
+    required this.appType,
     this.autoPlay = true,
     this.autoPlayInterval = const Duration(seconds: 4),
   });
 
-  final List<String> imagePaths;
+  final String appType;
   final bool autoPlay;
   final Duration autoPlayInterval;
 
@@ -24,20 +29,116 @@ class CodegreenBannerCarousel extends StatefulWidget {
 class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
   late final PageController _controller;
   int _index = 0;
+  List<_FeaturedBannerItem>? _items;
   Timer? _autoPlayTimer;
 
   @override
   void initState() {
     super.initState();
     _controller = PageController();
+    _loadBanners();
+  }
 
-    if (widget.autoPlay) {
+  Future<void> _loadBanners() async {
+    debugPrint(
+      '[CodegreenBannerCarousel] Loading featured banners for appType=${widget.appType}',
+    );
+
+    final banners = await FeaturedProductBannerService.instance
+        .fetchActiveBanners(
+          appType: widget.appType,
+        );
+
+    debugPrint(
+      '[CodegreenBannerCarousel] Fetched ${banners.length} featured_product_banner rows',
+    );
+
+    if (!mounted || banners.isEmpty) {
+      if (mounted) {
+        setState(() => _items = const []);
+      }
+      return;
+    }
+
+    final productIds = banners
+        .map((b) => b.productId)
+        .where((id) => id.trim().isNotEmpty)
+        .toList();
+
+    debugPrint(
+      '[CodegreenBannerCarousel] Product IDs from banners: $productIds',
+    );
+
+    final products = await ProductService.instance.fetchProductsByIds(
+      productIds: productIds,
+    );
+
+    debugPrint(
+      '[CodegreenBannerCarousel] Loaded ${products.length} products for featured banners',
+    );
+
+    if (!mounted) return;
+
+    final productById = {
+      for (final p in products) p.product.id: p,
+    };
+
+    final items = banners
+        .where((b) {
+          final hasProduct = productById[b.productId] != null;
+          if (!hasProduct) {
+            debugPrint(
+              '[CodegreenBannerCarousel] Skipping banner ${b.id} because product ${b.productId} was not found',
+            );
+          }
+          return hasProduct;
+        })
+        .map((b) {
+          final product = productById[b.productId]!;
+
+          String? backgroundUrl;
+
+          if ((b.backgroundImageBucket ?? '').isNotEmpty &&
+              (b.backgroundImageFileName ?? '').isNotEmpty) {
+            backgroundUrl = getImageLink(
+              b.backgroundImageBucket!,
+              b.backgroundImageFileName!,
+              folderPath: b.backgroundImageFolderPath,
+            );
+          } else if ((product.product.mainImageBucket ?? '').isNotEmpty &&
+              (product.product.mainImageFileName ?? '').isNotEmpty) {
+            backgroundUrl = getImageLink(
+              product.product.mainImageBucket!,
+              product.product.mainImageFileName!,
+              folderPath: product.product.mainImageFolderPath,
+            );
+          }
+
+          debugPrint(
+            '[CodegreenBannerCarousel] Banner ${b.id} for product ${product.product.id} -> backgroundUrl=${backgroundUrl ?? '(none)'}',
+          );
+
+          return _FeaturedBannerItem(
+            banner: b,
+            product: product,
+            backgroundImageUrl: backgroundUrl,
+          );
+        })
+        .toList(growable: false);
+
+    setState(() {
+      _items = items;
+      _index = 0;
+    });
+
+    if (widget.autoPlay && items.length > 1) {
+      _autoPlayTimer?.cancel();
       _autoPlayTimer = Timer.periodic(widget.autoPlayInterval, (_) {
         if (!mounted) return;
-        if (widget.imagePaths.length <= 1) return;
         if (!_controller.hasClients) return;
+        if (_items == null || _items!.length <= 1) return;
 
-        final nextIndex = (_index + 1) % widget.imagePaths.length;
+        final nextIndex = (_index + 1) % _items!.length;
         _goTo(nextIndex);
       });
     }
@@ -51,7 +152,9 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
   }
 
   void _goTo(int newIndex) {
-    if (newIndex < 0 || newIndex >= widget.imagePaths.length) return;
+    final items = _items;
+    if (items == null) return;
+    if (newIndex < 0 || newIndex >= items.length) return;
     _controller.animateToPage(
       newIndex,
       duration: const Duration(milliseconds: 250),
@@ -61,7 +164,13 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.imagePaths.isEmpty) {
+    final items = _items;
+
+    if (items == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (items.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -73,22 +182,18 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
         final theme = Theme.of(context);
 
         final bool canGoLeft = _index > 0;
-        final bool canGoRight = _index < widget.imagePaths.length - 1;
+        final bool canGoRight = _index < items.length - 1;
 
         final smallHeight = width;
 
         final pageView = PageView.builder(
           controller: _controller,
-          itemCount: widget.imagePaths.length,
+          itemCount: items.length,
           onPageChanged: (value) => setState(() => _index = value),
           itemBuilder: (context, index) {
-            final imagePath = widget.imagePaths[index];
-            return CachedNetworkImage(
-              imageUrl: imagePath,
-              fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+            final item = items[index];
+            return _FeaturedBannerCard(
+              item: item,
             );
           },
         );
@@ -145,7 +250,7 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
                   padding: const EdgeInsets.only(top: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: widget.imagePaths.asMap().keys.map(
+                    children: items.asMap().keys.map(
                       (i) {
                         final bool isActive = i == _index;
                         return InkWell(
@@ -176,6 +281,138 @@ class _CodegreenBannerCarouselState extends State<CodegreenBannerCarousel> {
           ),
         );
       },
+    );
+  }
+}
+
+class _FeaturedBannerItem {
+  const _FeaturedBannerItem({
+    required this.banner,
+    required this.product,
+    required this.backgroundImageUrl,
+  });
+
+  final FeaturedProductBannerRow banner;
+  final ProductWithOtherDetails product;
+  final String? backgroundImageUrl;
+}
+
+class _FeaturedBannerCard extends StatelessWidget {
+  const _FeaturedBannerCard({
+    required this.item,
+  });
+
+  final _FeaturedBannerItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final backgroundUrl = item.backgroundImageUrl;
+    final title = item.banner.title ?? '';
+    final subtitle = item.banner.subtitle ?? '';
+    final buttonText = (item.banner.buttonText ?? 'View product').trim();
+
+    Widget background;
+    if (backgroundUrl != null && backgroundUrl.isNotEmpty) {
+      background = CachedNetworkImage(
+        imageUrl: backgroundUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: cs.surfaceContainerHighest,
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: cs.surfaceContainerHighest,
+          alignment: Alignment.center,
+          child: const Icon(Icons.image_not_supported),
+        ),
+      );
+    } else {
+      background = Container(
+        color: cs.surfaceContainerHighest,
+      );
+    }
+
+    void openProductDetail() {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CodeGreenProductDetailTabScreen(
+            productWithDetails: item.product,
+          ),
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: openProductDetail,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          background,
+          Container(
+            color: Colors.black.withValues(alpha: 0.05),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 320,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 28,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.surface.withValues(alpha: 0.9),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (title.isNotEmpty) ...[
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (subtitle.isNotEmpty) ...[
+                      Text(
+                        subtitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    TextButton(
+                      onPressed: openProductDetail,
+                      style: TextButton.styleFrom(
+                        foregroundColor: cs.onSurface,
+                      ),
+                      child: Text(
+                        buttonText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          decoration: TextDecoration.underline,
+                          decorationThickness: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
