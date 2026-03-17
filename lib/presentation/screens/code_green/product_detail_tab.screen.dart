@@ -322,8 +322,8 @@ class _CodeGreenProductDetailTabScreenState
     final product = productWithDetails.product;
     final title = (product.title ?? product.name ?? '').isNotEmpty
         ? (product.title ?? product.name!)
-        : 'Product';
-    final sellerName = productWithDetails.seller.username ?? 'Unknown Seller';
+        : '상품';
+    final sellerName = productWithDetails.seller.username ?? '판매자 정보 없음';
     final description = product.description;
 
     final baseMainImageUrl =
@@ -420,7 +420,7 @@ class _CodeGreenProductDetailTabScreenState
                           child: IconButton(
                             onPressed: widget.onBack,
                             icon: const Icon(Icons.arrow_back),
-                            tooltip: 'Back',
+                            tooltip: '뒤로가기',
                           ),
                         ),
                       ),
@@ -532,7 +532,7 @@ class _CodeGreenProductDetailTabScreenState
             ),
             const SizedBox(height: 12),
             Text(
-              price != null ? formatKRW(price) : 'Price on request',
+              price != null ? formatKRW(price) : '가격 문의',
               style: theme.textTheme.titleLarge?.copyWith(
                 color: cs.primary,
                 fontWeight: FontWeight.w800,
@@ -541,7 +541,7 @@ class _CodeGreenProductDetailTabScreenState
             if (_colorOptions.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Color',
+                '색상',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -659,7 +659,7 @@ class _CodeGreenProductDetailTabScreenState
                               children: [
                                 Icon(Icons.shopping_cart_outlined, size: 18),
                                 SizedBox(width: 8),
-                                Text('Add to cart'),
+                                Text('장바구니 담기'),
                               ],
                             ),
                     )
@@ -668,8 +668,8 @@ class _CodeGreenProductDetailTabScreenState
                       children: [
                         Text(
                           _isCheckingCartState
-                              ? 'Checking cart...'
-                              : 'Already added to cart.',
+                              ? '장바구니 확인 중...'
+                              : '이미 장바구니에 담긴 상품입니다.',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: cs.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
@@ -689,14 +689,14 @@ class _CodeGreenProductDetailTabScreenState
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text('Add another'),
+                                    : const Text('추가로 담기'),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: OutlinedButton(
                                 onPressed: _openCart,
-                                child: const Text('Check cart'),
+                                child: const Text('장바구니 보기'),
                               ),
                             ),
                           ],
@@ -744,8 +744,8 @@ class _CodeGreenProductDetailTabScreenState
     final tabBar = TabBar(
       dividerColor: cs.outlineVariant,
       tabs: [
-        const Tab(text: 'Detail'),
-        Tab(text: 'Review(${widget.reviewCount})'),
+        const Tab(text: '상세정보'),
+        Tab(text: '리뷰(${widget.reviewCount})'),
         Tab(text: 'QnA($_qnaCount)'),
       ],
     );
@@ -756,7 +756,7 @@ class _CodeGreenProductDetailTabScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Description',
+            '상품 설명',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -765,13 +765,13 @@ class _CodeGreenProductDetailTabScreenState
           Text(
             (description != null && description.isNotEmpty)
                 ? description
-                : 'No description provided.',
+                : '등록된 상품 설명이 없습니다.',
             style: theme.textTheme.bodyMedium,
           ),
           if ((product.name ?? '').isNotEmpty) ...[
             const SizedBox(height: 24),
             Text(
-              'Product name',
+              '상품명',
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -792,7 +792,7 @@ class _CodeGreenProductDetailTabScreenState
       padding: const EdgeInsets.all(24),
       child: Center(
         child: Text(
-          'Reviews are coming soon.',
+          '리뷰 기능은 준비 중입니다.',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: cs.onSurfaceVariant,
           ),

@@ -51,16 +51,15 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     final cs = theme.colorScheme;
     final imageUrl =
         widget.mission.thumbnailBucket != null &&
-                widget.mission.thumbnailFilename != null
-            ? getImageLink(
-                widget.mission.thumbnailBucket!,
-                widget.mission.thumbnailFilename!,
-                folderPath: widget.mission.thumbnailFolderPath,
-              )
-            : null;
+            widget.mission.thumbnailFilename != null
+        ? getImageLink(
+            widget.mission.thumbnailBucket!,
+            widget.mission.thumbnailFilename!,
+            folderPath: widget.mission.thumbnailFolderPath,
+          )
+        : null;
     final points = widget.mission.awardPoints;
-    final isBannerMission =
-        widget.mission.type == MissionType.banner_exposed;
+    final isBannerMission = widget.mission.type == MissionType.banner_exposed;
 
     if (widget.variant == MissionAvailableTileVariant.grid) {
       // Grid cards should look identical for all mission types.
@@ -96,16 +95,16 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
               child: _buildBannerContent(theme, cs, points),
             )
           : GeneralMissionCard(
-                    child: Row(
-                      children: [
-                        _buildThumbnail(imageUrl),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildTextContent(theme, cs, points),
-                        ),
-                      ],
-                    ),
+              child: Row(
+                children: [
+                  _buildThumbnail(imageUrl),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextContent(theme, cs, points),
                   ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -127,13 +126,11 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
         children: [
           Text(
             widget.mission.title ?? 'No Title',
-            style:
-                (theme.textTheme.titleSmall ?? const TextStyle(fontSize: 14))
-                    .copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize:
-                          (theme.textTheme.titleSmall?.fontSize ?? 14) + 1,
-                    ),
+            style: (theme.textTheme.titleSmall ?? const TextStyle(fontSize: 14))
+                .copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: (theme.textTheme.titleSmall?.fontSize ?? 14) + 1,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -239,6 +236,8 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     ColorScheme cs,
     int? points,
   ) {
+    final formattedPoints = NumberFormat('#,###').format(points ?? 0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,7 +273,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${points ?? 0}',
+                  formattedPoints,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: cs.primary,
@@ -396,6 +395,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     ColorScheme cs,
     int? points,
   ) {
+    final formattedPoints = NumberFormat('#,###').format(points ?? 0);
     final path =
         'assets/${assetFolderPath[asset.cMileageReverse]}/${asset.cMileageReverse}';
     return Row(
@@ -409,7 +409,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
         ),
         const SizedBox(width: 4),
         Text(
-          '${points ?? 0}',
+          formattedPoints,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -455,7 +455,8 @@ class _BannerBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        style:
+            Theme.of(context).textTheme.labelMedium?.copyWith(
               color: const Color(0xFF2D5016),
               fontWeight: FontWeight.w600,
             ) ??
@@ -468,4 +469,3 @@ class _BannerBadge extends StatelessWidget {
     );
   }
 }
-

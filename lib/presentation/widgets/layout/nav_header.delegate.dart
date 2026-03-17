@@ -6,8 +6,6 @@ import 'package:esg_mobile/presentation/widgets/logo/code_green.logo.dart';
 import 'package:esg_mobile/presentation/widgets/logo/green_square.logo.dart';
 import 'package:flutter/material.dart';
 import 'package:esg_mobile/core/constants/navigation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:esg_mobile/presentation/screens/code_green/look_book.tab.dart';
 
 /// Responsive floating navigation header.
 ///
