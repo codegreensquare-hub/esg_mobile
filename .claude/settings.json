@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo $PATH)",
+      "Bash(brew list:*)",
+      "Read(//Volumes/T7/flutter/bin/**)",
+      "Bash(find /Users/withcenterdev/Desktop/projects/esg_mobile -type f -name *.gradle -o -name build.gradle)",
+      "Bash(find /Users/withcenterdev/Desktop/projects/esg_mobile -type f -name build.gradle -o -name *.gradle)",
+      "Bash(grep -r \"onMessage\\\\|getInitialMessage\\\\|onMessageOpenedApp\\\\|onNotification\" /Users/withcenterdev/Desktop/projects/esg_mobile/lib --include=*.dart)",
+      "Bash(grep -r \"flutter_local_notifications\\\\|NotificationDetails\\\\|initialize\" /Users/withcenterdev/Desktop/projects/esg_mobile/lib --include=*.dart)",
+      "Bash(/Volumes/T7/flutter/bin/flutter pub:*)"
+    ]
+  }
+}
