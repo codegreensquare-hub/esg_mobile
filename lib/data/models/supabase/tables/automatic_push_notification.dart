@@ -40,6 +40,7 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
     bool? isEnabled,
     String? createdBy,
     String? companyId,
+    DateTime? lastSentAt,
   }) : super({
          'category_id': supaSerialize(categoryId),
          if (id != null) 'id': supaSerialize(id),
@@ -55,6 +56,7 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
          if (isEnabled != null) 'is_enabled': supaSerialize(isEnabled),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (companyId != null) 'company_id': supaSerialize(companyId),
+         if (lastSentAt != null) 'last_sent_at': supaSerialize(lastSentAt),
        });
 
   /// Automatic Push Notification Row
@@ -174,6 +176,13 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
   String? get companyId => getField<String>(companyIdField);
   set companyId(String? value) => setField<String>(companyIdField, value);
 
+  /// Last Sent At field name
+  static const String lastSentAtField = 'last_sent_at';
+
+  /// Last Sent At
+  DateTime? get lastSentAt => getField<DateTime>(lastSentAtField);
+  set lastSentAt(DateTime? value) => setField<DateTime>(lastSentAtField, value);
+
   /// Make a copy of the current [AutomaticPushNotificationRow]
   /// overriding the provided fields
   AutomaticPushNotificationRow copyWith({
@@ -191,6 +200,7 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
     bool? isEnabled,
     String? createdBy,
     String? companyId,
+    DateTime? lastSentAt,
   }) => AutomaticPushNotificationRow.fromJson({
     'category_id': supaSerialize(categoryId) ?? data['category_id'],
     'id': supaSerialize(id) ?? data['id'],
@@ -206,8 +216,9 @@ class AutomaticPushNotificationRow extends SupabaseDataRow {
     'is_enabled': supaSerialize(isEnabled) ?? data['is_enabled'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'company_id': supaSerialize(companyId) ?? data['company_id'],
+    'last_sent_at': supaSerialize(lastSentAt) ?? data['last_sent_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-17 11:11:48.428840
+/// Date: 2026-03-17 16:20:06.009695

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_codegen/supabase_codegen.dart' as supa_codegen;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/firebase_options.dart';
@@ -24,6 +25,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Register background message handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   var supabaseUrl = (dotenv.env['SUPABASE_URL'] ?? '');
   var supabaseAnonKey = (dotenv.env['SUPABASE_ANON_KEY'] ?? '');

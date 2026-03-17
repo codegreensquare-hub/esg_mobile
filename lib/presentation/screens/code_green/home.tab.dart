@@ -171,27 +171,8 @@ class _HomeTabState extends State<HomeTab> {
             onTapBiodegradable: widget.onTapBiodegradableMaterial,
           ),
           const SizedBox(height: 80),
-          CodegreenBannerCarousel(
-            imagePaths: [
-              getImageLink(
-                bucket.asset,
-                asset_constants.asset.banner1Window,
-                folderPath: asset_constants
-                    .assetFolderPath[asset_constants.asset.banner1Window],
-              ),
-              getImageLink(
-                bucket.asset,
-                asset_constants.asset.banner2Window,
-                folderPath: asset_constants
-                    .assetFolderPath[asset_constants.asset.banner2Window],
-              ),
-              getImageLink(
-                bucket.asset,
-                asset_constants.asset.banner3Window,
-                folderPath: asset_constants
-                    .assetFolderPath[asset_constants.asset.banner3Window],
-              ),
-            ],
+          const CodegreenBannerCarousel(
+            appType: 'code_green',
           ),
           const SizedBox(height: 80),
           CodegreenMeetSection(

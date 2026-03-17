@@ -57,6 +57,21 @@
       "request": "launch",
       "type": "dart",
       "deviceId": "13620911-7CB1-4865-91F6-6A0B3A5CAD54"
-    }
+    },
+    {
+      "name": "Noe Pro Max",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "FFCC2D9B-9480-4B8A-BEF3-AF7259844E2F"
+    },
+
+    {
+      "name": "Noe Samsung",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "R9ATA00LMJM"
+    },
+
+   
   ]
 }

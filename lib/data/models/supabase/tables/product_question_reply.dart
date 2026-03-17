@@ -106,4 +106,4 @@ class ProductQuestionReplyRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-17 11:11:48.533748
+/// Date: 2026-03-17 16:20:06.120967
