@@ -1055,4 +1055,4 @@ class IntegratedAdminPreferencesRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-13 16:11:42.582350
+/// Date: 2026-03-17 11:11:48.481105

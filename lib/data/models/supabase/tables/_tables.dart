@@ -11,6 +11,7 @@ export 'automatic_push_category.dart';
 export 'automatic_push_notification.dart';
 export 'award_points.dart';
 export 'award_points_transaction.dart';
+export 'banner.dart';
 export 'cart_item.dart';
 export 'cart_item_option.dart';
 export 'client_admin_notification.dart';
@@ -86,4 +87,4 @@ export 'user_settings.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-03-13 16:11:42.610879
+/// Date: 2026-03-17 11:11:48.579423

@@ -96,13 +96,7 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
           ),
         ),
         const SizedBox(height: 16),
-        AutoImageBannerCarousel(
-          assetImagePaths: const [
-            'assets/images/about/about_1.7a6b64fe.jpg',
-            'assets/images/about/about_2.a32a1d4b.jpg',
-            'assets/images/about/about_4.5918b406.jpg',
-          ],
-        ),
+        const SupabaseBannerCarousel(appType: 'green_square'),
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

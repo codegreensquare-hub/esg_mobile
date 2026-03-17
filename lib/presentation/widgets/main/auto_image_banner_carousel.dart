@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esg_mobile/core/services/database/banner.service.dart';
+import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:flutter/material.dart';
 
 class AutoImageBannerCarousel extends StatefulWidget {
@@ -8,11 +11,13 @@ class AutoImageBannerCarousel extends StatefulWidget {
     required this.assetImagePaths,
     this.height = 160,
     this.autoPlayInterval = const Duration(seconds: 4),
+    this.isNetwork = false,
   }) : assert(assetImagePaths.length > 0, 'assetImagePaths cannot be empty');
 
   final List<String> assetImagePaths;
   final double height;
   final Duration autoPlayInterval;
+  final bool isNetwork;
 
   @override
   State<AutoImageBannerCarousel> createState() =>
@@ -84,7 +89,10 @@ class _AutoImageBannerCarouselState extends State<AutoImageBannerCarousel> {
                 itemCount: _infiniteItemCount,
                 itemBuilder: (context, index) {
                   final assetPath = imagePaths[index % imagePaths.length];
-                  return _BannerImage(assetPath: assetPath);
+                  return _BannerImage(
+                    assetPath: assetPath,
+                    isNetwork: widget.isNetwork,
+                  );
                 },
               ),
               Positioned(
@@ -130,18 +138,100 @@ class _AutoImageBannerCarouselState extends State<AutoImageBannerCarousel> {
 }
 
 class _BannerImage extends StatelessWidget {
-  const _BannerImage({required this.assetPath});
+  const _BannerImage({
+    required this.assetPath,
+    required this.isNetwork,
+  });
 
   final String assetPath;
+  final bool isNetwork;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Image.asset(
-        assetPath,
-        fit: BoxFit.cover,
-      ),
+      child: isNetwork
+          ? CachedNetworkImage(
+              imageUrl: assetPath,
+              fit: BoxFit.cover,
+            )
+          : Image.asset(
+              assetPath,
+              fit: BoxFit.cover,
+            ),
     );
   }
 }
+
+class SupabaseBannerCarousel extends StatefulWidget {
+  const SupabaseBannerCarousel({
+    super.key,
+    required this.appType,
+    this.height = 160,
+    this.autoPlayInterval = const Duration(seconds: 4),
+  });
+
+  final String appType;
+  final double height;
+  final Duration autoPlayInterval;
+
+  @override
+  State<SupabaseBannerCarousel> createState() =>
+      _SupabaseBannerCarouselState();
+}
+
+class _SupabaseBannerCarouselState extends State<SupabaseBannerCarousel> {
+  List<String>? _imageUrls;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBanners();
+  }
+
+  Future<void> _loadBanners() async {
+    final rows =
+        await BannerService.instance.fetchActiveBanners(appType: widget.appType);
+
+    final urls = rows
+        .where(
+          (row) =>
+              row.imageBucket != null &&
+              row.imageFileName != null &&
+              row.imageBucket!.isNotEmpty &&
+              row.imageFileName!.isNotEmpty,
+        )
+        .map(
+          (row) => getImageLink(
+            row.imageBucket!,
+            row.imageFileName!,
+            folderPath: row.imageFolderPath,
+          ),
+        )
+        .toList(growable: false);
+
+    if (!mounted) return;
+
+    setState(() {
+      _imageUrls = urls;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final urls = _imageUrls;
+
+    // If nothing is fetched (null or empty), don't render the carousel.
+    if (urls == null || urls.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return AutoImageBannerCarousel(
+      assetImagePaths: urls,
+      height: widget.height,
+      autoPlayInterval: widget.autoPlayInterval,
+      isNetwork: true,
+    );
+  }
+}
+
 
