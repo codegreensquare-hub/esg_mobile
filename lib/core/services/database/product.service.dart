@@ -112,6 +112,84 @@ class ProductService {
     }
   }
 
+  Future<List<ProductWithOtherDetails>> fetchPopularProducts({
+    String? searchQuery,
+    String? userId,
+    VendorAdminType? vendor,
+    ProductStyle? style,
+    ProductMaterial? material,
+    bool? isCuration,
+    String? company,
+    int? limit,
+  }) async {
+    try {
+      final products = await fetchProducts(
+        searchQuery: searchQuery,
+        userId: userId,
+        vendor: vendor,
+        style: style,
+        material: material,
+        isCuration: isCuration,
+        company: company,
+        orderByField: ProductRow.createdAtField,
+        orderAscending: false,
+      );
+
+      if (products.isEmpty) {
+        return [];
+      }
+
+      final productIds = products
+          .map((productWithDetails) => productWithDetails.product.id)
+          .toList(growable: false);
+
+      final orderItems = await _client
+          .from(OrderItemTable().tableName)
+          .select(
+            '${OrderItemRow.productField}, ${OrderItemRow.orderField}, ${OrderItemRow.cancelledAtField}',
+          )
+          .inFilter(OrderItemRow.productField, productIds)
+          .isFilter(OrderItemRow.cancelledAtField, null);
+
+      final orderCountByProductId = (orderItems as List)
+          .whereType<Map<String, dynamic>>()
+          .fold<Map<String, Set<String>>>({}, (accumulator, row) {
+            final productId = row[OrderItemRow.productField] as String?;
+            if (productId == null || productId.trim().isEmpty) {
+              return accumulator;
+            }
+
+            final orderId = row[OrderItemRow.orderField] as String?;
+            if (orderId == null || orderId.trim().isEmpty) {
+              return accumulator;
+            }
+
+            accumulator.putIfAbsent(productId, () => <String>{}).add(orderId);
+            return accumulator;
+          });
+
+      final sortedProducts = [...products]
+        ..sort((left, right) {
+          final leftCount = orderCountByProductId[left.product.id]?.length ?? 0;
+          final rightCount =
+              orderCountByProductId[right.product.id]?.length ?? 0;
+          final countComparison = rightCount.compareTo(leftCount);
+          if (countComparison != 0) {
+            return countComparison;
+          }
+
+          return right.product.createdAt.compareTo(left.product.createdAt);
+        });
+
+      return limit == null
+          ? sortedProducts
+          : sortedProducts.take(limit).toList(growable: false);
+    } catch (e) {
+      debugPrint('Error fetching popular products: $e');
+      return [];
+    }
+  }
+
   Future<List<ProductWithOtherDetails>> fetchProductsByIds({
     required List<String> productIds,
     String? userId,

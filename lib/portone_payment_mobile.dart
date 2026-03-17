@@ -62,14 +62,14 @@ class PortonePaymentScreen extends StatelessWidget {
 
     return IamportPayment(
       appBar: AppBar(
-        title: const Text('PortOne Payment'),
+        title: const Text('포트원 결제'),
       ),
       initialChild: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(padding: EdgeInsets.symmetric(vertical: 15)),
-            Text('Please wait...', style: TextStyle(fontSize: 20)),
+            Text('잠시만 기다려주세요...', style: TextStyle(fontSize: 20)),
           ],
         ),
       ),

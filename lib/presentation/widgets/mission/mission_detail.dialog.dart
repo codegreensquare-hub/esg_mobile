@@ -356,8 +356,7 @@ class _MissionDetailDialogState extends State<MissionDetailDialog> {
                     ),
                   ),
                   child: Text(
-                    widget.mission.participationButtonText ??
-                        'Participate in Mission',
+                    widget.mission.participationButtonText ?? '미션 참여하기',
                   ),
                 ),
               ),

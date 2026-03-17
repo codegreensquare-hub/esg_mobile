@@ -31,9 +31,11 @@ class ShoppingMallTab extends StatefulWidget {
 
 class _ShoppingMallTabState extends State<ShoppingMallTab>
     with TickerProviderStateMixin {
+  static const _allCategoryId = 'All';
+
   double awardPoints = 0.0;
   final TextEditingController _searchController = TextEditingController();
-  String selectedCategoryId = 'All';
+  String selectedCategoryId = _allCategoryId;
   List<ProductCategoryRow> categories = [];
   List<ProductWithOtherDetails> products = [];
   bool isLoading = true;
@@ -84,20 +86,20 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
     }
 
     var targetIndex = 0;
-    if (selectedCategoryId != 'All') {
+    if (selectedCategoryId != _allCategoryId) {
       final matchIndex = categories.indexWhere(
         (category) => category.id == selectedCategoryId,
       );
       if (matchIndex != -1) {
         targetIndex = matchIndex + 1;
       } else {
-        selectedCategoryId = 'All';
+        selectedCategoryId = _allCategoryId;
       }
     }
 
     if (targetIndex >= controller.length) {
       targetIndex = 0;
-      selectedCategoryId = 'All';
+      selectedCategoryId = _allCategoryId;
     }
 
     if (controller.index != targetIndex) {
@@ -127,11 +129,28 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
   ) {
     if (list.isEmpty) return list;
     const popularNames = ['인기', 'Popular'];
-    final popularIndex = list.indexWhere((c) => popularNames
-        .any((name) => c.name.trim().toLowerCase() == name.toLowerCase()));
+    final popularIndex = list.indexWhere(
+      (c) => popularNames.any(
+        (name) => c.name.trim().toLowerCase() == name.toLowerCase(),
+      ),
+    );
     if (popularIndex <= 0) return list;
     final popular = list[popularIndex];
     return [popular, ...list.where((c) => c.id != popular.id)];
+  }
+
+  bool _isPopularCategorySelected() {
+    if (selectedCategoryId == _allCategoryId) {
+      return false;
+    }
+
+    final selectedCategory = categories
+        .where((category) => category.id == selectedCategoryId)
+        .cast<ProductCategoryRow?>()
+        .firstWhere((category) => category != null, orElse: () => null);
+    final selectedName = selectedCategory?.name.trim().toLowerCase();
+
+    return selectedName == '인기' || selectedName == 'popular';
   }
 
   Future<void> _loadData() async {
@@ -149,14 +168,16 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
       }
 
       final fetchedCategories = await ProductService.instance.fetchCategories();
-      final orderedCategories = _orderCategoriesWithPopularFirst(fetchedCategories);
+      final orderedCategories = _orderCategoriesWithPopularFirst(
+        fetchedCategories,
+      );
       setState(() {
         categories = orderedCategories;
         final categoryStillExists =
-            selectedCategoryId == 'All' ||
+            selectedCategoryId == _allCategoryId ||
             categories.any((category) => category.id == selectedCategoryId);
         if (!categoryStillExists) {
-          selectedCategoryId = 'All';
+          selectedCategoryId = _allCategoryId;
         }
         _createOrUpdateTabController();
       });
@@ -172,14 +193,24 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
   }
 
   Future<void> _loadProducts() async {
-    final fetchedProducts = await ProductService.instance.fetchProducts(
-      categoryId: selectedCategoryId == 'All' ? null : selectedCategoryId,
-      searchQuery: _searchController.text.isEmpty
-          ? null
-          : _searchController.text,
-      userId: userId,
-      vendor: VendorAdminType.retailer,
-    );
+    final searchQuery = _searchController.text.isEmpty
+        ? null
+        : _searchController.text;
+
+    final fetchedProducts = _isPopularCategorySelected()
+        ? await ProductService.instance.fetchPopularProducts(
+            searchQuery: searchQuery,
+            userId: userId,
+            vendor: VendorAdminType.retailer,
+          )
+        : await ProductService.instance.fetchProducts(
+            categoryId: selectedCategoryId == _allCategoryId
+                ? null
+                : selectedCategoryId,
+            searchQuery: searchQuery,
+            userId: userId,
+            vendor: VendorAdminType.retailer,
+          );
     if (mounted) {
       setState(() => products = fetchedProducts);
     }
@@ -457,9 +488,9 @@ class _ShoppingMallTabState extends State<ShoppingMallTab>
                               productWithDetails: productWithDetails,
                               onWishlistToggle: (isInWishlist) =>
                                   _toggleWishlist(
-                                productWithDetails,
-                                isInWishlist,
-                              ),
+                                    productWithDetails,
+                                    isInWishlist,
+                                  ),
                               onTap: () =>
                                   _navigateToProductDetail(productWithDetails),
                             ),

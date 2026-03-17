@@ -9,6 +9,7 @@ import 'package:esg_mobile/core/utils/product_pricing.dart';
 import 'package:esg_mobile/data/entities/cart_item_with_product.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/portone_payment.dart';
+import 'package:esg_mobile/presentation/screens/green_square/my_orders.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/shipping_addresses.dialog.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/shipping_address_form_sheet.dart';
 
@@ -50,6 +51,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double _userAwardPoints = 0.0;
   bool _hasSetDefaultAwardPoints = false;
   final TextEditingController _awardPointsController = TextEditingController();
+  final FocusNode _awardPointsFocusNode = FocusNode();
 
   // New UI: orderer info
   final TextEditingController _ordererNameController = TextEditingController();
@@ -77,21 +79,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return sum +
         (baseDiscount +
                 usableAwardPointsAmount(
-                      regularPrice: item.unitPrice,
-                      baseDiscountRate: baseDiscountRate,
-                      platformDiscountRate: platformDiscountRate,
-                      vendorDiscountRate: vendorDiscountRate,
-                    )) *
+                  regularPrice: item.unitPrice,
+                  baseDiscountRate: baseDiscountRate,
+                  platformDiscountRate: platformDiscountRate,
+                  vendorDiscountRate: vendorDiscountRate,
+                )) *
             item.quantity;
   });
 
   double get _usedAwardPoints =>
       double.tryParse(_awardPointsController.text) ?? 0;
 
+  double get _defaultAwardPointsToUse =>
+      _userAwardPoints < _maxUsableAwardPoints
+      ? _userAwardPoints
+      : _maxUsableAwardPoints;
+
   /// Award points actually applied (only when mileage checkbox is on).
   double get _effectiveUsedAwardPoints => _useMileage ? _usedAwardPoints : 0.0;
 
-  double get _chargedAmount => _totalPoints - _effectiveUsedAwardPoints;
+  double get _chargedAmount =>
+      _totalPoints - _effectiveUsedAwardPoints + _shippingFee;
 
   @override
   void initState() {
@@ -104,9 +112,62 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _fillOrdererFromAddress(UserShippingAddressRow address) {
-    _ordererNameController.text =
-        (address.recipientName ?? address.name ?? '').trim();
+    _ordererNameController.text = (address.recipientName ?? address.name ?? '')
+        .trim();
     _ordererPhoneController.text = (address.phoneNumber ?? '').trim();
+  }
+
+  void _setAwardPointsInput(double value) {
+    final normalized = value.clamp(0.0, _defaultAwardPointsToUse);
+    final text = normalized.toStringAsFixed(0);
+    _awardPointsController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  void _handleUseMileageChanged(bool enabled) {
+    setState(() {
+      _useMileage = enabled;
+      if (!enabled) {
+        _awardPointsFocusNode.unfocus();
+        return;
+      }
+
+      final currentValue = double.tryParse(_awardPointsController.text) ?? 0;
+      final nextValue = currentValue > 0
+          ? currentValue
+          : _defaultAwardPointsToUse;
+      _setAwardPointsInput(nextValue);
+    });
+
+    if (enabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _awardPointsFocusNode.requestFocus();
+        _awardPointsController.selection = TextSelection.collapsed(
+          offset: _awardPointsController.text.length,
+        );
+      });
+    }
+  }
+
+  void _handleAwardPointsChanged(String value) {
+    final parsed = double.tryParse(value) ?? 0;
+    final clamped = parsed.clamp(0.0, _defaultAwardPointsToUse);
+
+    if (parsed != clamped) {
+      _setAwardPointsInput(clamped);
+    }
+
+    setState(() {});
+  }
+
+  void _goToOrdersScreen() {
+    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
+      (route) => route.isFirst,
+    );
   }
 
   Future<void> _loadDefaultAddress() async {
@@ -334,7 +395,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           otherData: result,
         );
 
-        Navigator.of(context).pop(orderId);
+        if (!mounted) return;
+
+        _goToOrdersScreen();
       } else {
         // Payment failed or cancelled
         await CartService.instance.updatePaymentStatus(
@@ -343,9 +406,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           otherData: result,
         );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('결제가 취소되었습니다.')),
-        );
+        if (!mounted) return;
+
+        _goToOrdersScreen();
       }
     } catch (e) {
       if (!mounted) return;
@@ -363,6 +426,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void dispose() {
     _awardPointsController.dispose();
+    _awardPointsFocusNode.dispose();
     _ordererNameController.dispose();
     _ordererPhoneController.dispose();
     _ordererEmailController.dispose();
@@ -378,11 +442,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     // Set default award points value
     if (!_hasSetDefaultAwardPoints && _userAwardPoints > 0) {
-      final maxAllowed = _userAwardPoints < _maxUsableAwardPoints
-          ? _userAwardPoints
-          : _maxUsableAwardPoints;
+      final maxAllowed = _defaultAwardPointsToUse;
       if (maxAllowed > 0) {
-        _awardPointsController.text = maxAllowed.toStringAsFixed(0);
+        _setAwardPointsInput(maxAllowed);
         _hasSetDefaultAwardPoints = true;
       }
     }
@@ -410,12 +472,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('배송지',
-                            style: theme.textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          '배송지',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         TextButton(
-                            onPressed: _manageAddresses,
-                            child: const Text('배송지 변경')),
+                          onPressed: _manageAddresses,
+                          child: const Text('배송지 변경'),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -423,46 +489,56 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       const LinearProgressIndicator()
                     else if (_selectedAddress == null)
                       Text(
-                          '선택된 배송지가 없습니다. 배송지를 등록하고 기본 배송지로 설정해주세요.',
-                          style: theme.textTheme.bodyMedium)
+                        '선택된 배송지가 없습니다. 배송지를 등록하고 기본 배송지로 설정해주세요.',
+                        style: theme.textTheme.bodyMedium,
+                      )
                     else
                       Card(
                         elevation: 2,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.location_on,
-                                  color: theme.colorScheme.primary, size: 24),
+                              Icon(
+                                Icons.location_on,
+                                color: theme.colorScheme.primary,
+                                size: 24,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        _selectedAddress?.name ?? '배송지',
-                                        style: theme.textTheme.titleSmall
-                                            ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    theme.colorScheme.primary)),
+                                      _selectedAddress?.name ?? '배송지',
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                    ),
                                     const SizedBox(height: 8),
                                     Text(
-                                        '받는 사람: ${_selectedAddress?.recipientName ?? ''}',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                                fontWeight: FontWeight.w500)),
+                                      '받는 사람: ${_selectedAddress?.recipientName ?? ''}',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
                                     const SizedBox(height: 4),
                                     Text(
-                                        '연락처: ${_selectedAddress?.phoneNumber ?? ''}',
-                                        style: theme.textTheme.bodyMedium),
+                                      '연락처: ${_selectedAddress?.phoneNumber ?? ''}',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
                                     const SizedBox(height: 8),
                                     Text(
-                                        '주소: ${_selectedAddress?.address ?? ''}${(_selectedAddress?.detailedAddress ?? '').trim().isEmpty ? '' : ' ${_selectedAddress!.detailedAddress}'}',
-                                        style: theme.textTheme.bodyMedium),
+                                      '주소: ${_selectedAddress?.address ?? ''}${(_selectedAddress?.detailedAddress ?? '').trim().isEmpty ? '' : ' ${_selectedAddress!.detailedAddress}'}',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -471,9 +547,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                     const SizedBox(height: 16),
-                    Text('주문 상품',
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      '주문 상품',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     ListView.builder(
                       shrinkWrap: true,
@@ -482,11 +561,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       itemBuilder: (context, index) {
                         final item = widget.items[index];
                         return ListTile(
-                          title: Text(item.product.title ??
-                              item.product.name ??
-                              '제품명 없음'),
+                          title: Text(
+                            item.product.title ?? item.product.name ?? '제품명 없음',
+                          ),
                           subtitle: Text(
-                              '수량: ${item.quantity}개 / 합계: ${formatter.format(item.totalPrice.toInt())}'),
+                            '수량: ${item.quantity}개 / 합계: ${formatter.format(item.totalPrice.toInt())}',
+                          ),
                         );
                       },
                     ),
@@ -508,7 +588,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         controller: _awardPointsController,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                            hintText: '0', suffixText: 'P', border: OutlineInputBorder()),
+                          hintText: '0',
+                          suffixText: 'P',
+                          border: OutlineInputBorder(),
+                        ),
                         onChanged: (_) => setState(() {}),
                       ),
                     ),
@@ -523,7 +606,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2))
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('주문 확정'),
                 ),
               ],
@@ -593,73 +677,74 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       )
                     : _selectedAddress == null
-                        ? Text(
-                            '배송지를 선택해주세요.',
+                    ? Text(
+                        '배송지를 선택해주세요.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontFamily: _fontFamily,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedAddress!.recipientName ??
+                                _selectedAddress!.name ??
+                                '',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontFamily: _fontFamily,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _selectedAddress!.phoneNumber ?? '',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontFamily: _fontFamily,
                             ),
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _selectedAddress!.recipientName ??
-                                    _selectedAddress!.name ??
-                                    '',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontFamily: _fontFamily,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _selectedAddress!.phoneNumber ?? '',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontFamily: _fontFamily,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${_selectedAddress!.address ?? ''} ${(_selectedAddress!.detailedAddress ?? '').trim()}'
-                                    .trim(),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontFamily: _fontFamily,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                              if ((_selectedAddress!.requestsForDelivery ?? '')
-                                  .trim()
-                                  .isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  _selectedAddress!.requestsForDelivery!,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontFamily: _fontFamily,
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: TextButton(
-                                  onPressed: _manageAddresses,
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: _sectionDivider,
-                                    foregroundColor: cs.onSurface,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 18),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.zero),
-                                  ),
-                                  child: const Text('배송지 변경'),
-                                ),
-                              ),
-                            ],
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${_selectedAddress!.address ?? ''} ${(_selectedAddress!.detailedAddress ?? '').trim()}'
+                                .trim(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontFamily: _fontFamily,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          if ((_selectedAddress!.requestsForDelivery ?? '')
+                              .trim()
+                              .isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              _selectedAddress!.requestsForDelivery!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontFamily: _fontFamily,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: TextButton(
+                              onPressed: _manageAddresses,
+                              style: TextButton.styleFrom(
+                                backgroundColor: _sectionDivider,
+                                foregroundColor: cs.onSurface,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 18,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                              ),
+                              child: const Text('배송지 변경'),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
               const SizedBox(height: _sectionGap),
 
@@ -671,77 +756,83 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ...widget.items.map((item) {
-                final imageUrl = item.product.mainImageBucket != null &&
-                        item.product.mainImageFileName != null
-                    ? getImageLink(
-                        item.product.mainImageBucket!,
-                        item.product.mainImageFileName!,
-                        folderPath: item.product.mainImageFolderPath,
-                      )
-                    : null;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      imageUrl != null
-                            ? Image.network(
-                                imageUrl,
-                                width: 64,
+                      final imageUrl =
+                          item.product.mainImageBucket != null &&
+                              item.product.mainImageFileName != null
+                          ? getImageLink(
+                              item.product.mainImageBucket!,
+                              item.product.mainImageFileName!,
+                              folderPath: item.product.mainImageFolderPath,
+                            )
+                          : null;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            imageUrl != null
+                                ? Image.network(
+                                    imageUrl,
+                                    width: 64,
+                                    height: 64,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      width: 64,
+                                      height: 64,
+                                      color: cs.surfaceContainerHighest,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    width: 64,
+                                    height: 64,
+                                    color: cs.surfaceContainerHighest,
+                                    child: const Icon(Icons.image),
+                                  ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: SizedBox(
                                 height: 64,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  width: 64,
-                                  height: 64,
-                                  color: cs.surfaceContainerHighest,
-                                  child: const Icon(Icons.image_not_supported),
-                                ),
-                              )
-                            : Container(
-                                width: 64,
-                                height: 64,
-                                color: cs.surfaceContainerHighest,
-                                child: const Icon(Icons.image),
-                              ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SizedBox(
-                          height: 64,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                item.product.title ??
-                                    item.product.name ??
-                                    '제품명 없음',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontFamily: _fontFamily,
-                                  fontWeight: FontWeight.normal,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      item.product.title ??
+                                          item.product.name ??
+                                          '제품명 없음',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontFamily: _fontFamily,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                    ),
+                                    Text(
+                                      '수량: ${item.quantity}개',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            fontFamily: _fontFamily,
+                                            color: _quantityGray,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                '수량: ${item.quantity}개',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontFamily: _fontFamily,
-                                  color: _quantityGray,
-                                ),
+                            ),
+                            Text(
+                              '총 정가 ${formatter.format(item.totalPrice.toInt())}원',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: _fontFamily,
+                                fontWeight: FontWeight.normal,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        '총 정가 ${formatter.format(item.totalPrice.toInt())}원',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: _fontFamily,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+                      );
+                    }),
                     const SizedBox(height: 16),
                     Container(
                       height: 1,
@@ -749,21 +840,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     const SizedBox(height: 16),
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Checkbox(
-                          value: _useMileage,
-                          onChanged: (v) =>
-                              setState(() => _useMileage = v ?? false),
-                          activeColor: cs.primary,
-                        ),
-                        Text(
-                          '마일리지 사용',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontFamily: _fontFamily,
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _handleUseMileageChanged(!_useMileage),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  IgnorePointer(
+                                    child: Checkbox(
+                                      value: _useMileage,
+                                      onChanged: (_) {},
+                                      activeColor: cs.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    '마일리지 사용',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontFamily: _fontFamily,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                        const Spacer(),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -772,6 +876,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               width: 100,
                               child: TextField(
                                 controller: _awardPointsController,
+                                focusNode: _awardPointsFocusNode,
                                 keyboardType: TextInputType.number,
                                 enabled: _useMileage,
                                 textAlign: TextAlign.right,
@@ -783,42 +888,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   fillColor: Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.zero,
-                                    borderSide:
-                                        const BorderSide(color: _inputBorder),
+                                    borderSide: const BorderSide(
+                                      color: _inputBorder,
+                                    ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.zero,
-                                    borderSide:
-                                        const BorderSide(color: _inputBorder),
+                                    borderSide: const BorderSide(
+                                      color: _inputBorder,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.zero,
-                                    borderSide:
-                                        BorderSide(color: cs.primary),
+                                    borderSide: BorderSide(color: cs.primary),
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                     vertical: 12,
                                   ),
                                 ),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value) ?? 0;
-                                  final maxAllowed =
-                                      _userAwardPoints < _maxUsableAwardPoints
-                                          ? _userAwardPoints
-                                          : _maxUsableAwardPoints;
-                                  final clamped =
-                                      parsed.clamp(0.0, maxAllowed);
-                                  if (parsed != clamped) {
-                                    _awardPointsController.text =
-                                        clamped.toStringAsFixed(0);
-                                    _awardPointsController.selection =
-                                        TextSelection.collapsed(
-                                            offset: _awardPointsController
-                                                .text.length);
+                                onTap: () {
+                                  if (!_useMileage) {
+                                    _handleUseMileageChanged(true);
                                   }
-                                  setState(() {});
                                 },
+                                onChanged: _handleAwardPointsChanged,
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -859,9 +953,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('합계',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                                fontFamily: _fontFamily)),
+                        Text(
+                          '합계',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontFamily: _fontFamily,
+                          ),
+                        ),
                         Text(
                           '${formatter.format(productTotal.toInt())}원',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -918,22 +1015,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildSummaryRow(theme, '총 상품금액',
-                        '${formatter.format(productTotal.toInt())}원'),
                     _buildSummaryRow(
-                        theme,
-                        '마일리지',
-                        mileageUsed > 0
-                            ? '-${formatter.format(mileageUsed.toInt())}원'
-                            : '0원'),
+                      theme,
+                      '총 상품금액',
+                      '${formatter.format(productTotal.toInt())}원',
+                    ),
                     _buildSummaryRow(
-                        theme,
-                        '쿠폰',
-                        couponDiscount > 0
-                            ? '-${formatter.format(couponDiscount.toInt())}원'
-                            : '0원'),
+                      theme,
+                      '마일리지',
+                      mileageUsed > 0
+                          ? '-${formatter.format(mileageUsed.toInt())}원'
+                          : '0원',
+                    ),
                     _buildSummaryRow(
-                        theme, '배송비', '${formatter.format(_shippingFee)}원'),
+                      theme,
+                      '쿠폰',
+                      couponDiscount > 0
+                          ? '-${formatter.format(couponDiscount.toInt())}원'
+                          : '0원',
+                    ),
+                    _buildSummaryRow(
+                      theme,
+                      '배송비',
+                      '${formatter.format(_shippingFee)}원',
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -973,10 +1078,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           CheckboxListTile(
                             value: _selectedPaymentMethod == 0,
                             onChanged: (v) => setState(
-                                () => _selectedPaymentMethod = v == true ? 0 : null),
-                            title: Text(_paymentMethodLabels[0],
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontFamily: _fontFamily)),
+                              () =>
+                                  _selectedPaymentMethod = v == true ? 0 : null,
+                            ),
+                            title: Text(
+                              _paymentMethodLabels[0],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: _fontFamily,
+                              ),
+                            ),
                             controlAffinity: ListTileControlAffinity.leading,
                             contentPadding: EdgeInsets.zero,
                             activeColor: cs.primary,
@@ -984,10 +1094,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           CheckboxListTile(
                             value: _selectedPaymentMethod == 1,
                             onChanged: (v) => setState(
-                                () => _selectedPaymentMethod = v == true ? 1 : null),
-                            title: Text(_paymentMethodLabels[1],
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontFamily: _fontFamily)),
+                              () =>
+                                  _selectedPaymentMethod = v == true ? 1 : null,
+                            ),
+                            title: Text(
+                              _paymentMethodLabels[1],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: _fontFamily,
+                              ),
+                            ),
                             controlAffinity: ListTileControlAffinity.leading,
                             contentPadding: EdgeInsets.zero,
                             activeColor: cs.primary,
@@ -1002,10 +1117,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           CheckboxListTile(
                             value: _selectedPaymentMethod == 2,
                             onChanged: (v) => setState(
-                                () => _selectedPaymentMethod = v == true ? 2 : null),
-                            title: Text(_paymentMethodLabels[2],
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontFamily: _fontFamily)),
+                              () =>
+                                  _selectedPaymentMethod = v == true ? 2 : null,
+                            ),
+                            title: Text(
+                              _paymentMethodLabels[2],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: _fontFamily,
+                              ),
+                            ),
                             controlAffinity: ListTileControlAffinity.leading,
                             contentPadding: EdgeInsets.zero,
                             activeColor: cs.primary,
@@ -1013,10 +1133,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           CheckboxListTile(
                             value: _selectedPaymentMethod == 3,
                             onChanged: (v) => setState(
-                                () => _selectedPaymentMethod = v == true ? 3 : null),
-                            title: Text(_paymentMethodLabels[3],
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontFamily: _fontFamily)),
+                              () =>
+                                  _selectedPaymentMethod = v == true ? 3 : null,
+                            ),
+                            title: Text(
+                              _paymentMethodLabels[3],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: _fontFamily,
+                              ),
+                            ),
                             controlAffinity: ListTileControlAffinity.leading,
                             contentPadding: EdgeInsets.zero,
                             activeColor: cs.primary,
@@ -1046,7 +1171,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero),
+                        borderRadius: BorderRadius.zero,
+                      ),
                     ),
                     child: _isSubmitting
                         ? const SizedBox(
@@ -1080,6 +1206,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   /// Extra padding above the section label.
   static const double _sectionLabelTopPadding = 24;
+
   /// Padding between section label and divider (reduced for tighter spacing).
   static const double _sectionLabelBottomPadding = 8;
 
@@ -1176,7 +1303,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _sectionHorizontalPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: _sectionHorizontalPadding,
+            ),
             child: Container(
               height: 1,
               color: _sectionDivider,
@@ -1223,27 +1352,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               borderRadius: BorderRadius.zero,
               borderSide: BorderSide(color: theme.colorScheme.primary),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSummaryRow(
-      ThemeData theme, String label, String value) {
+  Widget _buildSummaryRow(ThemeData theme, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                  fontFamily: _fontFamily)),
-          Text(value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                  fontFamily: _fontFamily)),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontFamily: _fontFamily,
+            ),
+          ),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontFamily: _fontFamily,
+            ),
+          ),
         ],
       ),
     );
