@@ -350,63 +350,65 @@ class _FeaturedBannerCard extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           background,
-          Container(
-            color: Colors.black.withValues(alpha: 0.05),
-          ),
           Align(
-            alignment: Alignment.center,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 320,
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 32,
+                right: 32,
+                bottom: 40,
               ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 28,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 320,
                 ),
-                decoration: BoxDecoration(
-                  color: cs.surface.withValues(alpha: 0.9),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (title.isNotEmpty) ...[
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  color: cs.surface.withValues(alpha: 0.4),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (title.isNotEmpty)
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurface,
+                            letterSpacing: 0.1,
+                          ),
                         ),
-                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          subtitle,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: cs.onSurfaceVariant.withValues(alpha: 0.9),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
-                    ],
-                    if (subtitle.isNotEmpty) ...[
-                      Text(
-                        subtitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.4,
+                      TextButton(
+                        onPressed: openProductDetail,
+                        style: TextButton.styleFrom(
+                          foregroundColor: cs.onSurface,
+                        ),
+                        child: Text(
+                          buttonText,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            decoration: TextDecoration.underline,
+                            decorationThickness: 1.5,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 24),
                     ],
-                    TextButton(
-                      onPressed: openProductDetail,
-                      style: TextButton.styleFrom(
-                        foregroundColor: cs.onSurface,
-                      ),
-                      child: Text(
-                        buttonText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          decoration: TextDecoration.underline,
-                          decorationThickness: 1.5,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
