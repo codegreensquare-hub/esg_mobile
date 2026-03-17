@@ -112,8 +112,9 @@ class _ProductCardState extends State<ProductCard> {
             final w = constraints.maxWidth;
             final cellHeight = constraints.maxHeight;
             final imageSize = w;
-            final textAreaHeight =
-            (cellHeight - imageSize).clamp(0.0, double.infinity).toDouble();
+            final textAreaHeight = (cellHeight - imageSize)
+                .clamp(0.0, double.infinity)
+                .toDouble();
             return Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,143 +125,151 @@ class _ProductCardState extends State<ProductCard> {
                   height: imageSize,
                   child: Stack(
                     children: [
-                  // Image with Hero
-                  Positioned.fill(
-                    child: Hero(
-                      tag: 'green-square-product-image-${product.id}',
-                      child: resolvedImageUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: resolvedImageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: cs.surfaceContainerHighest,
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
+                      // Image with Hero
+                      Positioned.fill(
+                        child: Hero(
+                          tag: 'green-square-product-image-${product.id}',
+                          child: resolvedImageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: resolvedImageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    color: cs.surfaceContainerHighest,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: cs.surfaceContainerHighest,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                        ),
+                                      ),
+                                )
+                              : Container(
+                                  color: cs.surfaceContainerHighest,
+                                  child: const Icon(Icons.image),
                                 ),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: cs.surfaceContainerHighest,
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              color: cs.surfaceContainerHighest,
-                              child: const Icon(Icons.image),
-                            ),
-                    ),
-                  ),
-                  // Heart Button
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: MouseRegion(
-                      onEnter: (_) => setState(() => _isHeartHovered = true),
-                      onExit: (_) => setState(() => _isHeartHovered = false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: _isHeartHovered
-                              ? cs.outline.withValues(alpha: 0.8)
-                              : cs.outline.withValues(alpha: 0.4),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          visualDensity: VisualDensity(
-                            horizontal: -3,
-                            vertical: -3,
-                          ),
-                          icon: Icon(
-                            _isInWishlist
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: _isInWishlist ? Colors.red : cs.surface,
-                          ),
-                          onPressed: () {
-                            widget.onWishlistToggle?.call(_isInWishlist);
-                            setState(() => _isInWishlist = !_isInWishlist);
-                          },
-                          iconSize: 20,
-                          padding: EdgeInsets.all(0),
                         ),
                       ),
-                    ),
-                  ),
+                      // Heart Button
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: MouseRegion(
+                          onEnter: (_) =>
+                              setState(() => _isHeartHovered = true),
+                          onExit: (_) =>
+                              setState(() => _isHeartHovered = false),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: _isHeartHovered
+                                  ? cs.outline.withValues(alpha: 0.8)
+                                  : cs.outline.withValues(alpha: 0.4),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              visualDensity: VisualDensity(
+                                horizontal: -3,
+                                vertical: -3,
+                              ),
+                              icon: Icon(
+                                _isInWishlist
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: _isInWishlist ? Colors.red : cs.surface,
+                              ),
+                              onPressed: () {
+                                widget.onWishlistToggle?.call(_isInWishlist);
+                                setState(() => _isInWishlist = !_isInWishlist);
+                              },
+                              iconSize: 20,
+                              padding: EdgeInsets.all(0),
+                            ),
+                          ),
+                        ),
+                      ),
 
-                  if (_colorValues.isNotEmpty)
-                    Positioned(
-                      left: 8,
-                      right: 8,
-                      bottom: 8,
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: _colorValues
-                                .map((valueRow) {
-                                  final hex = (valueRow.value ?? '').trim();
-                                  final isSelected =
-                                      _selectedColorHex?.toLowerCase() ==
-                                      hex.toLowerCase();
+                      if (_colorValues.isNotEmpty)
+                        Positioned(
+                          left: 8,
+                          right: 8,
+                          bottom: 8,
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: _colorValues
+                                    .map((valueRow) {
+                                      final hex = (valueRow.value ?? '').trim();
+                                      final isSelected =
+                                          _selectedColorHex?.toLowerCase() ==
+                                          hex.toLowerCase();
 
-                                  final color = Color(
-                                    int.parse('FF$hex', radix: 16),
-                                  );
+                                      final color = Color(
+                                        int.parse('FF$hex', radix: 16),
+                                      );
 
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 6),
-                                    child: Material(
-                                      color: cs.surface.withValues(alpha: 0.75),
-                                      shape: const StadiumBorder(),
-                                      clipBehavior: Clip.antiAlias,
-                                      child: InkWell(
-                                        onTap: () {
-                                          final bucket =
-                                              valueRow.coloredProductBucket;
-                                          final fileName =
-                                              valueRow.coloredProductFileName;
-                                          final folderPath =
-                                              valueRow.coloredProductFolderPath;
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 6,
+                                        ),
+                                        child: Material(
+                                          color: cs.surface.withValues(
+                                            alpha: 0.75,
+                                          ),
+                                          shape: const StadiumBorder(),
+                                          clipBehavior: Clip.antiAlias,
+                                          child: InkWell(
+                                            onTap: () {
+                                              final bucket =
+                                                  valueRow.coloredProductBucket;
+                                              final fileName = valueRow
+                                                  .coloredProductFileName;
+                                              final folderPath = valueRow
+                                                  .coloredProductFolderPath;
 
-                                          final nextUrl =
-                                              bucket != null && fileName != null
-                                              ? getImageLink(
-                                                  bucket,
-                                                  fileName,
-                                                  folderPath: folderPath,
-                                                )
-                                              : null;
+                                              final nextUrl =
+                                                  bucket != null &&
+                                                      fileName != null
+                                                  ? getImageLink(
+                                                      bucket,
+                                                      fileName,
+                                                      folderPath: folderPath,
+                                                    )
+                                                  : null;
 
-                                          setState(() {
-                                            _selectedColorHex = hex;
-                                            _selectedImageUrl = nextUrl;
-                                          });
-                                        },
-                                        child: Container(
-                                          width: 12,
-                                          height: 12,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: color,
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? cs.primary
-                                                  : cs.outlineVariant,
-                                              width: isSelected ? 2 : 1,
+                                              setState(() {
+                                                _selectedColorHex = hex;
+                                                _selectedImageUrl = nextUrl;
+                                              });
+                                            },
+                                            child: Container(
+                                              width: 12,
+                                              height: 12,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: color,
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? cs.primary
+                                                      : cs.outlineVariant,
+                                                  width: isSelected ? 2 : 1,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                })
-                                .toList(growable: false),
+                                      );
+                                    })
+                                    .toList(growable: false),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
                     ],
                   ),
                 ),
@@ -285,7 +294,10 @@ class _ProductCardState extends State<ProductCard> {
                           TextSpan(
                             children: [
                               if (productWithDetails.seller.username != null &&
-                                  productWithDetails.seller.username!.isNotEmpty)
+                                  productWithDetails
+                                      .seller
+                                      .username!
+                                      .isNotEmpty)
                                 TextSpan(
                                   text:
                                       "[${productWithDetails.seller.username ?? 'Unknown Seller'}] ",
