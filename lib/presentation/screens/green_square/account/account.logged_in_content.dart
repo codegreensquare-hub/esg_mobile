@@ -8,6 +8,7 @@ import 'package:esg_mobile/presentation/screens/green_square/account/my_rank_man
 import 'package:esg_mobile/presentation/screens/green_square/account/user_info.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/participation.dart';
 
@@ -266,8 +267,8 @@ class AccountLoggedInContent extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final mileageText = totalMileage == totalMileage.roundToDouble()
-        ? totalMileage.toInt().toString()
-        : totalMileage.toStringAsFixed(1);
+        ? NumberFormat.decimalPattern().format(totalMileage.toInt())
+        : NumberFormat('#,##0.0').format(totalMileage);
 
     final screenWidth = MediaQuery.of(context).size.width;
 

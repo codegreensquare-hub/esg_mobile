@@ -33,7 +33,9 @@ class _CodeGreenLoginTabState extends State<CodeGreenLoginTab> {
         _defaultAddressFuture = null;
         return;
       }
-      setState(() => _defaultAddressFuture = null);
+      setState(() {
+        _defaultAddressFuture = null;
+      });
       return;
     }
 
@@ -50,7 +52,9 @@ class _CodeGreenLoginTabState extends State<CodeGreenLoginTab> {
       _defaultAddressFuture = future;
       return;
     }
-    setState(() => _defaultAddressFuture = future);
+    setState(() {
+      _defaultAddressFuture = future;
+    });
   }
 
   Future<void> _loginWithKakao() async {

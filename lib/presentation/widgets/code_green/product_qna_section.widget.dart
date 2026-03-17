@@ -160,7 +160,11 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
 
     final userId = _userId;
     if (userId == null || userId.trim().isEmpty) {
-      showDialog<void>(context: context, barrierDismissible: false, builder: (context) => const LoginDialog());
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const LoginDialog(),
+      );
       return;
     }
 
@@ -197,7 +201,11 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
 
     final userId = _userId;
     if (userId == null || userId.trim().isEmpty) {
-      showDialog<void>(context: context, barrierDismissible: false, builder: (context) => const LoginDialog());
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const LoginDialog(),
+      );
       return;
     }
 
@@ -307,7 +315,11 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
                     ),
                   ),
                   FilledButton(
-                    onPressed: () => showDialog<void>(context: context, barrierDismissible: false, builder: (context) => const LoginDialog()),
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const LoginDialog(),
+                    ),
                     child: const Text('Login'),
                   ),
                 ],
@@ -342,7 +354,7 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.send, size: 18),
-                label: const Text('Ask'),
+                label: const Text('문의하기'),
               ),
             ),
           ],
@@ -505,22 +517,24 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w800,
-                                                              color: cs
-                                                                  .onSurface,
+                                                              color:
+                                                                  cs.onSurface,
                                                             ),
                                                       ),
                                                       const SizedBox(width: 6),
                                                       Container(
-                                                        padding: const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 2,
-                                                        ),
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 6,
+                                                              vertical: 2,
+                                                            ),
                                                         decoration: BoxDecoration(
-                                                          color: cs.primaryContainer,
+                                                          color: cs
+                                                              .primaryContainer,
                                                           borderRadius:
-                                                              BorderRadius
-                                                                  .circular(6),
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
                                                         ),
                                                         child: Text(
                                                           '관리자',
@@ -577,62 +591,63 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    if (_isQnaReplyAdmin)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: replyController,
-                              enabled: isLoggedIn && !_isPosting,
-                              minLines: 1,
-                              maxLines: 4,
-                              decoration: InputDecoration(
-                                hintText: isLoggedIn
-                                    ? '답변을 입력해주세요'
-                                    : '로그인 후 답변을 남길 수 있어요',
-                                filled: true,
-                                fillColor: cs.surfaceContainerHighest,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          FilledButton(
-                            onPressed: (!isLoggedIn ||
-                                    _isPosting ||
-                                    qid.isEmpty)
-                                ? null
-                                : () => _postReply(qid),
-                            child: _isPosting
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Reply'),
-                          ),
-                        ],
-                      )
-                    else if (isLoggedIn)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '답변은 관리자만 등록할 수 있어요',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+
+                    // if (_isQnaReplyAdmin)
+                    //   Row(
+                    //     children: [
+                    //       Expanded(
+                    //         child: TextField(
+                    //           controller: replyController,
+                    //           enabled: isLoggedIn && !_isPosting,
+                    //           minLines: 1,
+                    //           maxLines: 4,
+                    //           decoration: InputDecoration(
+                    //             hintText: isLoggedIn
+                    //                 ? '답변을 입력해주세요'
+                    //                 : '로그인 후 답변을 남길 수 있어요',
+                    //             filled: true,
+                    //             fillColor: cs.surfaceContainerHighest,
+                    //             border: OutlineInputBorder(
+                    //               borderRadius: BorderRadius.circular(12),
+                    //               borderSide: BorderSide.none,
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //       const SizedBox(width: 10),
+                    //       FilledButton(
+                    //         onPressed:
+                    //             (!isLoggedIn || _isPosting || qid.isEmpty)
+                    //             ? null
+                    //             : () => _postReply(qid),
+                    //         child: _isPosting
+                    //             ? const SizedBox(
+                    //                 width: 16,
+                    //                 height: 16,
+                    //                 child: CircularProgressIndicator(
+                    //                   strokeWidth: 2,
+                    //                 ),
+                    //               )
+                    //             : const Text('답장하기'),
+                    //       ),
+                    //     ],
+                    //   )
+                    // else
+                    // if (isLoggedIn)
+                    //   Container(
+                    //     padding: const EdgeInsets.all(12),
+                    //     decoration: BoxDecoration(
+                    //       color: cs.surfaceContainerHighest,
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //     child: Text(
+                    //       '답변은 관리자만 등록할 수 있어요',
+                    //       style: theme.textTheme.bodyMedium?.copyWith(
+                    //         color: cs.onSurfaceVariant,
+                    //         fontWeight: FontWeight.w600,
+                    //       ),
+                    //     ),
+                    //   ),
                   ],
                 ),
               );
@@ -657,18 +672,15 @@ class _ProductQnaSectionState extends State<ProductQnaSection> {
           )
         : const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 16),
-          list,
-          seeMore,
-          const SizedBox(height: 16),
-          askBox,
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 16),
+        list,
+        seeMore,
+        const SizedBox(height: 16),
+        askBox,
+      ],
     );
   }
 }

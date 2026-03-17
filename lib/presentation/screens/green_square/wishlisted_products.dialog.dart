@@ -3,7 +3,6 @@ import 'package:esg_mobile/data/entities/wishlisted_product.dart';
 import 'package:esg_mobile/presentation/screens/green_square/product_detail.screen.dart';
 import 'package:esg_mobile/presentation/widgets/green_square/product_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class WishlistedProductsDialog extends StatefulWidget {
   const WishlistedProductsDialog({
@@ -112,19 +111,39 @@ class _WishlistedProductsDialogState extends State<WishlistedProductsDialog> {
           ? const Center(child: CircularProgressIndicator())
           : wishlistedProducts.isEmpty
           ? const Center(child: Text('찜한 상품이 없습니다.'))
-          : MasonryGridView.count(
-              padding: const EdgeInsets.all(16),
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              itemCount: wishlistedProducts.length,
-              itemBuilder: (context, index) {
-                final wishlistedProduct = wishlistedProducts[index];
-                return ProductCard(
-                  productWithDetails: wishlistedProduct.product,
-                  onWishlistToggle: (isInWishlist) =>
-                      _toggleWishlist(wishlistedProduct, isInWishlist),
-                  onTap: () => _navigateToDetail(wishlistedProduct),
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final crossAxisCount = switch (constraints.maxWidth) {
+                  >= 1200 => 4,
+                  >= 700 => 3,
+                  _ => 2,
+                };
+
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.48,
+                      ),
+                      itemCount: wishlistedProducts.length,
+                      itemBuilder: (context, index) {
+                        final wishlistedProduct = wishlistedProducts[index];
+                        return ProductCard(
+                          productWithDetails: wishlistedProduct.product,
+                          onWishlistToggle: (isInWishlist) => _toggleWishlist(
+                            wishlistedProduct,
+                            isInWishlist,
+                          ),
+                          onTap: () => _navigateToDetail(wishlistedProduct),
+                        );
+                      },
+                    ),
+                  ),
                 );
               },
             ),
