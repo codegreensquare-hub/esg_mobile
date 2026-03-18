@@ -15,13 +15,15 @@ class SignupTypeScreen extends StatefulWidget {
 }
 
 class _SignupTypeScreenState extends State<SignupTypeScreen> {
-  String _selectedType = 'general'; // 'general' | 'company'
+  String? _selectedType; // 'general' | 'company'
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final onPrimary = theme.colorScheme.onPrimary;
+    const disabledBg = Color(0xFFE3E3E3);
+    const disabledFg = Color(0xFF9A9A9A);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainerLow,
@@ -113,17 +115,30 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: onPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) =>
+                    states.contains(WidgetState.disabled) ? disabledBg : primary,
+              ),
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? disabledFg
+                    : onPrimary,
+              ),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(vertical: 16),
+              ),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-            onPressed: () => context.push(
-              '${SignupTermsScreen.route}?type=$_selectedType',
-            ),
+            onPressed: _selectedType == null
+                ? null
+                : () => context.push(
+                      '${SignupTermsScreen.route}?type=$_selectedType',
+                    ),
             child: const Text('다음'),
           ),
         ),

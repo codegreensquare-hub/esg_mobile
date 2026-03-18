@@ -57,6 +57,7 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
   bool _isSubmitting = false;
   String? _error;
   Timer? _domainDebounce;
+  bool _submitEnabled = false;
 
   bool _isCompanyType(BuildContext context) {
     final uri = GoRouterState.of(context).uri;
@@ -67,6 +68,10 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
   void initState() {
     super.initState();
     _emailController.addListener(_handleEmailChanged);
+    _emailController.addListener(_recomputeSubmitEnabled);
+    _passwordController.addListener(_recomputeSubmitEnabled);
+    _confirmPasswordController.addListener(_recomputeSubmitEnabled);
+    _nameController.addListener(_recomputeSubmitEnabled);
   }
 
   @override
@@ -187,13 +192,43 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
             : companyName!.trim();
         _isResolvingCompany = false;
       });
+      _recomputeSubmitEnabled();
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _companyDomainError = '회사/기관 정보를 불러오지 못했습니다.';
         _isResolvingCompany = false;
       });
+      _recomputeSubmitEnabled();
     }
+  }
+
+  bool _isSubmitReady() {
+    if (_isSubmitting) return false;
+    final email = _emailController.text.trim();
+    final pw = _passwordController.text;
+    final pw2 = _confirmPasswordController.text;
+    final name = _nameController.text.trim();
+
+    if (!_emailRegex.hasMatch(email)) return false;
+    if (pw.length < 8) return false;
+    if (pw2 != pw) return false;
+    if (!_isValidName(name)) return false;
+
+    if (_isCompanySignup) {
+      if (_isResolvingCompany) return false;
+      if (_resolvedCompanyId == null || _resolvedCompanyId!.isEmpty) return false;
+      if (_companyDomainError != null) return false;
+    }
+
+    return true;
+  }
+
+  void _recomputeSubmitEnabled() {
+    final next = _isSubmitReady();
+    if (next == _submitEnabled) return;
+    if (!mounted) return;
+    setState(() => _submitEnabled = next);
   }
 
   bool _isUnder14() {
@@ -320,6 +355,8 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final onPrimary = theme.colorScheme.onPrimary;
+    const disabledBg = Color(0xFFE3E3E3);
+    const disabledFg = Color(0xFF9A9A9A);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainerLow,
@@ -677,15 +714,26 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: onPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) =>
+                    states.contains(WidgetState.disabled) ? disabledBg : primary,
+              ),
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? disabledFg
+                    : onPrimary,
+              ),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(vertical: 16),
+              ),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-            onPressed: _isSubmitting ? null : _handleSubmit,
+            onPressed: _submitEnabled ? _handleSubmit : null,
             child: _isSubmitting
                 ? const SizedBox(
                     height: 20,
