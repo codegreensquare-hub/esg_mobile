@@ -105,7 +105,63 @@ class UserAuthService extends ChangeNotifier {
       data: metadata.isEmpty ? null : metadata,
     );
     _updateUser(response.user);
-    return _syncUserRowFor(response.user);
+    final verified = await _syncUserRowFor(response.user);
+
+    // Some environments don't currently persist auth metadata -> public.user
+    // (e.g. missing/old DB trigger). For employee signups we must ensure the
+    // company is actually stored on the user row.
+    if (response.user != null && company != null && company.isNotEmpty) {
+      await _ensureCompanyPersisted(
+        userId: response.user!.id,
+        companyId: company,
+      );
+      await _syncUserRowFor(response.user);
+    }
+
+    return verified;
+  }
+
+  Future<void> _ensureCompanyPersisted({
+    required String userId,
+    required String companyId,
+  }) async {
+    const maxAttempts = 8;
+    const delay = Duration(milliseconds: 350);
+
+    Object? lastError;
+    for (var i = 0; i < maxAttempts; i++) {
+      try {
+        final row = await _client
+            .from(_userTable.tableName)
+            .select('${UserRow.idField}, ${UserRow.companyField}')
+            .eq(UserRow.idField, userId)
+            .maybeSingle();
+
+        // If the row doesn't exist yet, give the trigger time.
+        if (row == null) {
+          await Future<void>.delayed(delay);
+          continue;
+        }
+
+        final currentCompany = row[UserRow.companyField] as String?;
+        if (currentCompany != null && currentCompany.isNotEmpty) {
+          return;
+        }
+
+        await _client
+            .from(_userTable.tableName)
+            .update({UserRow.companyField: companyId})
+            .eq(UserRow.idField, userId);
+        return;
+      } catch (e) {
+        lastError = e;
+        await Future<void>.delayed(delay);
+      }
+    }
+
+    throw AuthException(
+      '회사 정보 저장에 실패했습니다. 잠시 후 다시 시도해주세요.\n${lastError ?? ''}',
+    );
   }
 
   /// Logs out the current session.
