@@ -8,7 +8,8 @@
       "Bash(find /Users/withcenterdev/Desktop/projects/esg_mobile -type f -name build.gradle -o -name *.gradle)",
       "Bash(grep -r \"onMessage\\\\|getInitialMessage\\\\|onMessageOpenedApp\\\\|onNotification\" /Users/withcenterdev/Desktop/projects/esg_mobile/lib --include=*.dart)",
       "Bash(grep -r \"flutter_local_notifications\\\\|NotificationDetails\\\\|initialize\" /Users/withcenterdev/Desktop/projects/esg_mobile/lib --include=*.dart)",
-      "Bash(/Volumes/T7/flutter/bin/flutter pub:*)"
+      "Bash(/Volumes/T7/flutter/bin/flutter pub:*)",
+      "Bash(cat /Users/withcenterdev/Desktop/projects/esg_mobile/supabase/migrations/*.sql)"
     ]
   }
 }
