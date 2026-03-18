@@ -18,6 +18,7 @@ export 'client_admin_notification.dart';
 export 'comment_blocked.dart';
 export 'comment_reported.dart';
 export 'company.dart';
+export 'company_email_domain.dart';
 export 'cost_change_request.dart';
 export 'department.dart';
 export 'event.dart';
@@ -63,6 +64,7 @@ export 'product_review_image.dart';
 export 'product_subcategory.dart';
 export 'product_wishlist.dart';
 export 'push_notification.dart';
+export 'push_notification_queue.dart';
 export 'push_notification_token.dart';
 export 'push_notification_trigger.dart';
 export 'report.dart';
@@ -88,4 +90,4 @@ export 'user_settings.dart';
 export 'user_shipping_address.dart';
 
 /// Tag: v2
-/// Date: 2026-03-17 16:20:06.159696
+/// Date: 2026-03-18 15:17:25.903280
