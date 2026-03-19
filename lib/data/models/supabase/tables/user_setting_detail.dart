@@ -86,4 +86,4 @@ class UserSettingDetailRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-17 16:20:06.158262
+/// Date: 2026-03-18 15:17:25.901179

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.dart';
@@ -47,11 +49,15 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
   final _birthdateController = TextEditingController();
   DateTime? _selectedBirthdate;
   String? _gender;
-  bool _isLoadingCompanies = true;
-  List<CompanyRow> _companies = const [];
-  String? _selectedCompanyId;
+  bool _isCompanySignup = false;
+  bool _isResolvingCompany = false;
+  String? _resolvedCompanyId;
+  String? _resolvedCompanyName;
+  String? _companyDomainError;
   bool _isSubmitting = false;
   String? _error;
+  Timer? _domainDebounce;
+  bool _submitEnabled = false;
 
   bool _isCompanyType(BuildContext context) {
     final uri = GoRouterState.of(context).uri;
@@ -61,37 +67,33 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
   @override
   void initState() {
     super.initState();
+    _emailController.addListener(_handleEmailChanged);
+    _emailController.addListener(_recomputeSubmitEnabled);
+    _passwordController.addListener(_recomputeSubmitEnabled);
+    _confirmPasswordController.addListener(_recomputeSubmitEnabled);
+    _nameController.addListener(_recomputeSubmitEnabled);
   }
 
-  Future<void> _loadCompanies() async {
-    setState(() {
-      _isLoadingCompanies = true;
-      _companies = const [];
-      _selectedCompanyId = null;
-    });
-    try {
-      final client = Supabase.instance.client;
-      final rows = await client
-          .from(CompanyTable().tableName)
-          .select('${CompanyRow.idField}, ${CompanyRow.nameField}')
-          .order(CompanyRow.nameField, ascending: true);
-      final companies = (rows as List)
-          .whereType<Map<String, dynamic>>()
-          .map(CompanyRow.fromJson)
-          .where((e) => (e.name ?? '').trim().isNotEmpty)
-          .toList(growable: false);
-      if (!mounted) return;
-      setState(() => _companies = companies);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _error = '회사 목록을 불러오지 못했습니다.');
-    } finally {
-      if (mounted) setState(() => _isLoadingCompanies = false);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final nextIsCompany = _isCompanyType(context);
+    if (nextIsCompany != _isCompanySignup) {
+      setState(() {
+        _isCompanySignup = nextIsCompany;
+        _resolvedCompanyId = null;
+        _resolvedCompanyName = null;
+        _companyDomainError = null;
+      });
+      if (nextIsCompany) {
+        _resolveCompanyFromEmail(_emailController.text.trim());
+      }
     }
   }
 
   @override
   void dispose() {
+    _domainDebounce?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -99,6 +101,134 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
     _phoneController.dispose();
     _birthdateController.dispose();
     super.dispose();
+  }
+
+  void _handleEmailChanged() {
+    if (!_isCompanySignup) return;
+    final email = _emailController.text.trim();
+    if (!_emailRegex.hasMatch(email)) {
+      if (_companyDomainError != null ||
+          _resolvedCompanyId != null ||
+          _resolvedCompanyName != null) {
+        setState(() {
+          _companyDomainError = null;
+          _resolvedCompanyId = null;
+          _resolvedCompanyName = null;
+        });
+      }
+      return;
+    }
+
+    _domainDebounce?.cancel();
+    _domainDebounce = Timer(
+      const Duration(milliseconds: 400),
+      () => _resolveCompanyFromEmail(email),
+    );
+  }
+
+  static String? _extractDomain(String email) {
+    final at = email.lastIndexOf('@');
+    if (at < 0 || at == email.length - 1) return null;
+    return email.substring(at + 1).trim().toLowerCase();
+  }
+
+  Future<void> _resolveCompanyFromEmail(String email) async {
+    if (!_isCompanySignup) return;
+    final domain = _extractDomain(email);
+    if (domain == null || domain.isEmpty) return;
+
+    setState(() {
+      _isResolvingCompany = true;
+      _companyDomainError = null;
+      _resolvedCompanyId = null;
+      _resolvedCompanyName = null;
+    });
+
+    try {
+      final client = Supabase.instance.client;
+      final domainRow = await client
+          .from(CompanyEmailDomainTable().tableName)
+          .select(
+            '${CompanyEmailDomainRow.companyIdField}, ${CompanyEmailDomainRow.domainField}',
+          )
+          .eq(CompanyEmailDomainRow.domainField, domain)
+          .eq(CompanyEmailDomainRow.isActiveField, true)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      if (domainRow == null) {
+        setState(() {
+          _companyDomainError = '등록된 회사/기관 이메일 도메인이 아닙니다.';
+          _isResolvingCompany = false;
+        });
+        return;
+      }
+
+      final companyId = (domainRow['company_id'] as String?)?.trim();
+      if (companyId == null || companyId.isEmpty) {
+        setState(() {
+          _companyDomainError = '회사 정보를 확인할 수 없습니다.';
+          _isResolvingCompany = false;
+        });
+        return;
+      }
+
+      final companyRow = await client
+          .from(CompanyTable().tableName)
+          .select('${CompanyRow.idField}, ${CompanyRow.nameField}')
+          .eq(CompanyRow.idField, companyId)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      final companyName =
+          (companyRow == null ? null : companyRow[CompanyRow.nameField]) as String?;
+
+      setState(() {
+        _resolvedCompanyId = companyId;
+        _resolvedCompanyName = (companyName ?? '').trim().isEmpty
+            ? null
+            : companyName!.trim();
+        _isResolvingCompany = false;
+      });
+      _recomputeSubmitEnabled();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _companyDomainError = '회사/기관 정보를 불러오지 못했습니다.';
+        _isResolvingCompany = false;
+      });
+      _recomputeSubmitEnabled();
+    }
+  }
+
+  bool _isSubmitReady() {
+    if (_isSubmitting) return false;
+    final email = _emailController.text.trim();
+    final pw = _passwordController.text;
+    final pw2 = _confirmPasswordController.text;
+    final name = _nameController.text.trim();
+
+    if (!_emailRegex.hasMatch(email)) return false;
+    if (pw.length < 8) return false;
+    if (pw2 != pw) return false;
+    if (!_isValidName(name)) return false;
+
+    if (_isCompanySignup) {
+      if (_isResolvingCompany) return false;
+      if (_resolvedCompanyId == null || _resolvedCompanyId!.isEmpty) return false;
+      if (_companyDomainError != null) return false;
+    }
+
+    return true;
+  }
+
+  void _recomputeSubmitEnabled() {
+    final next = _isSubmitReady();
+    if (next == _submitEnabled) return;
+    if (!mounted) return;
+    setState(() => _submitEnabled = next);
   }
 
   bool _isUnder14() {
@@ -124,12 +254,19 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
           ? null
           : _phoneController.text.trim(),
       birthdate: normalizedBirthdate,
-      company: _isCompanyType(context) ? _selectedCompanyId : null,
+      company: _isCompanySignup ? _resolvedCompanyId : null,
     );
   }
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_isCompanySignup && (_resolvedCompanyId == null || _resolvedCompanyId!.isEmpty)) {
+      setState(() {
+        _companyDomainError ??= '등록된 회사/기관 이메일로 가입해주세요.';
+      });
+      return;
+    }
 
     if (_isUnder14()) {
       context.push(SignupMinorTermsScreen.route, extra: _buildFormData());
@@ -152,7 +289,7 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
             ? null
             : _phoneController.text.trim(),
         birthdate: normalizedBirthdate,
-        company: _isCompanyType(context) ? _selectedCompanyId : null,
+        company: _isCompanySignup ? _resolvedCompanyId : null,
       );
       if (!mounted) return;
       context.go(isVerified ? MainScreen.route : EmailConfirmationScreen.route);
@@ -218,11 +355,8 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
     final onPrimary = theme.colorScheme.onPrimary;
-    if (_isCompanyType(context) &&
-        _companies.isEmpty &&
-        !_isLoadingCompanies) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _loadCompanies());
-    }
+    const disabledBg = Color(0xFFE3E3E3);
+    const disabledFg = Color(0xFF9A9A9A);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainerLow,
@@ -326,6 +460,40 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
                                   return null;
                                 },
                               ),
+                              if (_isCompanySignup) ...[
+                                const SizedBox(height: 8),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    if (_isResolvingCompany) ...[
+                                      const SizedBox(
+                                        height: 14,
+                                        width: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Expanded(
+                                      child: Text(
+                                        _companyDomainError != null
+                                            ? _companyDomainError!
+                                            : (_resolvedCompanyName != null
+                                                ? '회사/기관: $_resolvedCompanyName'
+                                                : '회사/기관이 자동으로 설정됩니다 (이메일 도메인 기준)'),
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          fontFamily: 'Noto Sans KR',
+                                          fontWeight: FontWeight.w500,
+                                          color: _companyDomainError != null
+                                              ? theme.colorScheme.error
+                                              : const Color(0xFF666666),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -521,37 +689,6 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
                               ),
                             ],
                           ),
-                          if (_isCompanyType(context)) ...[
-                            const SizedBox(height: 16),
-                            DropdownButtonFormField<String>(
-                              initialValue: _selectedCompanyId,
-                              items: _companies
-                                  .map(
-                                    (c) => DropdownMenuItem<String>(
-                                      value: c.id,
-                                      child: Text(c.name ?? ''),
-                                    ),
-                                  )
-                                  .toList(growable: false),
-                              onChanged: _isLoadingCompanies
-                                  ? null
-                                  : (v) =>
-                                      setState(() => _selectedCompanyId = v),
-                              decoration: InputDecoration(
-                                labelText: '회사',
-                                hintText: _isLoadingCompanies
-                                    ? '불러오는 중...'
-                                    : '회사를 선택해주세요',
-                              ),
-                              validator: (v) {
-                                if (_isCompanyType(context) &&
-                                    (v == null || v.isEmpty)) {
-                                  return '회사를 선택해주세요.';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
                           if (_error != null) ...[
                             const SizedBox(height: 12),
                             Text(
@@ -577,15 +714,26 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: onPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) =>
+                    states.contains(WidgetState.disabled) ? disabledBg : primary,
+              ),
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? disabledFg
+                    : onPrimary,
+              ),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(vertical: 16),
+              ),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-            onPressed: _isSubmitting ? null : _handleSubmit,
+            onPressed: _submitEnabled ? _handleSubmit : null,
             child: _isSubmitting
                 ? const SizedBox(
                     height: 20,

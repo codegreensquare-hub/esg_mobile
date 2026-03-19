@@ -62,8 +62,8 @@ class TriggerEventLogRow extends SupabaseDataRow {
   static const String idField = 'id';
 
   /// Id
-  int get id => getField<int>(idField)!;
-  set id(int value) => setField<int>(idField, value);
+  int? get id => getField<int>(idField);
+  set id(int? value) => setField<int>(idField, value);
 
   /// Occurred At field name
   static const String occurredAtField = 'occurred_at';
@@ -148,4 +148,4 @@ class TriggerEventLogRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-17 16:20:06.147199
+/// Date: 2026-03-18 15:17:25.896068
