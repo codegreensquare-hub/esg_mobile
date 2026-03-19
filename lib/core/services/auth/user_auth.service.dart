@@ -152,6 +152,19 @@ class UserAuthService extends ChangeNotifier {
           .eq(UserRow.idField, user.id)
           .maybeSingle();
       _userRow = data == null ? null : UserRow.fromJson(data);
+
+      // Update last_login_at for campaign push notification targeting
+      if (_userRow != null) {
+        unawaited(
+          _client
+              .from(_userTable.tableName)
+              .update({
+                'last_login_at': DateTime.now().toUtc().toIso8601String(),
+              })
+              .eq(UserRow.idField, user.id)
+              .then((_) {}, onError: (_) {}),
+        );
+      }
     } catch (_) {
       _userRow = null;
     }
