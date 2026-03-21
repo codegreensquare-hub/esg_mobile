@@ -130,4 +130,4 @@ class LookbookProductRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-18 15:17:25.834715
+/// Date: 2026-03-20 19:41:33.379488

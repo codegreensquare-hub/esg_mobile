@@ -140,4 +140,4 @@ class MissionPhotoTaskRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-18 15:17:25.855537
+/// Date: 2026-03-20 19:41:33.388314

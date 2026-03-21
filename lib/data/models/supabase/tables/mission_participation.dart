@@ -42,6 +42,7 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? profileUsed,
     String? department,
     String? subDepartment,
+    String? missionClick,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (participatedBy != null)
@@ -65,6 +66,7 @@ class MissionParticipationRow extends SupabaseDataRow {
          if (department != null) 'department': supaSerialize(department),
          if (subDepartment != null)
            'sub_department': supaSerialize(subDepartment),
+         if (missionClick != null) 'mission_click': supaSerialize(missionClick),
        });
 
   /// Mission Participation Row
@@ -208,6 +210,13 @@ class MissionParticipationRow extends SupabaseDataRow {
   set subDepartment(String? value) =>
       setField<String>(subDepartmentField, value);
 
+  /// Mission Click field name
+  static const String missionClickField = 'mission_click';
+
+  /// Mission Click
+  String? get missionClick => getField<String>(missionClickField);
+  set missionClick(String? value) => setField<String>(missionClickField, value);
+
   /// Make a copy of the current [MissionParticipationRow]
   /// overriding the provided fields
   MissionParticipationRow copyWith({
@@ -228,6 +237,7 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? profileUsed,
     String? department,
     String? subDepartment,
+    String? missionClick,
   }) => MissionParticipationRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'participated_by': supaSerialize(participatedBy) ?? data['participated_by'],
@@ -248,8 +258,9 @@ class MissionParticipationRow extends SupabaseDataRow {
     'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
     'department': supaSerialize(department) ?? data['department'],
     'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
+    'mission_click': supaSerialize(missionClick) ?? data['mission_click'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-18 15:17:25.850105
+/// Date: 2026-03-20 19:41:33.386233

@@ -45,6 +45,15 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     });
   }
 
+  void _logClick() {
+    unawaited(
+      MissionEventTrackingService.instance.logClick(
+        missionId: widget.mission.id,
+        cost: widget.mission.cost,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -66,11 +75,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
       return GestureDetector(
         onTap: widget.onTap != null
             ? () {
-                unawaited(
-                  MissionEventTrackingService.instance.logClick(
-                    missionId: widget.mission.id,
-                  ),
-                );
+                _logClick();
                 widget.onTap?.call(widget.mission);
               }
             : null,
@@ -81,11 +86,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     return GestureDetector(
       onTap: widget.onTap != null
           ? () {
-              unawaited(
-                MissionEventTrackingService.instance.logClick(
-                  missionId: widget.mission.id,
-                ),
-              );
+              _logClick();
               widget.onTap?.call(widget.mission);
             }
           : null,

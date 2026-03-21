@@ -32,6 +32,7 @@ class MissionClickRow extends SupabaseDataRow {
     String? profileUsed,
     String? department,
     String? subDepartment,
+    double? cost,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
@@ -41,6 +42,7 @@ class MissionClickRow extends SupabaseDataRow {
          if (department != null) 'department': supaSerialize(department),
          if (subDepartment != null)
            'sub_department': supaSerialize(subDepartment),
+         if (cost != null) 'cost': supaSerialize(cost),
        });
 
   /// Mission Click Row
@@ -108,6 +110,13 @@ class MissionClickRow extends SupabaseDataRow {
   set subDepartment(String? value) =>
       setField<String>(subDepartmentField, value);
 
+  /// Cost field name
+  static const String costField = 'cost';
+
+  /// Cost
+  double? get cost => getField<double>(costField);
+  set cost(double? value) => setField<double>(costField, value);
+
   /// Make a copy of the current [MissionClickRow]
   /// overriding the provided fields
   MissionClickRow copyWith({
@@ -118,6 +127,7 @@ class MissionClickRow extends SupabaseDataRow {
     String? profileUsed,
     String? department,
     String? subDepartment,
+    double? cost,
   }) => MissionClickRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
@@ -126,8 +136,9 @@ class MissionClickRow extends SupabaseDataRow {
     'profile_used': supaSerialize(profileUsed) ?? data['profile_used'],
     'department': supaSerialize(department) ?? data['department'],
     'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
+    'cost': supaSerialize(cost) ?? data['cost'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-18 15:17:25.845617
+/// Date: 2026-03-20 19:41:33.384865

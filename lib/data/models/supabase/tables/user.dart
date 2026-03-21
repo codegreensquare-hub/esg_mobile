@@ -48,6 +48,7 @@ class UserRow extends SupabaseDataRow {
     String? subDepartment,
     ClientAdminType? clientAdminType,
     bool? allowMultipleProfiles,
+    DateTime? lastLoginAt,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (username != null) 'username': supaSerialize(username),
@@ -85,6 +86,7 @@ class UserRow extends SupabaseDataRow {
            'client_admin_type': supaSerialize(clientAdminType),
          if (allowMultipleProfiles != null)
            'allow_multiple_profiles': supaSerialize(allowMultipleProfiles),
+         if (lastLoginAt != null) 'last_login_at': supaSerialize(lastLoginAt),
        });
 
   /// User Row
@@ -294,6 +296,14 @@ class UserRow extends SupabaseDataRow {
   set allowMultipleProfiles(bool value) =>
       setField<bool>(allowMultipleProfilesField, value);
 
+  /// Last Login At field name
+  static const String lastLoginAtField = 'last_login_at';
+
+  /// Last Login At
+  DateTime? get lastLoginAt => getField<DateTime>(lastLoginAtField);
+  set lastLoginAt(DateTime? value) =>
+      setField<DateTime>(lastLoginAtField, value);
+
   /// Make a copy of the current [UserRow]
   /// overriding the provided fields
   UserRow copyWith({
@@ -321,6 +331,7 @@ class UserRow extends SupabaseDataRow {
     String? subDepartment,
     ClientAdminType? clientAdminType,
     bool? allowMultipleProfiles,
+    DateTime? lastLoginAt,
   }) => UserRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'username': supaSerialize(username) ?? data['username'],
@@ -356,8 +367,9 @@ class UserRow extends SupabaseDataRow {
         supaSerialize(clientAdminType) ?? data['client_admin_type'],
     'allow_multiple_profiles':
         supaSerialize(allowMultipleProfiles) ?? data['allow_multiple_profiles'],
+    'last_login_at': supaSerialize(lastLoginAt) ?? data['last_login_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-18 15:17:25.897564
+/// Date: 2026-03-20 19:41:33.411155
