@@ -5,6 +5,7 @@ import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/core/constants/bucket.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/profile.service.dart';
+import 'package:esg_mobile/core/utils/image_phash.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_participation.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_photo_animation_completion.dart';
@@ -104,13 +105,19 @@ class MissionParticipationService {
       }
 
       dismissLoading = _showLoadingDialog(context);
-      final uploadedPhoto = await _uploadPhoto(
-        bytes: bytes,
-        mission: mission,
-      );
+
+      // Compute perceptual hash and upload in parallel
+      final phashFuture = ImagePhash.compute(bytes).catchError((_) => '');
+      final uploadFuture = _uploadPhoto(bytes: bytes, mission: mission);
+      final results = await Future.wait([phashFuture, uploadFuture]);
+      final imagePhash = results[0] as String;
+      final uploadedPhoto = results[1]
+          as ({String bucket, String folderPath, String fileName});
+
       await _createParticipation(
         mission,
         photo: uploadedPhoto,
+        imagePhash: imagePhash.isNotEmpty ? imagePhash : null,
       );
       _participationSubmittedController.add(null);
       onSuccess?.call();
@@ -200,6 +207,7 @@ class MissionParticipationService {
   Future<void> _createParticipation(
     MissionRow mission, {
     required ({String bucket, String folderPath, String fileName}) photo,
+    String? imagePhash,
   }) async {
     final userId = UserAuthService.instance.currentUser?.id;
     if (userId == null) {
@@ -228,6 +236,7 @@ class MissionParticipationService {
           MissionParticipationRow.profileUsedField: profileUsed,
           MissionParticipationRow.departmentField: userRow?.department,
           MissionParticipationRow.subDepartmentField: userRow?.subDepartment,
+          if (imagePhash != null) 'image_phash': imagePhash,
         })
         .select()
         .single();
