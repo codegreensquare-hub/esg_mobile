@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:esg_mobile/app/app.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/font.service.dart';
 import 'package:esg_mobile/core/services/push_notification.service.dart';
 import 'package:esg_mobile/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -87,6 +88,7 @@ Future<void> main() async {
 
   runApp(const App());
 
-  // Push notification init happens after first frame so it doesn't block render.
+  // Load fonts from Supabase storage and init push notifications after render.
+  FontService.instance.loadFonts();
   PushNotificationService.instance.initialize();
 }
