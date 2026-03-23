@@ -21,6 +21,8 @@ class AccountLoggedInContent extends StatelessWidget {
     required this.totalMileage,
     required this.activeMissions,
     required this.participations,
+    required this.hasMoreParticipations,
+    required this.onLoadMoreParticipations,
     required this.isActiveMissionsLoading,
     required this.isParticipationsLoading,
     required this.onManageShipping,
@@ -47,6 +49,8 @@ class AccountLoggedInContent extends StatelessWidget {
   final double totalMileage;
   final List<ActiveMission> activeMissions;
   final List<Participation> participations;
+  final bool hasMoreParticipations;
+  final VoidCallback onLoadMoreParticipations;
   final bool isActiveMissionsLoading;
   final bool isParticipationsLoading;
   final VoidCallback onManageShipping;
@@ -272,7 +276,19 @@ class AccountLoggedInContent extends StatelessWidget {
 
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return SingleChildScrollView(
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollEndNotification &&
+            notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200 &&
+            hasMoreParticipations &&
+            !isParticipationsLoading &&
+            participations.isNotEmpty) {
+          onLoadMoreParticipations();
+        }
+        return false;
+      },
+      child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Center(
         child: Container(
@@ -584,9 +600,8 @@ class AccountLoggedInContent extends StatelessWidget {
                                 const SizedBox(height: 12),
                                 Text(
                                   mission.title ?? '미션',
-                                  style: theme.textTheme.titleMedium
-                                      ?.copyWith(),
-                                  maxLines: 2,
+                                  style: theme.textTheme.titleSmall?.copyWith(),
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
@@ -759,10 +774,16 @@ class AccountLoggedInContent extends StatelessWidget {
                       ),
                   ],
                 ),
+              if (hasMoreParticipations && participations.isNotEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: CircularProgressIndicator.adaptive()),
+                ),
             ],
           ),
         ),
       ),
+    ),
     );
   }
 }

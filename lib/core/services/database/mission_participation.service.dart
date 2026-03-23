@@ -233,6 +233,7 @@ class MissionParticipationService {
           MissionParticipationRow.photoBucketField: photo.bucket,
           MissionParticipationRow.photoFolderPathField: photo.folderPath,
           MissionParticipationRow.photoFileNameField: photo.fileName,
+          MissionParticipationRow.costField: mission.costEnd,
           MissionParticipationRow.profileUsedField: profileUsed,
           MissionParticipationRow.departmentField: userRow?.department,
           MissionParticipationRow.subDepartmentField: userRow?.subDepartment,
