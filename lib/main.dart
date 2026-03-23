@@ -24,28 +24,41 @@ Future<void> main() async {
     usePathUrlStrategy();
   }
 
-  // Load .env and initialize Firebase in parallel.
-  await (
-    dotenv.load(fileName: '.env', isOptional: true),
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-  ).wait;
+  // Firebase is independent of Supabase — run it fully in the background.
+  final firebaseFuture = Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // Register background message handler
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Resolve Supabase credentials as fast as possible.
+  // On web the .env is always blank, so start the Netlify config fetch
+  // immediately in parallel with dotenv (which is a no-op on web).
+  final Future<http.Response?> configFuture;
+  if (kIsWeb) {
+    configFuture = http
+        .get(Uri.parse('/.netlify/functions/config'))
+        .catchError((_) => http.Response('', 500));
+  } else {
+    configFuture = Future.value(null);
+  }
+
+  final (_, configResponse) = await (
+    dotenv.load(fileName: '.env', isOptional: true),
+    configFuture,
+  ).wait;
 
   var supabaseUrl = (dotenv.env['SUPABASE_URL'] ?? '');
   var supabaseAnonKey = (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
 
   if ((supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) &&
-      kIsWeb) {
+      configResponse != null) {
     try {
-      final response = await http.get(Uri.parse('/.netlify/functions/config'));
-      if (response.statusCode == 200 && response.body.isNotEmpty) {
-        final decoded = jsonDecode(response.body);
+      if (configResponse.statusCode == 200 &&
+          configResponse.body.isNotEmpty) {
+        final decoded = jsonDecode(configResponse.body);
         if (decoded is Map<String, dynamic>) {
           supabaseUrl = (decoded['SUPABASE_URL'] ?? supabaseUrl).toString();
-          supabaseAnonKey = (decoded['SUPABASE_ANON_KEY'] ?? supabaseAnonKey)
-              .toString();
+          supabaseAnonKey =
+              (decoded['SUPABASE_ANON_KEY'] ?? supabaseAnonKey).toString();
         }
       }
     } catch (_) {
@@ -61,21 +74,20 @@ Future<void> main() async {
     );
   }
 
-  // Initialize Supabase
+  // Initialize Supabase immediately — don't wait for Firebase.
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
   );
 
-  // Ensure supabase_codegen generated tables reuse the initialized client
   supa_codegen.setClient(Supabase.instance.client);
-
-  // Ensure auth state listener is live (also syncs push token if logged in)
   UserAuthService.instance;
 
-  // Launch the app immediately — push notification init happens in background.
+  // Launch the app — Firebase and push notifications finish in the background.
   runApp(const App());
 
-  // Initialize push notifications after first frame so it doesn't block render.
+  // Wait for Firebase before registering messaging handlers.
+  await firebaseFuture;
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   PushNotificationService.instance.initialize();
 }
