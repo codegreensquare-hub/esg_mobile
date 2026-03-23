@@ -74,20 +74,19 @@ Future<void> main() async {
     );
   }
 
-  // Initialize Supabase immediately — don't wait for Firebase.
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
+  // Supabase init and Firebase init run in parallel.
+  // Both must complete before UserAuthService (which touches FirebaseMessaging).
+  await (
+    Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey),
+    firebaseFuture,
+  ).wait;
 
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   supa_codegen.setClient(Supabase.instance.client);
   UserAuthService.instance;
 
-  // Launch the app — Firebase and push notifications finish in the background.
   runApp(const App());
 
-  // Wait for Firebase before registering messaging handlers.
-  await firebaseFuture;
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Push notification init happens after first frame so it doesn't block render.
   PushNotificationService.instance.initialize();
 }
