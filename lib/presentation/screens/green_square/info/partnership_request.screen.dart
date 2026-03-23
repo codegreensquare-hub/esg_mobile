@@ -69,6 +69,7 @@ class _GreenSquarePartnershipRequestScreenState
       data: theme.copyWith(appBarTheme: appBarTheme),
       child: GreenSquareInfoPage(
         backgroundColor: const Color(0xFF355149),
+        foregroundColor: Colors.white,
         title: '입점 요청',
         body: Center(
           child: SingleChildScrollView(

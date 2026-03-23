@@ -11,6 +11,7 @@ class GreenSquareInfoPage extends StatelessWidget {
     this.bodyBuilder,
     this.appbarBackgroundColor,
     this.backgroundColor,
+    this.foregroundColor,
   }) : assert(
          body != null || bodyBuilder != null,
          'Either body or bodyBuilder must be provided',
@@ -24,6 +25,10 @@ class GreenSquareInfoPage extends StatelessWidget {
   final Widget Function(BuildContext context)? bodyBuilder;
   final Color? appbarBackgroundColor;
   final Color? backgroundColor;
+
+  /// Overrides the app bar icon and title color. Defaults to black87 when
+  /// [backgroundColor] is set, or the theme default otherwise.
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -48,18 +53,21 @@ class GreenSquareInfoPage extends StatelessWidget {
       bodyContent = body ?? bodyBuilder!(context);
     }
 
+    final effectiveForeground =
+        foregroundColor ?? (useLightStyle ? Colors.black87 : null);
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: appbarBackgroundColor ?? backgroundColor,
-        foregroundColor: useLightStyle ? Colors.black87 : null,
+        foregroundColor: effectiveForeground,
         title: Text(
           title,
           style: (useLightStyle ? textTheme : theme.textTheme).titleLarge
               ?.copyWith(
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Noto Sans KR',
-                color: useLightStyle ? Colors.black87 : null,
+                color: effectiveForeground,
               ),
         ),
       ),
