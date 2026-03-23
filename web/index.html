@@ -32,8 +32,8 @@
     <title>esg_mobile</title>
     <link rel="manifest" href="manifest.json" />
 
-    <!-- PortOne Payment SDK -->
-    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <!-- PortOne Payment SDK (deferred — not needed until checkout) -->
+    <script src="https://cdn.iamport.kr/v1/iamport.js" defer></script>
 
     <style>
       body {
@@ -73,6 +73,8 @@
       id="loading-image"
       src="https://vmqnzfnupmwcstgbgdgk.supabase.co/storage/v1/object/public/asset/images/loading/transition.78694b57.gif"
       alt="Loading..."
+      loading="eager"
+      fetchpriority="high"
     />
     <br />
     <br />

@@ -20,12 +20,15 @@ export 'package:esg_mobile/app/app.dart' show App, MyApp;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: '.env', isOptional: true);
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Load .env and initialize Firebase in parallel.
+  await (
+    dotenv.load(fileName: '.env', isOptional: true),
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+  ).wait;
 
   // Register background message handler
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -54,7 +57,7 @@ Future<void> main() async {
     throw StateError(
       'Missing SUPABASE_URL / SUPABASE_ANON_KEY. '
       'Provide them via the root .env file (local), '
-      'or configure Netlify env vars for the config function (web).d',
+      'or configure Netlify env vars for the config function (web).',
     );
   }
 
@@ -70,12 +73,9 @@ Future<void> main() async {
   // Ensure auth state listener is live (also syncs push token if logged in)
   UserAuthService.instance;
 
-  // Initialize push notifications
-  await PushNotificationService.instance.initialize();
-
-  if (kIsWeb) {
-    usePathUrlStrategy();
-  }
-
+  // Launch the app immediately — push notification init happens in background.
   runApp(const App());
+
+  // Initialize push notifications after first frame so it doesn't block render.
+  PushNotificationService.instance.initialize();
 }
