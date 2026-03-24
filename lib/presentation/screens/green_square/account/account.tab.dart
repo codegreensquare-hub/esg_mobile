@@ -43,9 +43,11 @@ class _AccountTabState extends State<AccountTab> {
   double totalMileage = 0;
   List<ActiveMission> activeMissions = [];
   List<Participation> participations = [];
+  bool hasMoreParticipations = true;
   bool isSummaryLoading = true;
   bool isActiveMissionsLoading = true;
   bool isParticipationsLoading = true;
+  static const _participationsPageSize = 10;
   String? companyName;
   bool? isEmployee;
   String? departmentName;
@@ -256,18 +258,24 @@ class _AccountTabState extends State<AccountTab> {
     }
 
     final now = DateTime.now().toIso8601String().split('T')[0];
+    final userCompanyId = userRow?['company'] as String?;
 
     Future<void> fetchActiveMissions() async {
       try {
-        final missionResponse = await client
+        final missionQuery = client
             .from('mission')
             .select(
               'id, title, award_points, stamp(bucket, folder_path, file_name)',
             )
             .eq('is_published', true)
-            .eq('publicity', 'public')
             .lte('start_active_date', now)
-            .gte('last_active_date', now)
+            .gte('last_active_date', now);
+
+        final missionResponse = await (userCompanyId != null
+                ? missionQuery.or(
+                    'publicity.eq.public,and(publicity.eq.all_staff,company_id.eq.$userCompanyId)',
+                  )
+                : missionQuery.eq('publicity', 'public'))
             .order('order');
 
         final missionIds = missionResponse
@@ -349,58 +357,15 @@ class _AccountTabState extends State<AccountTab> {
             await (isMainProfile
                     ? participationsQuery.isFilter('profile_used', null)
                     : participationsQuery.eq('profile_used', selectedProfileId))
-                .order('created_at', ascending: false);
+                .order('created_at', ascending: false)
+                .range(0, _participationsPageSize - 1);
 
-        final resolvedParticipations = participationsResponse.map((row) {
-          final approvedAt = row['approved_at'];
-          final rejectedBy = row['rejected_by'];
-          final rejectionReason = row['rejection_reason'] as String?;
-          final status = approvedAt != null
-              ? 'approved'
-              : (rejectedBy != null || rejectionReason != null)
-              ? 'rejected'
-              : 'pending';
-          final bucket = row['photo_bucket'] as String?;
-          final folder = row['photo_folder_path'] as String?;
-          final fileName = row['photo_file_name'] as String?;
-          final photoUrl = bucket != null && fileName != null
-              ? Supabase.instance.client.storage
-                    .from(bucket)
-                    .getPublicUrl(
-                      folder != null && folder.isNotEmpty
-                          ? '$folder/$fileName'
-                          : fileName,
-                    )
-              : null;
-          final missionData = row['mission'] as Map<String, dynamic>?;
-          final stampData = missionData?['stamp'] as Map<String, dynamic>?;
-          final stampBucket = stampData?['bucket'] as String?;
-          final stampFileName = stampData?['file_name'] as String?;
-          final stampFolder = stampData?['folder_path'] as String?;
-          final stampUrl = stampBucket != null && stampFileName != null
-              ? Supabase.instance.client.storage
-                    .from(stampBucket)
-                    .getPublicUrl(
-                      stampFolder != null && stampFolder.isNotEmpty
-                          ? '$stampFolder/$stampFileName'
-                          : stampFileName,
-                    )
-              : null;
-
-          return Participation(
-            id: row['id'] as String,
-            missionTitle: missionData?['title'] as String? ?? '미션',
-            status: status,
-            createdAt: DateTime.parse(row['created_at'] as String),
-            photoUrl: photoUrl,
-            rejectionReason: rejectionReason,
-            stampUrl: stampUrl,
-          );
-        }).toList();
+        final resolvedParticipations = _resolveParticipations(participationsResponse);
 
         if (!mounted) return;
         setState(() {
           participations = resolvedParticipations;
+          hasMoreParticipations = resolvedParticipations.length == _participationsPageSize;
           isParticipationsLoading = false;
         });
         await _persistAccountCache();
@@ -417,6 +382,102 @@ class _AccountTabState extends State<AccountTab> {
       fetchParticipations(),
       fetchRankLevel(),
     ]);
+  }
+
+  List<Participation> _resolveParticipations(List<dynamic> response) {
+    return response.map((row) {
+      final approvedAt = row['approved_at'];
+      final rejectedBy = row['rejected_by'];
+      final rejectionReason = row['rejection_reason'] as String?;
+      final status = approvedAt != null
+          ? 'approved'
+          : (rejectedBy != null || rejectionReason != null)
+          ? 'rejected'
+          : 'pending';
+      final bucket = row['photo_bucket'] as String?;
+      final folder = row['photo_folder_path'] as String?;
+      final fileName = row['photo_file_name'] as String?;
+      final photoUrl = bucket != null && fileName != null
+          ? Supabase.instance.client.storage
+                .from(bucket)
+                .getPublicUrl(
+                  folder != null && folder.isNotEmpty
+                      ? '$folder/$fileName'
+                      : fileName,
+                )
+          : null;
+      final missionData = row['mission'] as Map<String, dynamic>?;
+      final stampData = missionData?['stamp'] as Map<String, dynamic>?;
+      final stampBucket = stampData?['bucket'] as String?;
+      final stampFileName = stampData?['file_name'] as String?;
+      final stampFolder = stampData?['folder_path'] as String?;
+      final stampUrl = stampBucket != null && stampFileName != null
+          ? Supabase.instance.client.storage
+                .from(stampBucket)
+                .getPublicUrl(
+                  stampFolder != null && stampFolder.isNotEmpty
+                      ? '$stampFolder/$stampFileName'
+                      : stampFileName,
+                )
+          : null;
+
+      return Participation(
+        id: row['id'] as String,
+        missionTitle: missionData?['title'] as String? ?? '미션',
+        status: status,
+        createdAt: DateTime.parse(row['created_at'] as String),
+        photoUrl: photoUrl,
+        rejectionReason: rejectionReason,
+        stampUrl: stampUrl,
+      );
+    }).toList();
+  }
+
+  Future<void> _fetchMoreParticipations() async {
+    if (!hasMoreParticipations || isParticipationsLoading) return;
+
+    final user = UserAuthService.instance.currentUser;
+    if (user == null) return;
+
+    setState(() => isParticipationsLoading = true);
+
+    final client = Supabase.instance.client;
+    final profileService = ProfileService.instance;
+    await profileService.initialize();
+    final isMainProfile = profileService.isMainProfileSelected;
+    final selectedProfileId = profileService.selectedProfileId;
+
+    try {
+      final query = client
+          .from(MissionParticipationTable().tableName)
+          .select(
+            'id, mission(title, stamp(bucket, folder_path, file_name)), created_at, approved_at, rejected_at, rejected_by, rejection_reason, photo_bucket, photo_folder_path, photo_file_name',
+          )
+          .eq(MissionParticipationRow.participatedByField, user.id);
+
+      final from = participations.length;
+      final to = from + _participationsPageSize - 1;
+      final response =
+          await (isMainProfile
+                  ? query.isFilter('profile_used', null)
+                  : query.eq('profile_used', selectedProfileId!))
+              .order('created_at', ascending: false)
+              .range(from, to);
+
+      final newItems = _resolveParticipations(response);
+
+      if (!mounted) return;
+      setState(() {
+        participations = [...participations, ...newItems];
+        hasMoreParticipations = newItems.length == _participationsPageSize;
+        isParticipationsLoading = false;
+      });
+    } catch (error) {
+      debugPrint('Error fetching more participations: $error');
+      if (mounted) {
+        setState(() => isParticipationsLoading = false);
+      }
+    }
   }
 
   void _handleParticipationSubmitted() {
@@ -563,10 +624,12 @@ class _AccountTabState extends State<AccountTab> {
           .update({'company': null})
           .eq('id', userId!);
       setState(() => companyName = null);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('회사가 제거되었습니다.')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('회사 제거 중 오류가 발생했습니다.')),
       );
@@ -705,6 +768,8 @@ class _AccountTabState extends State<AccountTab> {
           totalMileage: totalMileage,
           activeMissions: activeMissions,
           participations: participations,
+          hasMoreParticipations: hasMoreParticipations,
+          onLoadMoreParticipations: _fetchMoreParticipations,
           isActiveMissionsLoading: isActiveMissionsLoading,
           isParticipationsLoading: isParticipationsLoading,
           onManageShipping: _openShippingAddressDialog,

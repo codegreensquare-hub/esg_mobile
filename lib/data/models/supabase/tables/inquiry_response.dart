@@ -129,4 +129,4 @@ class InquiryResponseRow extends SupabaseDataRow {
 }
 
 /// Tag: v2
-/// Date: 2026-03-20 19:41:33.368413
+/// Date: 2026-03-24 15:11:23.921137

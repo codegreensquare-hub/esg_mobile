@@ -49,7 +49,7 @@ class _MissionAvailableListTileState extends State<MissionAvailableListTile> {
     unawaited(
       MissionEventTrackingService.instance.logClick(
         missionId: widget.mission.id,
-        cost: widget.mission.cost,
+        cost: widget.mission.costStart,
       ),
     );
   }

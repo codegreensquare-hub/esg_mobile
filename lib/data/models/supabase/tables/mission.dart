@@ -24,7 +24,7 @@ class MissionTable extends SupabaseTable<MissionRow> {
 class MissionRow extends SupabaseDataRow {
   /// Mission Row
   MissionRow({
-    String? taskExplanation,
+    String? doNotDoExplanation,
     DateTime? createdAt,
     String? createdBy,
     MissionType? type,
@@ -35,8 +35,8 @@ class MissionRow extends SupabaseDataRow {
     String? thumbnailFilename,
     int? awardPoints,
     int? order,
+    String? taskExplanation,
     String? id,
-    String? doNotDoExplanation,
     String? participationButtonText,
     String? name,
     double? carbonEmissionsReductionPerParticipationG,
@@ -47,22 +47,23 @@ class MissionRow extends SupabaseDataRow {
     String? stamp,
     DateTime? submittedForReviewAt,
     DateTime? approvedAt,
-    bool? showPastToUsers,
-    DateTime? rejectedAt,
+    String? approvedBy,
+    double? costStart,
     String? rejectedBy,
     bool? isDeleted,
     String? rejectedReason,
     String? companyId,
-    double? cost,
+    double? costEnd,
     double? costChangeRequestedCost,
     DateTime? costChangeRequestedAt,
     String? costChangeRequestedBy,
     String? costChangeRejectedReason,
     double? budgetLimit,
-    String? approvedBy,
+    bool? showPastToUsers,
+    DateTime? rejectedAt,
   }) : super({
-         if (taskExplanation != null)
-           'task_explanation': supaSerialize(taskExplanation),
+         if (doNotDoExplanation != null)
+           'do_not_do_explanation': supaSerialize(doNotDoExplanation),
          if (createdAt != null) 'created_at': supaSerialize(createdAt),
          if (createdBy != null) 'created_by': supaSerialize(createdBy),
          if (type != null) 'type': supaSerialize(type),
@@ -76,9 +77,9 @@ class MissionRow extends SupabaseDataRow {
            'thumbnail_filename': supaSerialize(thumbnailFilename),
          if (awardPoints != null) 'award_points': supaSerialize(awardPoints),
          if (order != null) 'order': supaSerialize(order),
+         if (taskExplanation != null)
+           'task_explanation': supaSerialize(taskExplanation),
          if (id != null) 'id': supaSerialize(id),
-         if (doNotDoExplanation != null)
-           'do_not_do_explanation': supaSerialize(doNotDoExplanation),
          if (participationButtonText != null)
            'participation_button_text': supaSerialize(participationButtonText),
          if (name != null) 'name': supaSerialize(name),
@@ -96,15 +97,14 @@ class MissionRow extends SupabaseDataRow {
          if (submittedForReviewAt != null)
            'submitted_for_review_at': supaSerialize(submittedForReviewAt),
          if (approvedAt != null) 'approved_at': supaSerialize(approvedAt),
-         if (showPastToUsers != null)
-           'show_past_to_users': supaSerialize(showPastToUsers),
-         if (rejectedAt != null) 'rejected_at': supaSerialize(rejectedAt),
+         if (approvedBy != null) 'approved_by': supaSerialize(approvedBy),
+         if (costStart != null) 'cost_start': supaSerialize(costStart),
          if (rejectedBy != null) 'rejected_by': supaSerialize(rejectedBy),
          if (isDeleted != null) 'is_deleted': supaSerialize(isDeleted),
          if (rejectedReason != null)
            'rejected_reason': supaSerialize(rejectedReason),
          if (companyId != null) 'company_id': supaSerialize(companyId),
-         if (cost != null) 'cost': supaSerialize(cost),
+         if (costEnd != null) 'cost_end': supaSerialize(costEnd),
          if (costChangeRequestedCost != null)
            'cost_change_requested_cost': supaSerialize(costChangeRequestedCost),
          if (costChangeRequestedAt != null)
@@ -116,7 +116,9 @@ class MissionRow extends SupabaseDataRow {
              costChangeRejectedReason,
            ),
          if (budgetLimit != null) 'budget_limit': supaSerialize(budgetLimit),
-         if (approvedBy != null) 'approved_by': supaSerialize(approvedBy),
+         if (showPastToUsers != null)
+           'show_past_to_users': supaSerialize(showPastToUsers),
+         if (rejectedAt != null) 'rejected_at': supaSerialize(rejectedAt),
        });
 
   /// Mission Row
@@ -366,12 +368,12 @@ class MissionRow extends SupabaseDataRow {
   String? get companyId => getField<String>(companyIdField);
   set companyId(String? value) => setField<String>(companyIdField, value);
 
-  /// Cost field name
-  static const String costField = 'cost';
+  /// Cost End field name
+  static const String costEndField = 'cost_end';
 
-  /// Cost
-  double get cost => getField<double>(costField, defaultValue: 0)!;
-  set cost(double value) => setField<double>(costField, value);
+  /// Cost End
+  double get costEnd => getField<double>(costEndField, defaultValue: 0)!;
+  set costEnd(double value) => setField<double>(costEndField, value);
 
   /// Cost Change Requested Cost field name
   static const String costChangeRequestedCostField =
@@ -427,10 +429,17 @@ class MissionRow extends SupabaseDataRow {
   set showPastToUsers(bool value) =>
       setField<bool>(showPastToUsersField, value);
 
+  /// Cost Start field name
+  static const String costStartField = 'cost_start';
+
+  /// Cost Start
+  double get costStart => getField<double>(costStartField, defaultValue: 0)!;
+  set costStart(double value) => setField<double>(costStartField, value);
+
   /// Make a copy of the current [MissionRow]
   /// overriding the provided fields
   MissionRow copyWith({
-    String? taskExplanation,
+    String? doNotDoExplanation,
     DateTime? createdAt,
     String? createdBy,
     MissionType? type,
@@ -441,8 +450,8 @@ class MissionRow extends SupabaseDataRow {
     String? thumbnailFilename,
     int? awardPoints,
     int? order,
+    String? taskExplanation,
     String? id,
-    String? doNotDoExplanation,
     String? participationButtonText,
     String? name,
     double? carbonEmissionsReductionPerParticipationG,
@@ -453,22 +462,23 @@ class MissionRow extends SupabaseDataRow {
     String? stamp,
     DateTime? submittedForReviewAt,
     DateTime? approvedAt,
-    bool? showPastToUsers,
-    DateTime? rejectedAt,
+    String? approvedBy,
+    double? costStart,
     String? rejectedBy,
     bool? isDeleted,
     String? rejectedReason,
     String? companyId,
-    double? cost,
+    double? costEnd,
     double? costChangeRequestedCost,
     DateTime? costChangeRequestedAt,
     String? costChangeRequestedBy,
     String? costChangeRejectedReason,
     double? budgetLimit,
-    String? approvedBy,
+    bool? showPastToUsers,
+    DateTime? rejectedAt,
   }) => MissionRow.fromJson({
-    'task_explanation':
-        supaSerialize(taskExplanation) ?? data['task_explanation'],
+    'do_not_do_explanation':
+        supaSerialize(doNotDoExplanation) ?? data['do_not_do_explanation'],
     'created_at': supaSerialize(createdAt) ?? data['created_at'],
     'created_by': supaSerialize(createdBy) ?? data['created_by'],
     'type': supaSerialize(type) ?? data['type'],
@@ -482,9 +492,9 @@ class MissionRow extends SupabaseDataRow {
         supaSerialize(thumbnailFilename) ?? data['thumbnail_filename'],
     'award_points': supaSerialize(awardPoints) ?? data['award_points'],
     'order': supaSerialize(order) ?? data['order'],
+    'task_explanation':
+        supaSerialize(taskExplanation) ?? data['task_explanation'],
     'id': supaSerialize(id) ?? data['id'],
-    'do_not_do_explanation':
-        supaSerialize(doNotDoExplanation) ?? data['do_not_do_explanation'],
     'participation_button_text':
         supaSerialize(participationButtonText) ??
         data['participation_button_text'],
@@ -502,14 +512,13 @@ class MissionRow extends SupabaseDataRow {
     'submitted_for_review_at':
         supaSerialize(submittedForReviewAt) ?? data['submitted_for_review_at'],
     'approved_at': supaSerialize(approvedAt) ?? data['approved_at'],
-    'show_past_to_users':
-        supaSerialize(showPastToUsers) ?? data['show_past_to_users'],
-    'rejected_at': supaSerialize(rejectedAt) ?? data['rejected_at'],
+    'approved_by': supaSerialize(approvedBy) ?? data['approved_by'],
+    'cost_start': supaSerialize(costStart) ?? data['cost_start'],
     'rejected_by': supaSerialize(rejectedBy) ?? data['rejected_by'],
     'is_deleted': supaSerialize(isDeleted) ?? data['is_deleted'],
     'rejected_reason': supaSerialize(rejectedReason) ?? data['rejected_reason'],
     'company_id': supaSerialize(companyId) ?? data['company_id'],
-    'cost': supaSerialize(cost) ?? data['cost'],
+    'cost_end': supaSerialize(costEnd) ?? data['cost_end'],
     'cost_change_requested_cost':
         supaSerialize(costChangeRequestedCost) ??
         data['cost_change_requested_cost'],
@@ -523,9 +532,11 @@ class MissionRow extends SupabaseDataRow {
         supaSerialize(costChangeRejectedReason) ??
         data['cost_change_rejected_reason'],
     'budget_limit': supaSerialize(budgetLimit) ?? data['budget_limit'],
-    'approved_by': supaSerialize(approvedBy) ?? data['approved_by'],
+    'show_past_to_users':
+        supaSerialize(showPastToUsers) ?? data['show_past_to_users'],
+    'rejected_at': supaSerialize(rejectedAt) ?? data['rejected_at'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-20 19:41:33.383806
+/// Date: 2026-03-24 15:11:23.929524

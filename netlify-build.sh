@@ -48,7 +48,7 @@ do
 done
 
 if [ ${#dart_defines[@]} -gt 0 ]; then
-  flutter build web "${dart_defines[@]}"
+  flutter build web --wasm "${dart_defines[@]}"
 else
-  flutter build web
+  flutter build web --wasm
 fi

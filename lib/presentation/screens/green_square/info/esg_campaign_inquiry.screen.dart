@@ -80,6 +80,7 @@ class _GreenSquareEsgCampaignInquiryScreenState
       data: theme.copyWith(appBarTheme: appBarTheme),
       child: GreenSquareInfoPage(
         backgroundColor: const Color(0xFF355149),
+        foregroundColor: Colors.white,
         title: 'ESG 캠페인 문의',
         body: Center(
           child: SingleChildScrollView(

@@ -3,6 +3,8 @@ import 'package:esg_mobile/core/utils/get_image_link.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission.dart';
 import 'package:esg_mobile/data/models/supabase/tables/mission_photo_animation_completion.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MissionParticipationSuccessScreen extends StatelessWidget {
   const MissionParticipationSuccessScreen({
@@ -13,6 +15,52 @@ class MissionParticipationSuccessScreen extends StatelessWidget {
 
   final MissionRow mission;
   final List<MissionPhotoAnimationCompletionRow> completionPhotos;
+
+  Future<void> _shareToInstagram(BuildContext context) async {
+    String? imageUrl;
+    if (completionPhotos.isNotEmpty) {
+      final photo = completionPhotos.first;
+      imageUrl = getImageLink(
+        photo.bucket,
+        photo.fileName,
+        folderPath: photo.folderPath,
+      );
+    } else if (mission.thumbnailBucket != null &&
+        mission.thumbnailFilename != null) {
+      imageUrl = getImageLink(
+        mission.thumbnailBucket!,
+        mission.thumbnailFilename!,
+        folderPath: mission.thumbnailFolderPath,
+      );
+    }
+
+    if (imageUrl == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('공유할 이미지가 없습니다.')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final file = await DefaultCacheManager().getSingleFile(imageUrl);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'image/jpeg')],
+          text: '${mission.title ?? '친환경 미션'}에 참여하여 탄소 배출량 ${mission.carbonEmissionsReductionPerParticipationG.toStringAsFixed(1)}g을 줄였어요!\n\n#그린스퀘어 #친환경 #탄소절감 #ESG #지구지킴이 #녹색생활',
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error sharing: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('공유 중 문제가 발생했습니다.')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,11 +152,7 @@ class MissionParticipationSuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               FilledButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('인스타그램 공유 기능은 준비 중입니다.')),
-                  );
-                },
+                onPressed: () => _shareToInstagram(context),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 52),
                 ),

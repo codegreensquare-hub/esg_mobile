@@ -37,12 +37,14 @@ class CostChangeRequestRow extends SupabaseDataRow {
     String? company,
     String? department,
     String? mission,
-    double? currentCost,
-    double? requestedCost,
+    double? currentCostEnd,
+    double? requestedCostEnd,
     double? currentBudgetLimit,
     double? requestedBugdetLimit,
     double? currentDiscountRate,
     double? requestedDiscountRate,
+    double? currentCostStart,
+    double? requestedCostStart,
   }) : super({
          'type': supaSerialize(type),
          if (id != null) 'id': supaSerialize(id),
@@ -57,9 +59,10 @@ class CostChangeRequestRow extends SupabaseDataRow {
          if (company != null) 'company': supaSerialize(company),
          if (department != null) 'department': supaSerialize(department),
          if (mission != null) 'mission': supaSerialize(mission),
-         if (currentCost != null) 'current_cost': supaSerialize(currentCost),
-         if (requestedCost != null)
-           'requested_cost': supaSerialize(requestedCost),
+         if (currentCostEnd != null)
+           'current_cost_end': supaSerialize(currentCostEnd),
+         if (requestedCostEnd != null)
+           'requested_cost_end': supaSerialize(requestedCostEnd),
          if (currentBudgetLimit != null)
            'current_budget_limit': supaSerialize(currentBudgetLimit),
          if (requestedBugdetLimit != null)
@@ -68,6 +71,10 @@ class CostChangeRequestRow extends SupabaseDataRow {
            'current_discount_rate': supaSerialize(currentDiscountRate),
          if (requestedDiscountRate != null)
            'requested_discount_rate': supaSerialize(requestedDiscountRate),
+         if (currentCostStart != null)
+           'current_cost_start': supaSerialize(currentCostStart),
+         if (requestedCostStart != null)
+           'requested_cost_start': supaSerialize(requestedCostStart),
        });
 
   /// Cost Change Request Row
@@ -174,20 +181,21 @@ class CostChangeRequestRow extends SupabaseDataRow {
   String? get mission => getField<String>(missionField);
   set mission(String? value) => setField<String>(missionField, value);
 
-  /// Current Cost field name
-  static const String currentCostField = 'current_cost';
+  /// Current Cost End field name
+  static const String currentCostEndField = 'current_cost_end';
 
-  /// Current Cost
-  double? get currentCost => getField<double>(currentCostField);
-  set currentCost(double? value) => setField<double>(currentCostField, value);
+  /// Current Cost End
+  double? get currentCostEnd => getField<double>(currentCostEndField);
+  set currentCostEnd(double? value) =>
+      setField<double>(currentCostEndField, value);
 
-  /// Requested Cost field name
-  static const String requestedCostField = 'requested_cost';
+  /// Requested Cost End field name
+  static const String requestedCostEndField = 'requested_cost_end';
 
-  /// Requested Cost
-  double? get requestedCost => getField<double>(requestedCostField);
-  set requestedCost(double? value) =>
-      setField<double>(requestedCostField, value);
+  /// Requested Cost End
+  double? get requestedCostEnd => getField<double>(requestedCostEndField);
+  set requestedCostEnd(double? value) =>
+      setField<double>(requestedCostEndField, value);
 
   /// Current Budget Limit field name
   static const String currentBudgetLimitField = 'current_budget_limit';
@@ -223,6 +231,22 @@ class CostChangeRequestRow extends SupabaseDataRow {
   set requestedDiscountRate(double? value) =>
       setField<double>(requestedDiscountRateField, value);
 
+  /// Current Cost Start field name
+  static const String currentCostStartField = 'current_cost_start';
+
+  /// Current Cost Start
+  double? get currentCostStart => getField<double>(currentCostStartField);
+  set currentCostStart(double? value) =>
+      setField<double>(currentCostStartField, value);
+
+  /// Requested Cost Start field name
+  static const String requestedCostStartField = 'requested_cost_start';
+
+  /// Requested Cost Start
+  double? get requestedCostStart => getField<double>(requestedCostStartField);
+  set requestedCostStart(double? value) =>
+      setField<double>(requestedCostStartField, value);
+
   /// Make a copy of the current [CostChangeRequestRow]
   /// overriding the provided fields
   CostChangeRequestRow copyWith({
@@ -238,12 +262,14 @@ class CostChangeRequestRow extends SupabaseDataRow {
     String? company,
     String? department,
     String? mission,
-    double? currentCost,
-    double? requestedCost,
+    double? currentCostEnd,
+    double? requestedCostEnd,
     double? currentBudgetLimit,
     double? requestedBugdetLimit,
     double? currentDiscountRate,
     double? requestedDiscountRate,
+    double? currentCostStart,
+    double? requestedCostStart,
   }) => CostChangeRequestRow.fromJson({
     'type': supaSerialize(type) ?? data['type'],
     'id': supaSerialize(id) ?? data['id'],
@@ -258,8 +284,10 @@ class CostChangeRequestRow extends SupabaseDataRow {
     'company': supaSerialize(company) ?? data['company'],
     'department': supaSerialize(department) ?? data['department'],
     'mission': supaSerialize(mission) ?? data['mission'],
-    'current_cost': supaSerialize(currentCost) ?? data['current_cost'],
-    'requested_cost': supaSerialize(requestedCost) ?? data['requested_cost'],
+    'current_cost_end':
+        supaSerialize(currentCostEnd) ?? data['current_cost_end'],
+    'requested_cost_end':
+        supaSerialize(requestedCostEnd) ?? data['requested_cost_end'],
     'current_budget_limit':
         supaSerialize(currentBudgetLimit) ?? data['current_budget_limit'],
     'requested_bugdet_limit':
@@ -268,8 +296,12 @@ class CostChangeRequestRow extends SupabaseDataRow {
         supaSerialize(currentDiscountRate) ?? data['current_discount_rate'],
     'requested_discount_rate':
         supaSerialize(requestedDiscountRate) ?? data['requested_discount_rate'],
+    'current_cost_start':
+        supaSerialize(currentCostStart) ?? data['current_cost_start'],
+    'requested_cost_start':
+        supaSerialize(requestedCostStart) ?? data['requested_cost_start'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-20 19:41:33.361899
+/// Date: 2026-03-24 15:11:23.915945

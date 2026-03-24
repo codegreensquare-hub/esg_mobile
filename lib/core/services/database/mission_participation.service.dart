@@ -111,8 +111,8 @@ class MissionParticipationService {
       final uploadFuture = _uploadPhoto(bytes: bytes, mission: mission);
       final results = await Future.wait([phashFuture, uploadFuture]);
       final imagePhash = results[0] as String;
-      final uploadedPhoto = results[1]
-          as ({String bucket, String folderPath, String fileName});
+      final uploadedPhoto =
+          results[1] as ({String bucket, String folderPath, String fileName});
 
       await _createParticipation(
         mission,
@@ -156,6 +156,7 @@ class MissionParticipationService {
       if (!context.mounted) {
         return;
       }
+      debugPrint('Error during mission participation: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('미션 참여 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.')),
       );

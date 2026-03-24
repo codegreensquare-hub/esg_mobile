@@ -43,6 +43,8 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? department,
     String? subDepartment,
     String? missionClick,
+    String? imagePhash,
+    String? imageHistogram,
   }) : super({
          if (id != null) 'id': supaSerialize(id),
          if (participatedBy != null)
@@ -67,6 +69,9 @@ class MissionParticipationRow extends SupabaseDataRow {
          if (subDepartment != null)
            'sub_department': supaSerialize(subDepartment),
          if (missionClick != null) 'mission_click': supaSerialize(missionClick),
+         if (imagePhash != null) 'image_phash': supaSerialize(imagePhash),
+         if (imageHistogram != null)
+           'image_histogram': supaSerialize(imageHistogram),
        });
 
   /// Mission Participation Row
@@ -217,6 +222,21 @@ class MissionParticipationRow extends SupabaseDataRow {
   String? get missionClick => getField<String>(missionClickField);
   set missionClick(String? value) => setField<String>(missionClickField, value);
 
+  /// Image Phash field name
+  static const String imagePhashField = 'image_phash';
+
+  /// Image Phash
+  String? get imagePhash => getField<String>(imagePhashField);
+  set imagePhash(String? value) => setField<String>(imagePhashField, value);
+
+  /// Image Histogram field name
+  static const String imageHistogramField = 'image_histogram';
+
+  /// Image Histogram
+  String? get imageHistogram => getField<String>(imageHistogramField);
+  set imageHistogram(String? value) =>
+      setField<String>(imageHistogramField, value);
+
   /// Make a copy of the current [MissionParticipationRow]
   /// overriding the provided fields
   MissionParticipationRow copyWith({
@@ -238,6 +258,8 @@ class MissionParticipationRow extends SupabaseDataRow {
     String? department,
     String? subDepartment,
     String? missionClick,
+    String? imagePhash,
+    String? imageHistogram,
   }) => MissionParticipationRow.fromJson({
     'id': supaSerialize(id) ?? data['id'],
     'participated_by': supaSerialize(participatedBy) ?? data['participated_by'],
@@ -259,8 +281,10 @@ class MissionParticipationRow extends SupabaseDataRow {
     'department': supaSerialize(department) ?? data['department'],
     'sub_department': supaSerialize(subDepartment) ?? data['sub_department'],
     'mission_click': supaSerialize(missionClick) ?? data['mission_click'],
+    'image_phash': supaSerialize(imagePhash) ?? data['image_phash'],
+    'image_histogram': supaSerialize(imageHistogram) ?? data['image_histogram'],
   });
 }
 
 /// Tag: v2
-/// Date: 2026-03-20 19:41:33.386233
+/// Date: 2026-03-24 15:11:23.931056

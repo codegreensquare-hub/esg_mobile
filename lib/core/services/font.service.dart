@@ -1,61 +1,62 @@
 import 'package:esg_mobile/core/constants/bucket.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:esg_mobile/core/constants/asset.dart';
 import 'package:esg_mobile/core/utils/get_image_link.dart';
 
+/// Fonts loaded from Supabase storage, prioritised by importance.
+///
+/// Essential fonts (Noto Sans KR, EB Garamond) load first using variable font
+/// files (~11 MB total). Fallback serif fonts load afterwards.
 class FontService {
   static final FontService _instance = FontService._internal();
   static FontService get instance => _instance;
   FontService._internal();
 
-  String _getFamily(String fontName) {
-    if (fontName.startsWith('EBGaramond')) return 'EB Garamond';
-    if (fontName.startsWith('NotoSansKR')) return 'Noto Sans KR';
-    if (fontName.startsWith('SourceHanSerifK')) return 'Source Han Serif KR';
-    if (fontName.startsWith('SourceHanSerif')) return 'Source Han Serif';
-    return 'Unknown';
-  }
+  bool _loaded = false;
 
+  /// Essential fonts that the app needs immediately.
+  /// Variable font files cover all weights in a single file.
+  static const _essentialFonts = <(String family, String path)>[
+    ('Noto Sans KR', 'fonts/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf'),
+    ('EB Garamond', 'fonts/EB_Garamond/EBGaramond-VariableFont_wght.ttf'),
+  ];
+
+  /// Fallback serif fonts — only used for display text fallback.
+  /// Load only the Regular weight to keep download small.
+  static const _fallbackFonts = <(String family, String path)>[
+    ('Source Han Serif KR', 'fonts/Source_Han_Kr/SourceHanSerifK-Regular.otf'),
+    (
+      'Source Han Serif',
+      'fonts/Source_Hans_Serif/SourceHanSerif-Regular.ttc',
+    ),
+  ];
+
+  /// Load all fonts from Supabase storage. Safe to call multiple times.
   Future<void> loadFonts() async {
-    final fontPaths = <String, List<String>>{};
-    for (final entry in assetFolderPath.entries) {
-      final fontName = entry.key;
-      final folder = entry.value;
-      if (folder.startsWith('fonts/')) {
-        final family = _getFamily(fontName);
-        final path = '$folder/$fontName';
-        fontPaths.putIfAbsent(family, () => []).add(path);
-      }
-    }
+    if (_loaded) return;
+    _loaded = true;
 
-    for (final entry in fontPaths.entries) {
-      final family = entry.key;
-      final paths = entry.value;
-      final fontLoader = FontLoader(family);
-      final futures = paths.map((path) async {
-        final url = getImageLink(bucket.asset, path);
-        final file = await DefaultCacheManager().getSingleFile(url);
-        return await file.readAsBytes();
-      });
-      final bytesList = await Future.wait(futures);
-      for (final bytes in bytesList) {
-        fontLoader.addFont(Future.value(ByteData.sublistView(bytes)));
-      }
-      await fontLoader.load();
-    }
+    // Load essential fonts first (body + headline), then fallbacks.
+    await _loadFontList(_essentialFonts);
+    // Fire-and-forget: fallback fonts load in the background.
+    _loadFontList(_fallbackFonts);
   }
 
-  Future<void> loadFontEntry(String family, String path) async {
-    final fontLoader = FontLoader(family);
+  Future<void> _loadFontList(List<(String, String)> fonts) async {
+    await Future.wait(fonts.map((f) => _loadFont(f.$1, f.$2)));
+  }
+
+  Future<void> _loadFont(String family, String path) async {
     try {
       final url = getImageLink(bucket.asset, path);
       final file = await DefaultCacheManager().getSingleFile(url);
       final bytes = await file.readAsBytes();
+      final fontLoader = FontLoader(family);
       fontLoader.addFont(Future.value(ByteData.sublistView(bytes)));
       await fontLoader.load();
     } catch (e) {
-      print('Error loading font $family from $path: $e');
+      debugPrint('FontService: failed to load $family from $path: $e');
     }
   }
 }
