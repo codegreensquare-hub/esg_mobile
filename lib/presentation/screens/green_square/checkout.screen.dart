@@ -642,7 +642,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        onVerticalDragStart: (_) => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(top: 20, bottom: 24),
           child: Column(
@@ -1197,6 +1200,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
