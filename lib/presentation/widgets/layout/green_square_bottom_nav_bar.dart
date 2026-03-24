@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GreenSquareBottomNavBar extends StatefulWidget {
   const GreenSquareBottomNavBar({
@@ -48,14 +49,16 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
                       children: [
                         _NavItem(
                           index: 0,
-                          icon: Icons.auto_stories_outlined,
+                          offIconAssetPath: 'assets/images/nav_bar/off_stories.svg',
+                          onIconAssetPath: 'assets/images/nav_bar/on_stories.svg',
                           label: '스토리',
                           selected: widget.selectedIndex == 0,
                           onTap: () => widget.onItemSelected(0),
                         ),
                         _NavItem(
                           index: 1,
-                          icon: Icons.storefront_outlined,
+                          offIconAssetPath: 'assets/images/nav_bar/off_shop.svg',
+                          onIconAssetPath: 'assets/images/nav_bar/on_shop.svg',
                           label: '쇼핑몰',
                           selected: widget.selectedIndex == 1,
                           onTap: () => widget.onItemSelected(1),
@@ -64,14 +67,16 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
                         const SizedBox(width: 36),
                         _NavItem(
                           index: 2,
-                          icon: Icons.group_outlined,
+                          offIconAssetPath: 'assets/images/nav_bar/off_missions.svg',
+                          onIconAssetPath: 'assets/images/nav_bar/on_missions.svg',
                           label: '미션 참여',
                           selected: widget.selectedIndex == 2,
                           onTap: () => widget.onItemSelected(2),
                         ),
                         _NavItem(
                           index: 3,
-                          icon: Icons.person_outline,
+                          offIconAssetPath: 'assets/images/nav_bar/off_profile.svg',
+                          onIconAssetPath: 'assets/images/nav_bar/on_profile.svg',
                           label: '나의 콕',
                           selected: widget.selectedIndex == 3,
                           onTap: () => widget.onItemSelected(3),
@@ -137,14 +142,16 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
 class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.index,
-    required this.icon,
+    required this.offIconAssetPath,
+    required this.onIconAssetPath,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
   final int index;
-  final IconData icon;
+  final String offIconAssetPath;
+  final String onIconAssetPath;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -155,19 +162,20 @@ class _NavItem extends StatefulWidget {
 
 class _NavItemState extends State<_NavItem> {
   bool _isHovered = false;
+  static const Color _activeLabelColor = Color(0xFF355148);
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final Color color = widget.selected
-        ? cs.primary
+        ? _activeLabelColor
         : (_isHovered
               ? cs.primary.withValues(alpha: 0.7)
               : cs.onSurfaceVariant);
-    final IconData iconData = widget.selected
-        ? _getSolidIcon(widget.icon)
-        : widget.icon;
+    final iconAssetPath = widget.selected
+        ? widget.onIconAssetPath
+        : widget.offIconAssetPath;
     final TextStyle textStyle = widget.selected
         ? theme.textTheme.labelSmall?.copyWith(
                 color: color,
@@ -195,10 +203,11 @@ class _NavItemState extends State<_NavItem> {
                   scale: animation,
                   child: child,
                 ),
-                child: Icon(
-                  iconData,
-                  key: ValueKey(iconData),
-                  color: color,
+                child: SizedBox(
+                  key: ValueKey(iconAssetPath),
+                  width: 24,
+                  height: 24,
+                  child: _buildNavIcon(iconAssetPath),
                 ),
               ),
               AnimatedDefaultTextStyle(
@@ -216,17 +225,17 @@ class _NavItemState extends State<_NavItem> {
     );
   }
 
-  IconData _getSolidIcon(IconData outlinedIcon) {
-    if (outlinedIcon == Icons.auto_stories_outlined) {
-      return Icons.auto_stories;
-    } else if (outlinedIcon == Icons.storefront_outlined) {
-      return Icons.storefront;
-    } else if (outlinedIcon == Icons.group_outlined) {
-      return Icons.group;
-    } else if (outlinedIcon == Icons.person_outline) {
-      return Icons.person;
+  Widget _buildNavIcon(String assetPath) {
+    if (assetPath.toLowerCase().endsWith('.svg')) {
+      return SvgPicture.asset(
+        assetPath,
+        fit: BoxFit.contain,
+      );
     }
-    return outlinedIcon; // fallback
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.contain,
+    );
   }
 }
 
@@ -347,10 +356,14 @@ class KakaoTalkButton extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.black,
-              size: 24,
+            child: SvgPicture.asset(
+              'assets/images/icons/kakao-icon.svg',
+              width: 24,
+              height: 24,
+              colorFilter: const ColorFilter.mode(
+                Colors.black,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),

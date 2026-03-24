@@ -45,6 +45,7 @@ flutter:
   assets:
     - .env
     - assets/images/icons/
+    - assets/images/nav_bar/
     - assets/images/carousel/
     - assets/images/about/
     - assets/images/award_points/
