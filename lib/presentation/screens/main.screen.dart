@@ -1115,17 +1115,49 @@ class _MissionListSheetContent extends StatefulWidget {
 
 class _MissionListSheetContentState extends State<_MissionListSheetContent> {
   late final ScrollController _scrollController;
+  bool _canScrollUp = false;
+  bool _canScrollDown = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _scrollController.addListener(_updateArrowVisibility);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateArrowVisibility();
+    });
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_updateArrowVisibility);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MissionListSheetContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.missions.length != widget.missions.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _updateArrowVisibility();
+      });
+    }
+  }
+
+  void _updateArrowVisibility() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    final canScrollUp = position.pixels > position.minScrollExtent;
+    final canScrollDown = position.pixels < position.maxScrollExtent;
+    if (canScrollUp != _canScrollUp || canScrollDown != _canScrollDown) {
+      setState(() {
+        _canScrollUp = canScrollUp;
+        _canScrollDown = canScrollDown;
+      });
+    }
   }
 
   @override
@@ -1156,23 +1188,24 @@ class _MissionListSheetContentState extends State<_MissionListSheetContent> {
               const SizedBox(width: 16),
             ],
           ),
-          Center(
-            child: IconButton(
-              icon: const Icon(Icons.arrow_upward),
-              onPressed: () {
-                if (_scrollController.hasClients) {
-                  final position = _scrollController.position;
-                  final target = (position.pixels - position.viewportDimension)
-                      .clamp(0.0, position.maxScrollExtent);
-                  _scrollController.animateTo(
-                    target,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                }
-              },
+          if (_canScrollUp)
+            Center(
+              child: IconButton(
+                icon: const Icon(Icons.arrow_upward),
+                onPressed: () {
+                  if (_scrollController.hasClients) {
+                    final position = _scrollController.position;
+                    final target = (position.pixels - position.viewportDimension)
+                        .clamp(0.0, position.maxScrollExtent);
+                    _scrollController.animateTo(
+                      target,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                },
+              ),
             ),
-          ),
           Expanded(
             child: GridView.builder(
               controller: _scrollController,
@@ -1191,24 +1224,25 @@ class _MissionListSheetContentState extends State<_MissionListSheetContent> {
               ),
             ),
           ),
-          Center(
-            child: IconButton(
-              icon: const Icon(Icons.arrow_downward),
-              onPressed: () {
-                if (_scrollController.hasClients &&
-                    _scrollController.position.maxScrollExtent > 0) {
-                  final position = _scrollController.position;
-                  final target = (position.pixels + position.viewportDimension)
-                      .clamp(0.0, position.maxScrollExtent);
-                  _scrollController.animateTo(
-                    target,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                }
-              },
+          if (_canScrollDown)
+            Center(
+              child: IconButton(
+                icon: const Icon(Icons.arrow_downward),
+                onPressed: () {
+                  if (_scrollController.hasClients &&
+                      _scrollController.position.maxScrollExtent > 0) {
+                    final position = _scrollController.position;
+                    final target = (position.pixels + position.viewportDimension)
+                        .clamp(0.0, position.maxScrollExtent);
+                    _scrollController.animateTo(
+                      target,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                },
+              ),
             ),
-          ),
         ],
       ),
     );

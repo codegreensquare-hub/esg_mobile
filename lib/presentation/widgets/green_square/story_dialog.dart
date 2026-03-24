@@ -15,6 +15,7 @@ import 'package:esg_mobile/presentation/widgets/green_square/text.story.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:esg_mobile/web_updater.dart'
@@ -26,6 +27,34 @@ String _formatDateYyyyMmDd(DateTime date) {
   final month = date.month.toString().padLeft(2, '0');
   final day = date.day.toString().padLeft(2, '0');
   return '$year.$month.$day';
+}
+
+const String _kCommentProfileSvg =
+    'assets/images/story_comments/comment_profile.svg';
+
+const Color _kCommentNameColor = Color(0xFF4E4E4E);
+const Color _kCommentDateColor = Color(0xFFB3B3B3);
+const Color _kCommentBodyColor = Color(0xFF3B3733);
+const Color _kCommentActionColor = Color(0xFF4E4E4E);
+const Color _kCommentDividerColor = Color(0xFFE5E5E5);
+
+/// Horizontal inset matches screen edge; vertical is symmetric between dividers.
+const EdgeInsets _kCommentRowPadding =
+    EdgeInsets.symmetric(horizontal: 16, vertical: 16);
+
+Widget _commentDefaultProfileAvatar() {
+  return SvgPicture.asset(
+    _kCommentProfileSvg,
+    width: 36,
+    height: 36,
+  );
+}
+
+TextStyle? _commentActionButtonStyle(ThemeData theme) {
+  return theme.textTheme.bodySmall?.copyWith(
+    color: _kCommentActionColor,
+    fontWeight: FontWeight.w400,
+  );
 }
 
 class StoryDialog extends StatefulWidget {
@@ -359,14 +388,9 @@ class _StoryDialogState extends State<StoryDialog> {
     ThemeData theme,
   ) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: const CircleAvatar(
-            child: Icon(Icons.person),
-          ),
-        ),
+        _commentDefaultProfileAvatar(),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -379,7 +403,10 @@ class _StoryDialogState extends State<StoryDialog> {
                   Flexible(
                     child: Text(
                       '*차단한 댓글입니다',
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: _kCommentNameColor,
+                        fontWeight: FontWeight.w400,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -415,10 +442,8 @@ class _StoryDialogState extends State<StoryDialog> {
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      foregroundColor: const Color(0xFF4E4E4E),
-                      textStyle: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w400,
-                      ),
+                      foregroundColor: _kCommentActionColor,
+                      textStyle: _commentActionButtonStyle(theme),
                     ),
                     child: const Text('차단 해제'),
                   ),
@@ -1072,16 +1097,22 @@ class _StoryDialogState extends State<StoryDialog> {
                                 ),
                               ],
                             ),
-                            Divider(
+                            const Divider(
                               height: 1,
+                              thickness: 1,
+                              color: _kCommentDividerColor,
                             ),
-
-                            const SizedBox(height: 12),
-                            ListView.builder(
+                            ListView.separated(
                               shrinkWrap: true,
                               padding: EdgeInsets.zero,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: comments.length,
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: _kCommentDividerColor,
+                                  ),
                               itemBuilder: (context, index) {
                                 final commentWithUser = comments[index];
                                 final isBlockedComment = _blockedCommentIds
@@ -1090,12 +1121,7 @@ class _StoryDialogState extends State<StoryDialog> {
                                     );
                                 if (isBlockedComment) {
                                   return Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      16,
-                                      16,
-                                      16,
-                                      0,
-                                    ),
+                                    padding: _kCommentRowPadding,
                                     child: _buildBlockedCommentRow(
                                       context,
                                       commentWithUser.comment.id,
@@ -1108,26 +1134,12 @@ class _StoryDialogState extends State<StoryDialog> {
                                     commentWithUser.comment.commentBy.trim() ==
                                         userId!.trim();
                                 return Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    16,
-                                    16,
-                                    0,
-                                  ),
+                                  padding: _kCommentRowPadding,
                                   child: Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 4.0,
-                                        ),
-                                        child: const CircleAvatar(
-                                          child: Icon(
-                                            Icons.person,
-                                          ), // placeholder
-                                        ),
-                                      ),
+                                      _commentDefaultProfileAvatar(),
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Column(
@@ -1151,8 +1163,10 @@ class _StoryDialogState extends State<StoryDialog> {
                                                         .textTheme
                                                         .bodyMedium
                                                         ?.copyWith(
+                                                          color:
+                                                              _kCommentNameColor,
                                                           fontWeight:
-                                                              FontWeight.bold,
+                                                              FontWeight.w400,
                                                         ),
                                                     overflow:
                                                         TextOverflow.ellipsis,
@@ -1170,7 +1184,9 @@ class _StoryDialogState extends State<StoryDialog> {
                                                       .bodySmall
                                                       ?.copyWith(
                                                         color:
-                                                            cs.onSurfaceVariant,
+                                                            _kCommentDateColor,
+                                                        fontWeight:
+                                                            FontWeight.w400,
                                                       ),
                                                 ),
                                                 const Spacer(),
@@ -1198,15 +1214,10 @@ class _StoryDialogState extends State<StoryDialog> {
                                                           MaterialTapTargetSize
                                                               .shrinkWrap,
                                                       foregroundColor:
-                                                          const Color(
-                                                            0xFF4E4E4E,
-                                                          ),
-                                                      textStyle: theme
-                                                          .textTheme
-                                                          .bodySmall
-                                                          ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w400,
+                                                          _kCommentActionColor,
+                                                      textStyle:
+                                                          _commentActionButtonStyle(
+                                                            theme,
                                                           ),
                                                     ),
                                                     child: const Text('수정'),
@@ -1244,15 +1255,10 @@ class _StoryDialogState extends State<StoryDialog> {
                                                           MaterialTapTargetSize
                                                               .shrinkWrap,
                                                       foregroundColor:
-                                                          const Color(
-                                                            0xFF4E4E4E,
-                                                          ),
-                                                      textStyle: theme
-                                                          .textTheme
-                                                          .bodySmall
-                                                          ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w400,
+                                                          _kCommentActionColor,
+                                                      textStyle:
+                                                          _commentActionButtonStyle(
+                                                            theme,
                                                           ),
                                                     ),
                                                     child: const Text('삭제'),
@@ -1309,15 +1315,10 @@ class _StoryDialogState extends State<StoryDialog> {
                                                           MaterialTapTargetSize
                                                               .shrinkWrap,
                                                       foregroundColor:
-                                                          const Color(
-                                                            0xFF4E4E4E,
-                                                          ),
-                                                      textStyle: theme
-                                                          .textTheme
-                                                          .bodySmall
-                                                          ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w400,
+                                                          _kCommentActionColor,
+                                                      textStyle:
+                                                          _commentActionButtonStyle(
+                                                            theme,
                                                           ),
                                                     ),
                                                     child: const Text('차단'),
@@ -1365,15 +1366,10 @@ class _StoryDialogState extends State<StoryDialog> {
                                                           MaterialTapTargetSize
                                                               .shrinkWrap,
                                                       foregroundColor:
-                                                          const Color(
-                                                            0xFF4E4E4E,
-                                                          ),
-                                                      textStyle: theme
-                                                          .textTheme
-                                                          .bodySmall
-                                                          ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w400,
+                                                          _kCommentActionColor,
+                                                      textStyle:
+                                                          _commentActionButtonStyle(
+                                                            theme,
                                                           ),
                                                     ),
                                                     child: const Text('신고'),
@@ -1395,7 +1391,13 @@ class _StoryDialogState extends State<StoryDialog> {
                                                     maxLines: null,
                                                     style: theme
                                                         .textTheme
-                                                        .bodyMedium,
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          color:
+                                                              _kCommentBodyColor,
+                                                          fontWeight:
+                                                              FontWeight.w300,
+                                                        ),
                                                     decoration: const InputDecoration(
                                                       isDense: true,
                                                       contentPadding:
@@ -1420,6 +1422,14 @@ class _StoryDialogState extends State<StoryDialog> {
                                                                 .clear();
                                                           });
                                                         },
+                                                        style: TextButton.styleFrom(
+                                                          foregroundColor:
+                                                              _kCommentActionColor,
+                                                          textStyle:
+                                                              _commentActionButtonStyle(
+                                                                theme,
+                                                              ),
+                                                        ),
                                                         child: const Text('취소'),
                                                       ),
                                                       const SizedBox(width: 8),
@@ -1462,6 +1472,14 @@ class _StoryDialogState extends State<StoryDialog> {
                                                                 null;
                                                           });
                                                         },
+                                                        style: TextButton.styleFrom(
+                                                          foregroundColor:
+                                                              _kCommentActionColor,
+                                                          textStyle:
+                                                              _commentActionButtonStyle(
+                                                                theme,
+                                                              ),
+                                                        ),
                                                         child: const Text('저장'),
                                                       ),
                                                     ],
@@ -1474,8 +1492,14 @@ class _StoryDialogState extends State<StoryDialog> {
                                                         .comment
                                                         .comment ??
                                                     '',
-                                                style:
-                                                    theme.textTheme.bodyMedium,
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: _kCommentBodyColor,
+                                                      fontWeight:
+                                                          FontWeight.w300,
+                                                    ),
                                               ),
                                           ],
                                         ),
@@ -1485,12 +1509,15 @@ class _StoryDialogState extends State<StoryDialog> {
                                 );
                               },
                             ),
+                            if (comments.isNotEmpty)
+                              const Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: _kCommentDividerColor,
+                              ),
                             if (userId == null)
                               const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 24,
-                                ),
+                                padding: _kCommentRowPadding,
                                 child: Text(
                                   'Login to comment',
                                   style: TextStyle(color: Colors.grey),
@@ -1498,25 +1525,11 @@ class _StoryDialogState extends State<StoryDialog> {
                               )
                             else
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  16,
-                                  16,
-                                  0,
-                                ),
+                                padding: _kCommentRowPadding,
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 4.0,
-                                      ),
-                                      child: const CircleAvatar(
-                                        child: Icon(
-                                          Icons.person,
-                                        ), // placeholder
-                                      ),
-                                    ),
+                                    _commentDefaultProfileAvatar(),
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
@@ -1529,13 +1542,19 @@ class _StoryDialogState extends State<StoryDialog> {
                                                 .displayName,
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
+                                                  color: _kCommentNameColor,
+                                                  fontWeight: FontWeight.w400,
                                                 ),
                                           ),
                                           SizedBox(height: 4),
                                           TextField(
                                             controller: _commentController,
                                             focusNode: _commentFocusNode,
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: _kCommentBodyColor,
+                                                  fontWeight: FontWeight.w300,
+                                                ),
                                             decoration: const InputDecoration(
                                               hintText: 'Add a comment',
                                               border: OutlineInputBorder(),

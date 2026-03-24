@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Background color for policy-style pages (terms, privacy); app bar matches.
 const kPolicyPageBackground = Color(0xFFF3F1EF);
+const kPolicyAppBarBackground = Color(0xFFFAF8F6);
 
 class GreenSquareInfoPage extends StatelessWidget {
   const GreenSquareInfoPage({
@@ -51,15 +52,27 @@ class GreenSquareInfoPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: appbarBackgroundColor ?? backgroundColor,
-        foregroundColor: useLightStyle ? Colors.black87 : null,
+        backgroundColor:
+            appbarBackgroundColor ??
+            (useLightStyle ? kPolicyAppBarBackground : backgroundColor),
+        foregroundColor: useLightStyle ? Colors.black : null,
+        leading: useLightStyle
+            ? IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 18,
+                  color: Colors.black,
+                ),
+                onPressed: () => Navigator.of(context).maybePop(),
+              )
+            : null,
         title: Text(
           title,
           style: (useLightStyle ? textTheme : theme.textTheme).titleLarge
               ?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 fontFamily: 'Noto Sans KR',
-                color: useLightStyle ? Colors.black87 : null,
+                color: useLightStyle ? Colors.black : null,
               ),
         ),
       ),

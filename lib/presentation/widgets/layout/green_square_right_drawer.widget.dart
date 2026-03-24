@@ -18,7 +18,6 @@ class GreenSquareRightDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     const bottomTextColor = Color(0xFF878583);
     const horizontalPadding = 24.0;
     const separatorColor = Color(0xFF000000);
@@ -28,23 +27,13 @@ class GreenSquareRightDrawer extends StatelessWidget {
 
     return Drawer(
       elevation: 16,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: SafeArea(
         left: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: cs.onSurfaceVariant,
-                ),
-                onPressed: () {
-                  Navigator.of(context).maybePop();
-                },
-              ),
-            ),
             Expanded(
               child: ListView(
                 children: [
@@ -173,159 +162,143 @@ class GreenSquareRightDrawer extends StatelessWidget {
                       );
                     },
                   ),
-
-                  // Bottom section — scrolls with the list
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      24,
-                      horizontalPadding,
-                      20,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Terms row — centered
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                horizontalPadding,
+                24,
+                horizontalPadding,
+                20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          await Navigator.of(context).maybePop();
+                          if (!context.mounted) return;
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const GreenSquareTermsScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          '스퀘어 이용 약관',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: bottomTextColor,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          '|',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: bottomTextColor,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          await Navigator.of(context).maybePop();
+                          if (!context.mounted) return;
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  const GreenSquarePrivacyPolicyScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          '개인정보 처리 방침',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: bottomTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () async {
+                          await Navigator.of(context).maybePop();
+                          if (!context.mounted) return;
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const GreenSquareSettingsScreen(),
+                            ),
+                          );
+                        },
+                        child: Row(
                           children: [
-                            GestureDetector(
-                              onTap: () async {
-                                await Navigator.of(context).maybePop();
-                                if (!context.mounted) return;
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        const GreenSquareTermsScreen(),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                '스퀘어 이용 약관',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: bottomTextColor,
-                                ),
-                              ),
+                            Icon(
+                              Icons.settings_outlined,
+                              size: 18,
+                              color: bottomTextColor,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: Text(
-                                '|',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: bottomTextColor,
-                                ),
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                await Navigator.of(context).maybePop();
-                                if (!context.mounted) return;
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        const GreenSquarePrivacyPolicyScreen(),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                '개인정보 처리 방침',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: bottomTextColor,
-                                ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '설정',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: bottomTextColor,
                               ),
                             ),
                           ],
                         ),
-
-                        const SizedBox(height: 20),
-
-                        // Settings and Logout row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Settings
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () async {
-                                await Navigator.of(context).maybePop();
-                                if (!context.mounted) return;
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        const GreenSquareSettingsScreen(),
+                      ),
+                      if (isLoggedIn)
+                        GestureDetector(
+                          onTap: () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            final navigator = Navigator.of(context);
+                            try {
+                              await UserAuthService.instance.signOut();
+                              if (!context.mounted) return;
+                              navigator.pop();
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('로그아웃되었습니다.'),
+                                ),
+                              );
+                            } catch (_) {
+                              if (!context.mounted) return;
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    '로그아웃에 실패했습니다. 다시 시도해주세요.',
                                   ),
-                                );
-                              },
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.settings_outlined,
-                                    size: 18,
-                                    color: bottomTextColor,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '설정',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: bottomTextColor,
-                                    ),
-                                  ),
-                                ],
+                                ),
+                              );
+                            }
+                          },
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.logout,
+                                size: 18,
+                                color: bottomTextColor,
                               ),
-                            ),
-
-                            // Logout
-                            if (isLoggedIn)
-                              GestureDetector(
-                                onTap: () async {
-                                  final messenger = ScaffoldMessenger.of(
-                                    context,
-                                  );
-                                  final navigator = Navigator.of(context);
-                                  try {
-                                    await UserAuthService.instance.signOut();
-                                    if (!context.mounted) return;
-                                    navigator.pop();
-                                    messenger.showSnackBar(
-                                      const SnackBar(
-                                        content: Text('로그아웃되었습니다.'),
-                                      ),
-                                    );
-                                  } catch (_) {
-                                    if (!context.mounted) return;
-                                    messenger.showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          '로그아웃에 실패했습니다. 다시 시도해주세요.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.logout,
-                                      size: 18,
-                                      color: bottomTextColor,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      '로그아웃',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: bottomTextColor,
-                                          ),
-                                    ),
-                                  ],
+                              const SizedBox(width: 6),
+                              Text(
+                                '로그아웃',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: bottomTextColor,
                                 ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 ],
               ),

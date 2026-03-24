@@ -178,10 +178,11 @@ class _GreenSquareSettingsScreenState extends State<GreenSquareSettingsScreen> {
                     Text(
                       message.title,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontFamily: 'Noto Sans KR',
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                         color: Colors.black,
+                        height: 1.3,
                       ),
                     ),
                     const SizedBox(height: 10),

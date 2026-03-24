@@ -18,6 +18,7 @@ class AccountLoggedInContent extends StatelessWidget {
     required this.userName,
     required this.showProfileChange,
     required this.activeProfileCount,
+    required this.accountRankLevel,
     required this.totalMileage,
     required this.activeMissions,
     required this.participations,
@@ -44,6 +45,7 @@ class AccountLoggedInContent extends StatelessWidget {
   final String userName;
   final bool showProfileChange;
   final int activeProfileCount;
+  final int accountRankLevel;
   final double totalMileage;
   final List<ActiveMission> activeMissions;
   final List<Participation> participations;
@@ -334,7 +336,7 @@ class AccountLoggedInContent extends StatelessWidget {
                       );
                     },
                     child: Text(
-                      'Level 1',
+                      'Level $accountRankLevel',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: cs.primary,
                         fontWeight: FontWeight.bold,

@@ -1,7 +1,9 @@
+import 'package:esg_mobile/core/navigation/green_square_drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:esg_mobile/presentation/screens/auth/signup_terms.screen.dart';
+import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 
 /// Step 1 of Green Square sign-up: choose membership type (general vs company).
@@ -15,6 +17,7 @@ class SignupTypeScreen extends StatefulWidget {
 }
 
 class _SignupTypeScreenState extends State<SignupTypeScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   String? _selectedType; // 'general' | 'company'
 
   @override
@@ -26,22 +29,32 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
     const disabledFg = Color(0xFF9A9A9A);
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: theme.colorScheme.surfaceContainerLow,
+      endDrawer: GreenSquareRightDrawer(
+        onSelect: (destination) =>
+            navigateFromGreenSquareDrawer(context, destination),
+      ),
       body: CustomScrollView(
         slivers: [
           CodeGreenTopHeader(
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                }
+              },
+            ),
             actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  }
-                },
+                icon: const Icon(Icons.menu, color: Colors.white),
+                tooltip: '메뉴',
+                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
               ),
             ],
           ),

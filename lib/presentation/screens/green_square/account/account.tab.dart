@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:esg_mobile/core/enums/device.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
+import 'package:esg_mobile/core/services/database/rank_management.service.dart';
 import 'package:esg_mobile/core/services/profile.service.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/stamp.dart';
@@ -50,6 +51,7 @@ class _AccountTabState extends State<AccountTab> {
   String? departmentName;
   int activeProfileCount = 0;
   bool allowMultipleProfiles = false;
+  int accountRankLevel = 1;
 
   @override
   void initState() {
@@ -150,6 +152,7 @@ class _AccountTabState extends State<AccountTab> {
         isEmployee = null;
         departmentName = null;
         activeProfileCount = 0;
+        accountRankLevel = 1;
         isSummaryLoading = false;
         isActiveMissionsLoading = false;
         isParticipationsLoading = false;
@@ -319,6 +322,20 @@ class _AccountTabState extends State<AccountTab> {
       }
     }
 
+    Future<void> fetchRankLevel() async {
+      try {
+        final snap = await RankManagementService.instance.fetchSnapshot(
+          userId: user.id,
+          isMainProfile: isMainProfile,
+          selectedProfileId: selectedProfileId,
+        );
+        if (!mounted) return;
+        setState(() => accountRankLevel = snap.currentLevel);
+      } catch (error) {
+        debugPrint('Error fetching rank level: $error');
+      }
+    }
+
     Future<void> fetchParticipations() async {
       try {
         final participationsQuery = client
@@ -395,7 +412,11 @@ class _AccountTabState extends State<AccountTab> {
       }
     }
 
-    await Future.wait([fetchActiveMissions(), fetchParticipations()]);
+    await Future.wait([
+      fetchActiveMissions(),
+      fetchParticipations(),
+      fetchRankLevel(),
+    ]);
   }
 
   void _handleParticipationSubmitted() {
@@ -680,6 +701,7 @@ class _AccountTabState extends State<AccountTab> {
               UserAuthService.instance.userRow?.allowMultipleProfiles ??
               allowMultipleProfiles,
           activeProfileCount: activeProfileCount,
+          accountRankLevel: accountRankLevel,
           totalMileage: totalMileage,
           activeMissions: activeMissions,
           participations: participations,

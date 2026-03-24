@@ -1,6 +1,8 @@
+import 'package:esg_mobile/core/navigation/green_square_drawer_navigation.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_form.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_guardian_form.screen.dart';
 import 'package:esg_mobile/presentation/screens/green_square/info/privacy_policy.screen.dart';
+import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,7 @@ class SignupMinorTermsScreen extends StatefulWidget {
 }
 
 class _SignupMinorTermsScreenState extends State<SignupMinorTermsScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _agreeAll = false;
   bool _agreeChildPrivacy = false;
   bool _agreePrivacy = false;
@@ -63,20 +66,30 @@ class _SignupMinorTermsScreenState extends State<SignupMinorTermsScreen> {
     final onPrimary = theme.colorScheme.onPrimary;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: theme.colorScheme.surfaceContainerLow,
+      endDrawer: GreenSquareRightDrawer(
+        onSelect: (destination) =>
+            navigateFromGreenSquareDrawer(context, destination),
+      ),
       body: CustomScrollView(
         slivers: [
           CodeGreenTopHeader(
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              onPressed: () {
+                if (context.canPop()) context.pop();
+              },
+            ),
             actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                onPressed: () {
-                  if (context.canPop()) context.pop();
-                },
+                icon: const Icon(Icons.menu, color: Colors.white),
+                tooltip: '메뉴',
+                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
               ),
             ],
           ),

@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:esg_mobile/core/navigation/green_square_drawer_navigation.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_minor_terms.screen.dart';
 import 'package:esg_mobile/presentation/screens/main.screen.dart';
+import 'package:esg_mobile/presentation/widgets/layout/green_square_right_drawer.widget.dart';
 import 'package:esg_mobile/presentation/widgets/layout/top_header.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +42,7 @@ class SignupFormScreen extends StatefulWidget {
 }
 
 class _SignupFormScreenState extends State<SignupFormScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -359,22 +362,32 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
     const disabledFg = Color(0xFF9A9A9A);
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: theme.colorScheme.surfaceContainerLow,
+      endDrawer: GreenSquareRightDrawer(
+        onSelect: (destination) =>
+            navigateFromGreenSquareDrawer(context, destination),
+      ),
       body: CustomScrollView(
         slivers: [
           CodeGreenTopHeader(
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                }
+              },
+            ),
             actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  }
-                },
+                icon: const Icon(Icons.menu, color: Colors.white),
+                tooltip: '메뉴',
+                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
               ),
             ],
           ),

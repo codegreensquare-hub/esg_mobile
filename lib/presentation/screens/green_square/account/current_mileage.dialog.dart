@@ -1,5 +1,10 @@
 import 'package:esg_mobile/core/enums/device.dart';
+import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/services/database/rank_management.service.dart';
+import 'package:esg_mobile/core/services/profile.service.dart';
+import 'package:esg_mobile/data/entities/rank_management.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 enum _MileageDialogState { main, earningHistory, usedMileage }
 
@@ -23,10 +28,136 @@ class CurrentMileageDialog extends StatefulWidget {
 
 class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
   _MileageDialogState _state = _MileageDialogState.main;
+  bool _historyLoading = false;
+  String? _historyError;
+  List<RankMileageHistoryEntry> _earningEntries = [];
+  List<RankMileageHistoryEntry> _usedEntries = [];
+  late DateTime _historyMonth;
+  String? _userId;
+  bool _isMainProfile = true;
+  String? _selectedProfileId;
+  final _monthTitleFormat = DateFormat('yyyy.MM.dd');
+  final _numberFormat = NumberFormat.decimalPattern('ko');
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _historyMonth = DateTime(now.year, now.month, 1);
+    _initUserContext();
+  }
+
+  Future<void> _initUserContext() async {
+    final user = UserAuthService.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await ProfileService.instance.refresh();
+      final allowMultiple =
+          UserAuthService.instance.userRow?.allowMultipleProfiles ?? false;
+      if (!allowMultiple) {
+        await ProfileService.instance.selectMainProfile();
+      }
+
+      final selectedProfileId = allowMultiple
+          ? ProfileService.instance.selectedProfileId
+          : null;
+      final isMainProfile =
+          !allowMultiple ||
+          ProfileService.instance.isMainProfileSelected ||
+          selectedProfileId == null;
+
+      if (!mounted) return;
+      setState(() {
+        _userId = user.id;
+        _isMainProfile = isMainProfile;
+        _selectedProfileId = selectedProfileId;
+      });
+    } catch (e, st) {
+      debugPrint('CurrentMileageDialog init context error: $e\n$st');
+    }
+  }
 
   void _goBack() {
     setState(() => _state = _MileageDialogState.main);
   }
+
+  Future<void> _openEarningHistory() async {
+    setState(() => _state = _MileageDialogState.earningHistory);
+    await _loadHistory();
+  }
+
+  Future<void> _openUsedMileage() async {
+    setState(() => _state = _MileageDialogState.usedMileage);
+    await _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    if (_userId == null) {
+      await _initUserContext();
+    }
+    final userId = _userId ?? UserAuthService.instance.currentUser?.id;
+    if (userId == null) {
+      setState(() {
+        _historyError = '로그인이 필요합니다.';
+      });
+      return;
+    }
+
+    setState(() {
+      _historyLoading = true;
+      _historyError = null;
+    });
+
+    try {
+      if (_state == _MileageDialogState.earningHistory) {
+        final list = await RankManagementService.instance.fetchEarningHistoryForMonth(
+          userId: userId,
+          isMainProfile: _isMainProfile,
+          selectedProfileId: _selectedProfileId,
+          month: _historyMonth,
+        );
+        if (!mounted) return;
+        setState(() {
+          _earningEntries = list;
+          _historyLoading = false;
+        });
+      } else if (_state == _MileageDialogState.usedMileage) {
+        final list = await RankManagementService.instance.fetchUsedMileageForMonth(
+          userId: userId,
+          isMainProfile: _isMainProfile,
+          selectedProfileId: _selectedProfileId,
+          month: _historyMonth,
+        );
+        if (!mounted) return;
+        setState(() {
+          _usedEntries = list;
+          _historyLoading = false;
+        });
+      } else {
+        if (!mounted) return;
+        setState(() => _historyLoading = false);
+      }
+    } catch (e, st) {
+      debugPrint('CurrentMileageDialog history error: $e\n$st');
+      if (!mounted) return;
+      setState(() {
+        _historyLoading = false;
+        _historyError = '내역을 불러오지 못했습니다.';
+      });
+    }
+  }
+
+  String _monthRangeLabel() {
+    final start = DateTime(_historyMonth.year, _historyMonth.month, 1);
+    final end = DateTime(_historyMonth.year, _historyMonth.month + 1, 0);
+    return '${_monthTitleFormat.format(start)} ~ ${_monthTitleFormat.format(end)}';
+  }
+
+  int _earningMonthTotal() =>
+      _earningEntries.fold(0, (sum, item) => sum + item.points);
+
+  int _usedMonthTotal() => _usedEntries.fold(0, (sum, item) => sum + item.points);
 
   @override
   Widget build(BuildContext context) {
@@ -165,12 +296,26 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
     ColorScheme cs,
     TextTheme textTheme,
   ) {
+    if (_historyLoading) {
+      return const Center(child: CircularProgressIndicator.adaptive());
+    }
+    if (_historyError != null) {
+      return Center(
+        child: Text(
+          _historyError!,
+          style: textTheme.bodyMedium?.copyWith(color: cs.error),
+        ),
+      );
+    }
+
+    final monthTotal = _numberFormat.format(_earningMonthTotal());
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Center(
           child: Text(
-            '2026.01.01 ~ 2026.01.31',
+            _monthRangeLabel(),
             style: textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -188,7 +333,7 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
               children: [
                 const TextSpan(text: '한 달 동안 '),
                 TextSpan(
-                  text: '1,600',
+                  text: monthTotal,
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -201,19 +346,29 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
         ),
         const SizedBox(height: 16),
         Flexible(
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: 4,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) => _EarningEntryCard(
-              date: '2026.01.13',
-              action: '텀블러 사용하기',
-              category: '미션',
-              points: '30점',
-              textTheme: textTheme,
-              colorScheme: cs,
-            ),
-          ),
+          child: _earningEntries.isEmpty
+              ? Center(
+                  child: Text(
+                    '적립 내역이 없습니다.',
+                    style: textTheme.bodyMedium?.copyWith(color: _grayLink),
+                  ),
+                )
+              : ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _earningEntries.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final entry = _earningEntries[index];
+                    return _EarningEntryCard(
+                      date: _monthTitleFormat.format(entry.date),
+                      action: entry.title,
+                      category: entry.category,
+                      points: '${_numberFormat.format(entry.points)}점',
+                      textTheme: textTheme,
+                      colorScheme: cs,
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -225,12 +380,26 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
     ColorScheme cs,
     TextTheme textTheme,
   ) {
+    if (_historyLoading) {
+      return const Center(child: CircularProgressIndicator.adaptive());
+    }
+    if (_historyError != null) {
+      return Center(
+        child: Text(
+          _historyError!,
+          style: textTheme.bodyMedium?.copyWith(color: cs.error),
+        ),
+      );
+    }
+
+    final monthTotal = _numberFormat.format(_usedMonthTotal());
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Center(
           child: Text(
-            '2026.01.01 ~ 2026.01.31',
+            _monthRangeLabel(),
             style: textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -248,7 +417,7 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
               children: [
                 const TextSpan(text: '한 달 동안 '),
                 TextSpan(
-                  text: '60',
+                  text: monthTotal,
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -261,19 +430,29 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
         ),
         const SizedBox(height: 16),
         Flexible(
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: 2,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) => _UsedMileageEntryCard(
-              date: '2026.01.13',
-              item: '텀블러 구매',
-              category: '쇼핑몰',
-              points: '30점',
-              textTheme: textTheme,
-              colorScheme: cs,
-            ),
-          ),
+          child: _usedEntries.isEmpty
+              ? Center(
+                  child: Text(
+                    '사용한 마일리지가 없습니다.',
+                    style: textTheme.bodyMedium?.copyWith(color: _grayLink),
+                  ),
+                )
+              : ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _usedEntries.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final entry = _usedEntries[index];
+                    return _UsedMileageEntryCard(
+                      date: _monthTitleFormat.format(entry.date),
+                      item: entry.title,
+                      category: entry.category,
+                      points: '${_numberFormat.format(entry.points)}점',
+                      textTheme: textTheme,
+                      colorScheme: cs,
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -284,7 +463,7 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
       children: [
         Expanded(
           child: InkWell(
-            onTap: () => setState(() => _state = _MileageDialogState.earningHistory),
+            onTap: _openEarningHistory,
             child: Text(
               '적립 내역 확인하기',
               style: textTheme.bodyMedium?.copyWith(
@@ -298,7 +477,7 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
         ),
         Expanded(
           child: InkWell(
-            onTap: () => setState(() => _state = _MileageDialogState.usedMileage),
+            onTap: _openUsedMileage,
             child: Text(
               '사용한 마일리지 확인하기',
               style: textTheme.bodyMedium?.copyWith(
