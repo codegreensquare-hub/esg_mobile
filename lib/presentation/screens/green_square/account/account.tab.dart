@@ -255,18 +255,24 @@ class _AccountTabState extends State<AccountTab> {
     }
 
     final now = DateTime.now().toIso8601String().split('T')[0];
+    final userCompanyId = userRow?['company'] as String?;
 
     Future<void> fetchActiveMissions() async {
       try {
-        final missionResponse = await client
+        final missionQuery = client
             .from('mission')
             .select(
               'id, title, award_points, stamp(bucket, folder_path, file_name)',
             )
             .eq('is_published', true)
-            .eq('publicity', 'public')
             .lte('start_active_date', now)
-            .gte('last_active_date', now)
+            .gte('last_active_date', now);
+
+        final missionResponse = await (userCompanyId != null
+                ? missionQuery.or(
+                    'publicity.eq.public,and(publicity.eq.all_staff,company_id.eq.$userCompanyId)',
+                  )
+                : missionQuery.eq('publicity', 'public'))
             .order('order');
 
         final missionIds = missionResponse

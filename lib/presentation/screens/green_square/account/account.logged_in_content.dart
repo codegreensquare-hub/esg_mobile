@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/participation.dart';
 
-class AccountLoggedInContent extends StatelessWidget {
+class AccountLoggedInContent extends StatefulWidget {
   const AccountLoggedInContent({
     super.key,
     required this.userName,
@@ -69,6 +69,47 @@ class AccountLoggedInContent extends StatelessWidget {
   final VoidCallback onRemoveDepartment;
   final VoidCallback onViewBenefitsByLevel;
   final VoidCallback onProfileChange;
+
+  @override
+  State<AccountLoggedInContent> createState() =>
+      _AccountLoggedInContentState();
+}
+
+class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(AccountLoggedInContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // After new participations load, check if we're still near the bottom
+    if (oldWidget.isParticipationsLoading && !widget.isParticipationsLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 200 &&
+        widget.hasMoreParticipations &&
+        !widget.isParticipationsLoading &&
+        widget.participations.isNotEmpty) {
+      widget.onLoadMoreParticipations();
+    }
+  }
 
   // Old dialog
   // void _showRelationshipDialog(BuildContext context) {
@@ -256,11 +297,11 @@ class AccountLoggedInContent extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => UserInfoScreen(
-          userName: userName,
-          affiliationName: companyName,
-          activeProfileCount: activeProfileCount,
-          upperDepartmentName: departmentName,
-          lowerDepartmentName: departmentName,
+          userName: widget.userName,
+          affiliationName: widget.companyName,
+          activeProfileCount: widget.activeProfileCount,
+          upperDepartmentName: widget.departmentName,
+          lowerDepartmentName: widget.departmentName,
         ),
       ),
     );
@@ -270,25 +311,14 @@ class AccountLoggedInContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final mileageText = totalMileage == totalMileage.roundToDouble()
-        ? NumberFormat.decimalPattern().format(totalMileage.toInt())
-        : NumberFormat('#,##0.0').format(totalMileage);
+    final mileageText = widget.totalMileage == widget.totalMileage.roundToDouble()
+        ? NumberFormat.decimalPattern().format(widget.totalMileage.toInt())
+        : NumberFormat('#,##0.0').format(widget.totalMileage);
 
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollEndNotification &&
-            notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200 &&
-            hasMoreParticipations &&
-            !isParticipationsLoading &&
-            participations.isNotEmpty) {
-          onLoadMoreParticipations();
-        }
-        return false;
-      },
-      child: SingleChildScrollView(
+    return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.all(24),
       child: Center(
         child: Container(
@@ -308,7 +338,7 @@ class AccountLoggedInContent extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                             child: Text(
-                              userName,
+                              widget.userName,
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -316,9 +346,9 @@ class AccountLoggedInContent extends StatelessWidget {
                           ),
                         ),
 
-                        if (showProfileChange)
+                        if (widget.showProfileChange)
                           InkWell(
-                            onTap: onProfileChange,
+                            onTap: widget.onProfileChange,
                             child: Text(
                               '프로필 변경',
                               style: theme.textTheme.titleMedium?.copyWith(
@@ -333,7 +363,7 @@ class AccountLoggedInContent extends StatelessWidget {
                     ),
                   ),
                   TextButton.icon(
-                    onPressed: onManageShipping,
+                    onPressed: widget.onManageShipping,
 
                     icon: const Icon(Icons.location_on_outlined),
                     label: const Text('배송지 관리'),
@@ -359,7 +389,7 @@ class AccountLoggedInContent extends StatelessWidget {
                   ),
                   const Spacer(),
                   TextButton(
-                    onPressed: onViewBenefitsByLevel,
+                    onPressed: widget.onViewBenefitsByLevel,
                     child: const Text('레벨별 혜택 보기'),
                   ),
                 ],
@@ -476,28 +506,28 @@ class AccountLoggedInContent extends StatelessWidget {
                           child: _ActionButton(
                             icon: Icons.local_shipping_outlined,
                             label: '주문배송조회',
-                            onTap: onOrderLookup,
+                            onTap: widget.onOrderLookup,
                           ),
                         ),
                         Expanded(
                           child: _ActionButton(
                             icon: Icons.favorite_outline,
                             label: '찜한 상품',
-                            onTap: onWishlist,
+                            onTap: widget.onWishlist,
                           ),
                         ),
                         Expanded(
                           child: _ActionButton(
                             icon: Icons.comment_outlined,
                             label: '내가 쓴 댓글',
-                            onTap: onMyComments,
+                            onTap: widget.onMyComments,
                           ),
                         ),
                         Expanded(
                           child: _ActionButton(
                             icon: Icons.thumb_up_outlined,
                             label: '좋아요 한 글',
-                            onTap: onLikedStories,
+                            onTap: widget.onLikedStories,
                           ),
                         ),
                       ],
@@ -506,7 +536,7 @@ class AccountLoggedInContent extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: InkWell(
-                        onTap: onBlockedReportHistory,
+                        onTap: widget.onBlockedReportHistory,
                         borderRadius: BorderRadius.circular(4),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -536,13 +566,13 @@ class AccountLoggedInContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              if (isActiveMissionsLoading && activeMissions.isEmpty)
+              if (widget.isActiveMissionsLoading && widget.activeMissions.isEmpty)
                 const Center(child: CircularProgressIndicator.adaptive())
               else
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (activeMissions.isEmpty)
+                    if (widget.activeMissions.isEmpty)
                       const Center(child: Text('현재 진행 중인 미션이 없습니다.'))
                     else
                       GridView.count(
@@ -553,7 +583,7 @@ class AccountLoggedInContent extends StatelessWidget {
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
                         childAspectRatio: 4 / 3,
-                        children: activeMissions.map((mission) {
+                        children: widget.activeMissions.map((mission) {
                           return Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -626,22 +656,22 @@ class AccountLoggedInContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              if (isParticipationsLoading && participations.isEmpty)
+              if (widget.isParticipationsLoading && widget.participations.isEmpty)
                 const Center(child: CircularProgressIndicator.adaptive())
               else
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (participations.isEmpty)
+                    if (widget.participations.isEmpty)
                       const Center(child: Text('참여 기록이 없습니다.'))
                     else
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.zero,
-                        itemCount: participations.length,
+                        itemCount: widget.participations.length,
                         itemBuilder: (context, index) {
-                          final participation = participations[index];
+                          final participation = widget.participations[index];
                           final rejectionReason = participation.rejectionReason;
 
                           return Container(
@@ -774,7 +804,7 @@ class AccountLoggedInContent extends StatelessWidget {
                       ),
                   ],
                 ),
-              if (hasMoreParticipations && participations.isNotEmpty)
+              if (widget.hasMoreParticipations && widget.participations.isNotEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
                   child: Center(child: CircularProgressIndicator.adaptive()),
@@ -783,7 +813,6 @@ class AccountLoggedInContent extends StatelessWidget {
           ),
         ),
       ),
-    ),
     );
   }
 }
