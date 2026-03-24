@@ -73,8 +73,7 @@ class AccountLoggedInContent extends StatefulWidget {
   final VoidCallback onProfileChange;
 
   @override
-  State<AccountLoggedInContent> createState() =>
-      _AccountLoggedInContentState();
+  State<AccountLoggedInContent> createState() => _AccountLoggedInContentState();
 }
 
 class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
@@ -313,7 +312,8 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final mileageText = widget.totalMileage == widget.totalMileage.roundToDouble()
+    final mileageText =
+        widget.totalMileage == widget.totalMileage.roundToDouble()
         ? NumberFormat.decimalPattern().format(widget.totalMileage.toInt())
         : NumberFormat('#,##0.0').format(widget.totalMileage);
 
@@ -382,7 +382,7 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                       );
                     },
                     child: Text(
-                      'Level $accountRankLevel',
+                      'Level ${widget.accountRankLevel}',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: cs.primary,
                         fontWeight: FontWeight.bold,
@@ -568,7 +568,8 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (widget.isActiveMissionsLoading && widget.activeMissions.isEmpty)
+              if (widget.isActiveMissionsLoading &&
+                  widget.activeMissions.isEmpty)
                 const Center(child: CircularProgressIndicator.adaptive())
               else
                 Column(
@@ -658,7 +659,8 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (widget.isParticipationsLoading && widget.participations.isEmpty)
+              if (widget.isParticipationsLoading &&
+                  widget.participations.isEmpty)
                 const Center(child: CircularProgressIndicator.adaptive())
               else
                 Column(
@@ -806,7 +808,8 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                       ),
                   ],
                 ),
-              if (widget.hasMoreParticipations && widget.participations.isNotEmpty)
+              if (widget.hasMoreParticipations &&
+                  widget.participations.isNotEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
                   child: Center(child: CircularProgressIndicator.adaptive()),
