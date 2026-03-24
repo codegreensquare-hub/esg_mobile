@@ -88,6 +88,8 @@ class _MainScreenState extends State<MainScreen> {
   String? _productIdToOpen;
   String? _storyIdToOpen;
   String? _missionIdToOpen;
+  String? _selectedStoryFilterTag;
+  int _selectedStoryFilterRequestId = 0;
   int _codeGreenLastNonProductTabIndex = 0;
 
   String? _selectedLookbookId;
@@ -617,7 +619,7 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Navigator.of(context)
-          .push(
+          .push<String>(
             MaterialPageRoute(
               fullscreenDialog: true,
               builder: (context) => StoryDialog(
@@ -626,7 +628,13 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           )
-          .then((_) {
+          .then((selectedTag) {
+            if (mounted && selectedTag != null) {
+              setState(() {
+                _selectedStoryFilterTag = selectedTag;
+                _selectedStoryFilterRequestId += 1;
+              });
+            }
             if (mounted) {
               _updateUrl(MainTab.greenSquare);
             }
@@ -1081,7 +1089,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildGreenSquareContent(int index) {
     switch (index) {
       case 0:
-        return StoryTab(onTapStory: _openGreenSquareStory);
+        return StoryTab(
+          onTapStory: _openGreenSquareStory,
+          selectedFilterTag: _selectedStoryFilterTag,
+          selectedFilterRequestId: _selectedStoryFilterRequestId,
+        );
       case 1:
         return ShoppingMallTab(
           onBadgeUpdate: _updateBadgeCounts,

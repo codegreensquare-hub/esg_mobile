@@ -4,9 +4,16 @@ import 'package:esg_mobile/presentation/widgets/green_square/green_square_statis
 import 'package:flutter/material.dart';
 
 class StoryTab extends StatefulWidget {
-  const StoryTab({super.key, this.onTapStory});
+  const StoryTab({
+    super.key,
+    this.onTapStory,
+    this.selectedFilterTag,
+    this.selectedFilterRequestId = 0,
+  });
 
   final void Function(StoryWithTags)? onTapStory;
+  final String? selectedFilterTag;
+  final int selectedFilterRequestId;
 
   @override
   State<StoryTab> createState() => _StoryTabState();
@@ -14,6 +21,7 @@ class StoryTab extends StatefulWidget {
 
 class _StoryTabState extends State<StoryTab> {
   final ScrollController _scrollController = ScrollController();
+  bool _isFiltered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +30,19 @@ class _StoryTabState extends State<StoryTab> {
       physics: const ClampingScrollPhysics(),
       child: Column(
         children: [
-          const GreenSquareStatisticsBanner(),
+          if (!_isFiltered) const GreenSquareStatisticsBanner(),
           // Main Content
           StoriesSection(
             scrollController: _scrollController,
             onTapStory: widget.onTapStory,
+            selectedFilterTag: widget.selectedFilterTag,
+            selectedFilterRequestId: widget.selectedFilterRequestId,
+            onFilterStateChanged: (isFiltered) {
+              if (_isFiltered == isFiltered) return;
+              setState(() {
+                _isFiltered = isFiltered;
+              });
+            },
           ),
         ],
       ),

@@ -2,11 +2,11 @@ import 'package:esg_mobile/core/enums/mission_status.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
 import 'package:esg_mobile/core/services/database/mission.row.service.dart';
 import 'package:esg_mobile/core/services/database/mission_participation.service.dart';
+import 'package:esg_mobile/core/services/database/rank_management.service.dart';
 import 'package:esg_mobile/core/config/maxParticipation.dart';
 import 'package:esg_mobile/data/models/supabase/database.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_available.list_tile.dart';
 import 'package:esg_mobile/presentation/widgets/mission/mission_detail.dialog.dart';
-import 'package:esg_mobile/presentation/widgets/main/auto_image_banner_carousel.dart';
 import 'package:flutter/material.dart';
 
 class MissionParticipationTab extends StatefulWidget {
@@ -30,6 +30,14 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
 
   bool showPastMissions = false;
   int todayParticipationCount = 0;
+  int currentLevel = 1;
+
+  int get additionalMileageByLevel {
+    if (currentLevel >= 5) return 100;
+    if (currentLevel == 4) return 30;
+    if (currentLevel == 3) return 20;
+    return 0;
+  }
 
   @override
   void initState() {
@@ -37,6 +45,7 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
     _fetchCurrentMissions();
     _fetchPastMissions();
     _fetchTodayParticipationCount();
+    _fetchCurrentLevel();
   }
 
   void _fetchCurrentMissions() async {
@@ -70,8 +79,27 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
     setState(() {});
   }
 
+  void _fetchCurrentLevel() async {
+    final userId = UserAuthService.instance.currentUser?.id;
+    if (userId == null) return;
+    try {
+      final snapshot = await RankManagementService.instance.fetchSnapshot(
+        userId: userId,
+        isMainProfile: true,
+        selectedProfileId: null,
+      );
+      if (!mounted) return;
+      setState(() {
+        currentLevel = snapshot.currentLevel;
+      });
+    } catch (_) {
+      // Keep default level when the rank API is unavailable.
+    }
+  }
+
   void refreshParticipationCount() {
     _fetchTodayParticipationCount();
+    _fetchCurrentLevel();
     widget.onParticipationSuccess?.call();
   }
 
@@ -95,8 +123,6 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
             style: TextStyle(fontWeight: FontWeight.w300),
           ),
         ),
-        const SizedBox(height: 16),
-        const SupabaseBannerCarousel(appType: 'green_square'),
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -129,8 +155,8 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                           color: const Color(0xFF3B3733),
                         ),
                         children: [
-                          const TextSpan(
-                            text: 'Level.3',
+                          TextSpan(
+                            text: 'Level.$currentLevel',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF3B3733),
@@ -152,8 +178,8 @@ class _MissionParticipationTabState extends State<MissionParticipationTab> {
                           color: const Color(0xFF3B3733),
                         ),
                         children: [
-                          const TextSpan(
-                            text: '20마일리지',
+                          TextSpan(
+                            text: '${additionalMileageByLevel}마일리지',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF3B3733),

@@ -12,10 +12,16 @@ class StoriesSection extends StatefulWidget {
     super.key,
     this.scrollController,
     this.onTapStory,
+    this.selectedFilterTag,
+    this.selectedFilterRequestId = 0,
+    this.onFilterStateChanged,
   });
 
   final ScrollController? scrollController;
   final void Function(StoryWithTags)? onTapStory;
+  final String? selectedFilterTag;
+  final int selectedFilterRequestId;
+  final ValueChanged<bool>? onFilterStateChanged;
 
   @override
   State<StoriesSection> createState() => _StoriesSectionState();
@@ -48,6 +54,19 @@ class _StoriesSectionState extends State<StoriesSection> {
   }
 
   @override
+  void didUpdateWidget(covariant StoriesSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final hasNewFilterRequest =
+        oldWidget.selectedFilterRequestId != widget.selectedFilterRequestId;
+    if (hasNewFilterRequest && widget.selectedFilterTag != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _toggleFilterByLabel(widget.selectedFilterTag!);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
@@ -60,6 +79,7 @@ class _StoriesSectionState extends State<StoriesSection> {
       setState(() {
         _activeFilter = null;
       });
+      _notifyFilteredState();
     }
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -68,6 +88,53 @@ class _StoriesSectionState extends State<StoriesSection> {
       });
       _refreshStories();
     });
+  }
+
+  String _normalizeToHashtag(String label) {
+    if (label.trim().isEmpty) return label;
+    return label.startsWith('#') ? label : '#$label';
+  }
+
+  void _notifyFilteredState() {
+    widget.onFilterStateChanged?.call(_activeFilter != null);
+  }
+
+  void _applyFilter(String label) {
+    final normalizedLabel = _normalizeToHashtag(label.trim());
+    final keyword = normalizedLabel.startsWith('#')
+        ? normalizedLabel.substring(1)
+        : normalizedLabel;
+    _debounce?.cancel();
+    setState(() {
+      _activeFilter = normalizedLabel;
+      _searchController.text = keyword;
+      _searchQuery = keyword;
+      _offset = 0;
+    });
+    _notifyFilteredState();
+    _refreshStories();
+  }
+
+  void _clearFilter() {
+    _debounce?.cancel();
+    setState(() {
+      _activeFilter = null;
+      _searchController.clear();
+      _searchQuery = '';
+      _offset = 0;
+    });
+    _notifyFilteredState();
+    _refreshStories();
+  }
+
+  void _toggleFilterByLabel(String label) {
+    final normalizedLabel = _normalizeToHashtag(label.trim());
+    if (normalizedLabel.isEmpty) return;
+    if (_activeFilter == normalizedLabel) {
+      _clearFilter();
+    } else {
+      _applyFilter(normalizedLabel);
+    }
   }
 
   Future<List<StoryWithTags>> _fetchStories() async {
@@ -138,38 +205,59 @@ class _StoriesSectionState extends State<StoriesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isFiltered = _activeFilter != null;
     return Column(
       children: [
-        const SizedBox(height: 16),
-        const SupabaseBannerCarousel(appType: 'green_square'),
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Align(
-            alignment: Alignment.center,
-            child: FractionallySizedBox(
-              widthFactor: 0.8,
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: '키워드 검색',
-                  filled: true,
-                  fillColor: Colors.white,
-                  suffixIcon: Icon(Icons.search),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+        if (!isFiltered) ...[
+          const SizedBox(height: 16),
+          const SupabaseBannerCarousel(appType: 'green_square'),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Align(
+              alignment: Alignment.center,
+              child: FractionallySizedBox(
+                widthFactor: 0.8,
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: '키워드 검색',
+                    filled: true,
+                    fillColor: Colors.white,
+                    suffixIcon: Icon(Icons.search),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
+                  onChanged: _onSearchChanged,
                 ),
-                onChanged: _onSearchChanged,
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ] else ...[
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                '친환경 소비를 즐겁게, 자연과 환경을 이롭게 🌿',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF1C1C1E),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         // Static filter row spanning the available width
         SizedBox(
           height: 40,
@@ -186,41 +274,11 @@ class _StoriesSectionState extends State<StoriesSection> {
                 final Color bgColor =
                     isActive ? const Color(0xFFFFF6F1) : Colors.white;
 
-                void applyFilter() {
-                  final keyword =
-                      label.startsWith('#') ? label.substring(1) : label;
-                  _debounce?.cancel();
-                  setState(() {
-                    _activeFilter = label;
-                    _searchController.text = keyword;
-                    _searchQuery = keyword;
-                    _offset = 0;
-                  });
-                  _refreshStories();
-                }
-
-                void clearFilter() {
-                  _debounce?.cancel();
-                  setState(() {
-                    _activeFilter = null;
-                    _searchController.clear();
-                    _searchQuery = '';
-                    _offset = 0;
-                  });
-                  _refreshStories();
-                }
-
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(4),
-                    onTap: () {
-                      if (isActive) {
-                        clearFilter();
-                      } else {
-                        applyFilter();
-                      }
-                    },
+                    onTap: () => _toggleFilterByLabel(label),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -288,6 +346,7 @@ class _StoriesSectionState extends State<StoriesSection> {
                 storyWithTags: story,
                 onBlocked: _refreshStories,
                 onUnblocked: _refreshStories,
+                onTagTap: _toggleFilterByLabel,
                 onTap: widget.onTapStory != null
                     ? () => widget.onTapStory!(story)
                     : null,

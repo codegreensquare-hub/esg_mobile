@@ -816,9 +816,24 @@ class _StoryDialogState extends State<StoryDialog> {
                                               spacing: 8,
                                               children: widget.tags
                                                   .map(
-                                                    (tag) => Chip(
-                                                      label: Text(
-                                                        '#${tag.tag ?? ''}',
+                                                    (tag) => InkWell(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            16,
+                                                          ),
+                                                      onTap: () {
+                                                        final raw =
+                                                            (tag.tag ?? '')
+                                                                .trim();
+                                                        if (raw.isEmpty) return;
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop('#$raw');
+                                                      },
+                                                      child: Chip(
+                                                        label: Text(
+                                                          '#${tag.tag ?? ''}',
+                                                        ),
                                                       ),
                                                     ),
                                                   )

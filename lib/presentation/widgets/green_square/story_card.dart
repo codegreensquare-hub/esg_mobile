@@ -16,6 +16,7 @@ class StoryCard extends StatelessWidget {
     this.onBlocked,
     this.onUnblocked,
     this.onTap,
+    this.onTagTap,
   });
 
   final StoryWithTags storyWithTags;
@@ -23,6 +24,7 @@ class StoryCard extends StatelessWidget {
   final Future<void> Function()? onBlocked;
   final Future<void> Function()? onUnblocked;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onTagTap;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +96,21 @@ class StoryCard extends StatelessWidget {
       );
     }
 
+    Future<void> openStoryDialog() async {
+      final selectedTag = await Navigator.of(context).push<String>(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => StoryDialog(
+            story: storyWithTags.story,
+            tags: storyWithTags.tags,
+          ),
+        ),
+      );
+      if (selectedTag != null && onTagTap != null) {
+        onTagTap!(selectedTag);
+      }
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final mediaQuery = MediaQuery.of(context);
@@ -106,15 +123,7 @@ class StoryCard extends StatelessWidget {
         return GestureDetector(
           onTap:
               onTap ??
-              () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (context) => StoryDialog(
-                    story: storyWithTags.story,
-                    tags: storyWithTags.tags,
-                  ),
-                ),
-              ),
+              openStoryDialog,
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             clipBehavior: Clip.antiAlias,
@@ -320,8 +329,18 @@ class StoryCard extends StatelessWidget {
                                   spacing: 8,
                                   children: storyWithTags.tags
                                       .map(
-                                        (tag) => Chip(
-                                          label: Text('#${tag.tag ?? ''}'),
+                                        (tag) => InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          onTap: () {
+                                            final raw = (tag.tag ?? '').trim();
+                                            if (raw.isEmpty) return;
+                                            onTagTap?.call('#$raw');
+                                          },
+                                          child: Chip(
+                                            label: Text('#${tag.tag ?? ''}'),
+                                          ),
                                         ),
                                       )
                                       .toList(),
