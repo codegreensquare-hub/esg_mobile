@@ -34,6 +34,9 @@ fi
 # Note: dart-defines are compiled into JS bundle, so do not pass secrets.
 dart_defines=()
 for key in \
+  SUPABASE_URL \
+  SUPABASE_ANON_KEY \
+  SUPABASE_USER_PHOTO_BUCKET \
   MODE \
   PORTONE_V1_USER_CODE \
   PORTONE_V1_USER_CODE_DEV \
