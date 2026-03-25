@@ -2,13 +2,6 @@
   publish = "build/web"
   command = "bash ./netlify-build.sh"
 
-# Cross-origin isolation headers required for Flutter WASM.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cross-Origin-Embedder-Policy = "credentialless"
-    Cross-Origin-Opener-Policy = "same-origin"
-
 # Flutter web is a single-page app; this makes deep links work.
 [[redirects]]
   from = "/*"
