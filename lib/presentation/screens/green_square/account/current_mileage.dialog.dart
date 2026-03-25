@@ -11,6 +11,7 @@ enum _MileageDialogState { main, earningHistory, usedMileage }
 const _grayLink = Color(0xFF464646);
 const _cardBorder = Color(0xFF959595);
 const _mileageGreen = Color(0xFF3F615D);
+const _dialogBackground = Color(0xFFFFFFFF);
 
 /// "현재 보유 마일리지" dialog. Main view shows balance + two links;
 /// tapping a link replaces content with earning or used-mileage view (chevron back).
@@ -169,6 +170,7 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
     final isMainState = _state == _MileageDialogState.main;
 
     return Dialog(
+      backgroundColor: _dialogBackground,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -225,7 +227,7 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
           ),
         Text(
           title,
-          style: textTheme.titleLarge?.copyWith(
+          style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             fontFamily: 'Noto Sans KR',
           ),
@@ -458,34 +460,42 @@ class _CurrentMileageDialogState extends State<CurrentMileageDialog> {
     );
   }
 
+  TextStyle? _bottomLinkTextStyle(TextTheme textTheme) {
+    final mediumSize = textTheme.bodyMedium?.fontSize ?? 14.0;
+    final smallSize = textTheme.bodySmall?.fontSize ?? 12.0;
+    final midSize = (mediumSize + smallSize) / 2.0;
+    return textTheme.bodyMedium?.copyWith(
+      fontSize: midSize,
+      color: _grayLink,
+      fontWeight: FontWeight.w400,
+      decoration: TextDecoration.underline,
+      decorationColor: _grayLink,
+    );
+  }
+
   Widget _buildBottomLinks(BuildContext context, TextTheme textTheme) {
+    final linkStyle = _bottomLinkTextStyle(textTheme);
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
+        Flexible(
           child: InkWell(
             onTap: _openEarningHistory,
             child: Text(
               '적립 내역 확인하기',
-              style: textTheme.bodyMedium?.copyWith(
-                color: _grayLink,
-                fontWeight: FontWeight.w400,
-                decoration: TextDecoration.underline,
-                decorationColor: _grayLink,
-              ),
+              textAlign: TextAlign.center,
+              style: linkStyle,
             ),
           ),
         ),
-        Expanded(
+        Flexible(
           child: InkWell(
             onTap: _openUsedMileage,
             child: Text(
               '사용한 마일리지 확인하기',
-              style: textTheme.bodyMedium?.copyWith(
-                color: _grayLink,
-                fontWeight: FontWeight.w400,
-                decoration: TextDecoration.underline,
-                decorationColor: _grayLink,
-              ),
+              textAlign: TextAlign.center,
+              style: linkStyle,
             ),
           ),
         ),

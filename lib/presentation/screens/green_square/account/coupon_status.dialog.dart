@@ -2,6 +2,7 @@ import 'package:esg_mobile/core/enums/device.dart';
 import 'package:flutter/material.dart';
 
 const _cardBorder = Color(0xFF959595);
+const _dialogBackground = Color(0xFFFFFFFF);
 
 /// "보유 쿠폰 현황" dialog – shows available coupons with title and validity.
 class CouponStatusDialog extends StatelessWidget {
@@ -15,6 +16,7 @@ class CouponStatusDialog extends StatelessWidget {
     final maxWidth = Device.largeMobile.breakpoint;
 
     return Dialog(
+      backgroundColor: _dialogBackground,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -28,25 +30,11 @@ class CouponStatusDialog extends StatelessWidget {
             children: [
               _buildHeader(context, textTheme),
               const SizedBox(height: 20),
-              Row(
-                children: [
-                  Text(
-                    '사용 가능한 쿠폰 : 2매',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const Spacer(),
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: cs.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.person,
-                      size: 20,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+              Text(
+                '사용 가능한 쿠폰 : 2매',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface,
+                ),
               ),
               const SizedBox(height: 20),
               _CouponCard(
@@ -75,7 +63,7 @@ class CouponStatusDialog extends StatelessWidget {
       children: [
         Text(
           '보유 쿠폰 현황',
-          style: textTheme.titleLarge?.copyWith(
+          style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             fontFamily: 'Noto Sans KR',
           ),
