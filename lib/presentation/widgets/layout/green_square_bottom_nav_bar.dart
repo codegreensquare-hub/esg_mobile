@@ -49,15 +49,18 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
                       children: [
                         _NavItem(
                           index: 0,
-                          offIconAssetPath: 'assets/images/nav_bar/off_stories.svg',
-                          onIconAssetPath: 'assets/images/nav_bar/on_stories.svg',
+                          offIconAssetPath:
+                              'assets/images/nav_bar/off_stories.svg',
+                          onIconAssetPath:
+                              'assets/images/nav_bar/on_stories.svg',
                           label: '스토리',
                           selected: widget.selectedIndex == 0,
                           onTap: () => widget.onItemSelected(0),
                         ),
                         _NavItem(
                           index: 1,
-                          offIconAssetPath: 'assets/images/nav_bar/off_shop.svg',
+                          offIconAssetPath:
+                              'assets/images/nav_bar/off_shop.svg',
                           onIconAssetPath: 'assets/images/nav_bar/on_shop.svg',
                           label: '쇼핑몰',
                           selected: widget.selectedIndex == 1,
@@ -67,16 +70,20 @@ class _GreenSquareBottomNavBarState extends State<GreenSquareBottomNavBar> {
                         const SizedBox(width: 36),
                         _NavItem(
                           index: 2,
-                          offIconAssetPath: 'assets/images/nav_bar/off_missions.svg',
-                          onIconAssetPath: 'assets/images/nav_bar/on_missions.svg',
+                          offIconAssetPath:
+                              'assets/images/nav_bar/off_missions.svg',
+                          onIconAssetPath:
+                              'assets/images/nav_bar/on_missions.svg',
                           label: '미션 참여',
                           selected: widget.selectedIndex == 2,
                           onTap: () => widget.onItemSelected(2),
                         ),
                         _NavItem(
                           index: 3,
-                          offIconAssetPath: 'assets/images/nav_bar/off_profile.svg',
-                          onIconAssetPath: 'assets/images/nav_bar/on_profile.svg',
+                          offIconAssetPath:
+                              'assets/images/nav_bar/off_profile.svg',
+                          onIconAssetPath:
+                              'assets/images/nav_bar/on_profile.svg',
                           label: '나의 콕',
                           selected: widget.selectedIndex == 3,
                           onTap: () => widget.onItemSelected(3),
@@ -356,13 +363,15 @@ class KakaoTalkButton extends StatelessWidget {
                 ),
               ],
             ),
-            child: SvgPicture.asset(
-              'assets/images/icons/kakao-icon.svg',
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.black,
-                BlendMode.srcIn,
+            child: Center(
+              child: SvgPicture.asset(
+                'assets/images/icons/kakao-icon.svg',
+                width: 24,
+                height: 24,
+                colorFilter: const ColorFilter.mode(
+                  Colors.black,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),

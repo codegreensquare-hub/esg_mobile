@@ -330,16 +330,32 @@ class StoryCard extends StatelessWidget {
                                   children: storyWithTags.tags
                                       .map(
                                         (tag) => InkWell(
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
+                                          borderRadius: BorderRadius.circular(4),
                                           onTap: () {
                                             final raw = (tag.tag ?? '').trim();
                                             if (raw.isEmpty) return;
                                             onTagTap?.call('#$raw');
                                           },
-                                          child: Chip(
-                                            label: Text('#${tag.tag ?? ''}'),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              border: Border.all(
+                                                color: const Color(0xFFE5E5EA),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '#${tag.tag ?? ''}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF1C1C1E),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       )

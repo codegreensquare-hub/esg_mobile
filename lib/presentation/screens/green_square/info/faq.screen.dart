@@ -27,7 +27,7 @@ class _GreenSquareFaqScreenState extends State<GreenSquareFaqScreen> {
         .order(FaqRow.createdAtField);
 
     final list = (raw as List).cast<Map<String, dynamic>>();
-    return list.map((json) => FaqRow.fromJson(json)).toList();
+    return list.map((json) => FaqRow.fromJson(json)).toList().reversed.toList();
   }
 
   @override

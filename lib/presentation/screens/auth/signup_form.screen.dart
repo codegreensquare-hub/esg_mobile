@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:esg_mobile/core/navigation/green_square_drawer_navigation.dart';
 import 'package:esg_mobile/core/services/auth/user_auth.service.dart';
+import 'package:esg_mobile/core/utils/auth_exception_message_ko.dart';
 import 'package:esg_mobile/data/models/supabase/tables/_tables.dart';
 import 'package:esg_mobile/presentation/screens/auth/email_confirmation.screen.dart';
 import 'package:esg_mobile/presentation/screens/auth/signup_minor_terms.screen.dart';
@@ -306,7 +307,12 @@ class _SignupFormScreenState extends State<SignupFormScreen> {
         ),
       );
     } on AuthException catch (e) {
-      setState(() => _error = e.message);
+      setState(
+        () => _error = authExceptionMessageKo(
+          e,
+          genericFallback: '회원가입에 실패했습니다. 다시 시도해주세요.',
+        ),
+      );
     } catch (e) {
       setState(() => _error = '회원가입에 실패했습니다. 다시 시도해주세요.');
     } finally {

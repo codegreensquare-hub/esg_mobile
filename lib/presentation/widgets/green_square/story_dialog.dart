@@ -39,8 +39,10 @@ const Color _kCommentActionColor = Color(0xFF4E4E4E);
 const Color _kCommentDividerColor = Color(0xFFE5E5E5);
 
 /// Horizontal inset matches screen edge; vertical is symmetric between dividers.
-const EdgeInsets _kCommentRowPadding =
-    EdgeInsets.symmetric(horizontal: 16, vertical: 16);
+const EdgeInsets _kCommentRowPadding = EdgeInsets.symmetric(
+  horizontal: 16,
+  vertical: 16,
+);
 
 Widget _commentDefaultProfileAvatar() {
   return SvgPicture.asset(
@@ -809,37 +811,6 @@ class _StoryDialogState extends State<StoryDialog> {
                                                   ),
                                             ),
                                           ),
-
-                                          if (widget.tags.isNotEmpty) ...[
-                                            const SizedBox(height: 16),
-                                            Wrap(
-                                              spacing: 8,
-                                              children: widget.tags
-                                                  .map(
-                                                    (tag) => InkWell(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            16,
-                                                          ),
-                                                      onTap: () {
-                                                        final raw =
-                                                            (tag.tag ?? '')
-                                                                .trim();
-                                                        if (raw.isEmpty) return;
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop('#$raw');
-                                                      },
-                                                      child: Chip(
-                                                        label: Text(
-                                                          '#${tag.tag ?? ''}',
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  )
-                                                  .toList(),
-                                            ),
-                                          ],
                                         ],
                                       ),
                                     ),

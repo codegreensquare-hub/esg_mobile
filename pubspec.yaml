@@ -53,6 +53,7 @@ flutter:
     - assets/images/carousel/
     - assets/images/about/
     - assets/images/award_points/
+    - assets/images/my_cok/
     - assets/images/story_comments/
     # - assets/images/screen/settings/
   # Fonts are loaded dynamically from Supabase storage via FontService

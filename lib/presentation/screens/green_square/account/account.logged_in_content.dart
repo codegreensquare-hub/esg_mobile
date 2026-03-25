@@ -12,6 +12,11 @@ import 'package:intl/intl.dart';
 import 'package:esg_mobile/data/entities/active_mission.dart';
 import 'package:esg_mobile/data/entities/participation.dart';
 
+const _myCokOrdersSvg = 'assets/images/my_cok/my_orders.svg';
+const _myCokWishlistSvg = 'assets/images/my_cok/my_wishlist.svg';
+const _myCokCommentsSvg = 'assets/images/my_cok/my_comments.svg';
+const _myCokLikesSvg = 'assets/images/my_cok/my_likes.svg';
+
 class AccountLoggedInContent extends StatefulWidget {
   const AccountLoggedInContent({
     super.key,
@@ -312,6 +317,16 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    const accountLinkGreen = Color(0xFF355149);
+    final accountLinkTextStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontFamily: 'Noto Sans KR',
+      fontWeight: FontWeight.w400,
+      fontSize: 13,
+      height: 1.25,
+      color: accountLinkGreen,
+      decoration: TextDecoration.underline,
+      decorationColor: accountLinkGreen,
+    );
     final mileageText =
         widget.totalMileage == widget.totalMileage.roundToDouble()
         ? NumberFormat.decimalPattern().format(widget.totalMileage.toInt())
@@ -343,6 +358,7 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                               widget.userName,
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: const Color(0xFF355149),
                               ),
                             ),
                           ),
@@ -364,11 +380,14 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                       ],
                     ),
                   ),
-                  TextButton.icon(
+                  TextButton(
                     onPressed: widget.onManageShipping,
-
-                    icon: const Icon(Icons.location_on_outlined),
-                    label: const Text('배송지 관리'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: accountLinkGreen,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: accountLinkTextStyle,
+                    ),
+                    child: const Text('배송지 관리'),
                   ),
                 ],
               ),
@@ -384,7 +403,7 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                     child: Text(
                       'Level ${widget.accountRankLevel}',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: cs.primary,
+                        color: const Color(0xFF355149),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -392,6 +411,11 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                   const Spacer(),
                   TextButton(
                     onPressed: widget.onViewBenefitsByLevel,
+                    style: TextButton.styleFrom(
+                      foregroundColor: accountLinkGreen,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: accountLinkTextStyle,
+                    ),
                     child: const Text('레벨별 혜택 보기'),
                   ),
                 ],
@@ -424,7 +448,7 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                             Text(
                               '현재 보유 마일리지',
                               style: theme.textTheme.bodyLarge?.copyWith(
-                                color: cs.outline,
+                                color: const Color(0xFF737373),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -474,7 +498,7 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                             Text(
                               '보유 쿠폰',
                               style: theme.textTheme.bodyLarge?.copyWith(
-                                color: cs.outline,
+                                color: const Color(0xFF737373),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -506,28 +530,28 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
                       children: [
                         Expanded(
                           child: _ActionButton(
-                            icon: Icons.local_shipping_outlined,
+                            svgAsset: _myCokOrdersSvg,
                             label: '주문배송조회',
                             onTap: widget.onOrderLookup,
                           ),
                         ),
                         Expanded(
                           child: _ActionButton(
-                            icon: Icons.favorite_outline,
+                            svgAsset: _myCokWishlistSvg,
                             label: '찜한 상품',
                             onTap: widget.onWishlist,
                           ),
                         ),
                         Expanded(
                           child: _ActionButton(
-                            icon: Icons.comment_outlined,
+                            svgAsset: _myCokCommentsSvg,
                             label: '내가 쓴 댓글',
                             onTap: widget.onMyComments,
                           ),
                         ),
                         Expanded(
                           child: _ActionButton(
-                            icon: Icons.thumb_up_outlined,
+                            svgAsset: _myCokLikesSvg,
                             label: '좋아요 한 글',
                             onTap: widget.onLikedStories,
                           ),
@@ -563,8 +587,9 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
               const SizedBox(height: 32),
               Text(
                 '현재 미션',
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: const Color(0xFF252424),
                 ),
               ),
               const SizedBox(height: 16),
@@ -824,12 +849,12 @@ class _AccountLoggedInContentState extends State<AccountLoggedInContent> {
 
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
-    required this.icon,
+    required this.svgAsset,
     required this.label,
     required this.onTap,
   });
 
-  final IconData icon;
+  final String svgAsset;
   final String label;
   final VoidCallback onTap;
 
@@ -846,9 +871,21 @@ class _ActionButton extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 8),
-          Icon(icon),
+          SvgPicture.asset(
+            svgAsset,
+            width: 28,
+            height: 28,
+            fit: BoxFit.contain,
+            semanticsLabel: label,
+          ),
           const SizedBox(height: 4),
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: const Color(0xFF333333),
+              fontWeight: FontWeight.w400,
+            ),
+          ),
           const SizedBox(height: 8),
         ],
       ),
