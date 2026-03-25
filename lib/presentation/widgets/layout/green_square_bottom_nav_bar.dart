@@ -366,8 +366,8 @@ class KakaoTalkButton extends StatelessWidget {
             child: Center(
               child: SvgPicture.asset(
                 'assets/images/icons/kakao-icon.svg',
-                width: 24,
-                height: 24,
+                width: 26,
+                height: 26,
                 colorFilter: const ColorFilter.mode(
                   Colors.black,
                   BlendMode.srcIn,
